@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr" data-motion="full" data-contrast="standard">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#11100d">
+    <meta name="description" content="Tableau de bord de développement LAST REFUGE.">
+    <title>DEV MODE | LAST REFUGE</title>
+    <link rel="icon" type="image/svg+xml" href="../../assets/svg/identite/favicon.svg">
+    <link rel="stylesheet" href="../../css/commun/site.css">
+    <link rel="stylesheet" href="../../css/dev/dev.css">
+    <script src="../../js/commun/preferences.js" defer></script>
+    <script src="../../js/commun/content.js" data-page="dev" data-source="../../data/content.json" defer></script>
+    <script src="../../js/dev/index.js" defer></script>
+  </head>
+  <body data-device-gate>
+    <div class="device-notice">
+      <div class="device-notice__panel">
+        <p class="device-notice__brand">LAST REFUGE · XM</p>
+        <h1>Un écran plus grand<br><em>vous attend.</em></h1>
+        <p>L’expérience est disponible sur tablette et ordinateur. Utilisez un écran d’au moins 768 pixels de largeur.</p>
+      </div>
+    </div>
+    <a class="skip-link" href="#dev-content">Aller au tableau de bord</a>
+    <header class="site-header section-shell dev-header">
+      <a class="brand" href="../../../index.html" aria-label="LAST REFUGE, accueil">
+        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 4 41 11v12c0 10-7 17-17 21C14 40 7 33 7 23V11Z"/>
+          <circle cx="24" cy="24" r="8"/>
+          <path d="M24 19v10m-5-5h10"/>
+        </svg>
+        <span class="brand__word">LAST<span> REFUGE</span></span>
+      </a>
+      <nav class="site-nav" aria-label="Navigation principale">
+        <a href="../../../index.html">Accueil</a>
+        <a href="../options/index.html">Options</a>
+      </nav>
+    </header>
+    <main class="dev-page section-shell" id="dev-content">
+      <section class="dev-hero" aria-labelledby="dev-title">
+        <div>
+          <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Poste technique · Accès DEV</p>
+          <h1 id="dev-title"><span data-content="heading">Centre</span><br><span data-content="headingSuffix">de </span><em data-content="headingEmphasis">contrôle.</em></h1>
+          <p data-content="intro">Un espace pour observer les réglages du poste et préparer les futurs outils de développement.</p>
+          <span class="dev-badge"><i aria-hidden="true"></i> TABLEAU DE BORD · VERSION INITIALE</span>
+        </div>
+        <svg class="dev-instrument" viewBox="0 0 240 240" aria-hidden="true">
+          <circle cx="120" cy="120" r="106" fill="#141e18" stroke="#73856f" stroke-width="4"/>
+          <circle cx="120" cy="120" r="93" fill="none" stroke="#e09170" stroke-opacity=".5" stroke-dasharray="2 7"/>
+          <path d="M120 42v156M42 120h156M120 120l58-58" fill="none" stroke="#8fa38a" stroke-width="2"/>
+          <circle cx="120" cy="120" r="70" fill="none" stroke="#8fa38a" stroke-opacity=".5"/>
+          <circle cx="178" cy="62" r="5" fill="#ef8c6f"/>
+        </svg>
+      </section>
+      <section class="dev-dashboard" aria-labelledby="diagnostic-title">
+        <div class="dev-dashboard__heading">
+          <div>
+            <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Instruments</p>
+            <h2 id="diagnostic-title" data-content="dashboardTitle">État du système</h2>
+          </div>
+          <span>LECTURE LOCALE · EN DIRECT</span>
+        </div>
+        <div class="dev-cards">
+          <article class="dev-card">
+            <span class="dev-card__number">01 / AFFICHAGE</span>
+            <h3>Fenêtre</h3>
+            <strong id="dev-viewport">—</strong>
+            <p>Dimensions actuelles de la zone d’affichage.</p>
+          </article>
+          <article class="dev-card">
+            <span class="dev-card__number">02 / MOUVEMENT</span>
+            <h3>Animations</h3>
+            <strong id="dev-motion">—</strong>
+            <p>Réglage actif, avec respect de la préférence système.</p>
+          </article>
+          <article class="dev-card">
+            <span class="dev-card__number">03 / LISIBILITÉ</span>
+            <h3>Contraste</h3>
+            <strong id="dev-contrast">—</strong>
+            <p>Préférence enregistrée sur cet appareil.</p>
+          </article>
+        </div>
+        <p class="dev-note" data-content="note">Première version : ces informations sont affichées localement. Les outils de développement seront ajoutés plus tard.</p>
+      </section>
+      <footer class="dev-footer">
+        <span>LAST REFUGE · XM / POSTE TECHNIQUE</span>
+        <a class="action-button action-button--secondary" href="../../../index.html">Retour à l’accueil</a>
+      </footer>
+    </main>
+  </body>
+</html>
