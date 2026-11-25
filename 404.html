@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#11100d">
+    <meta name="description" content="Le signal de cette page a été perdu dans LAST REFUGE.">
+    <title>404 — Page introuvable | LAST REFUGE</title>
+    <link rel="icon" type="image/svg+xml" href="docs/assets/svg/identite/favicon.svg">
+    <link rel="shortcut icon" href="docs/assets/svg/identite/favicon.svg">
+    <link rel="stylesheet" href="docs/css/commun/site.css">
+    <link rel="stylesheet" href="docs/css/404/404.css">
+    <script src="docs/js/commun/preferences.js" defer></script>
+    <script src="docs/js/commun/content.js" data-page="notFound" data-source="docs/data/content.json" defer></script>
+    <script src="docs/js/404/index.js" defer></script>
+  </head>
+  <body data-device-gate>
+    <div class="device-notice">
+      <div class="device-notice__panel">
+        <p class="device-notice__brand">LAST REFUGE · XM</p>
+        <h1>Un écran plus grand<br><em>vous attend.</em></h1>
+        <p>L’expérience est disponible sur tablette et ordinateur. Utilisez un écran d’au moins 768 pixels de largeur.</p>
+      </div>
+    </div>
+    <main class="not-found">
+      <section class="not-found__panel" aria-labelledby="not-found-title">
+        <div class="not-found__copy">
+          <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Erreur de navigation</p>
+          <h1 id="not-found-title"><span data-content="heading">Cette page</span><br><em data-content="headingEmphasis">s’est égarée.</em></h1>
+          <p data-content="intro">Le signal est perdu. La page demandée n’existe pas ou a changé de chemin.</p>
+          <a class="action-button action-button--primary" href="./index.html">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 4-6 6 6 6M2 10h13a3 3 0 0 1 3 3v3"/></svg>
+            <span>Retour à l’accueil</span>
+          </a>
+        </div>
+        <div class="not-found__seal" aria-hidden="true">
+          <svg viewBox="0 0 180 180">
+            <circle cx="90" cy="90" r="76" fill="#18231d" stroke="#8a9b83" stroke-width="3"/>
+            <circle cx="90" cy="90" r="64" fill="none" stroke="#e09170" stroke-dasharray="3 7"/>
+            <path d="M90 28v20M90 132v20M28 90h20m84 0h20" stroke="#b3c2a9" stroke-width="2"/>
+            <text x="90" y="102" fill="#efaa8d" font-family="Arial,sans-serif" font-weight="700" font-size="32" text-anchor="middle">404</text>
+          </svg>
+          <span>SIGNAL PERDU</span>
+        </div>
+        <footer class="not-found__footer">
+          <button class="dev-mode-button" id="dev-mode-toggle" type="button" aria-expanded="false" aria-controls="dev-panel">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/><circle cx="7" cy="5" r="1.5"/><circle cx="13" cy="10" r="1.5"/><circle cx="9" cy="15" r="1.5"/></svg>
+            <span>DEV MODE</span>
+          </button>
+          <span class="not-found__folio">LAST REFUGE <i aria-hidden="true"></i> ZONE DE QUARANTAINE</span>
+        </footer>
+        <aside class="not-found__dev-panel" id="dev-panel" aria-label="Informations de développement" hidden>
+          <p>OUTILS DE DÉVELOPPEMENT <strong>404</strong></p>
+          <dl>
+            <div><dt>Route demandée</dt><dd id="dev-requested-path">—</dd></div>
+            <div><dt>Favicon actif</dt><dd><a href="docs/assets/svg/identite/favicon.svg" target="_blank" rel="noopener">Ouvrir l’asset SVG ↗</a></dd></div>
+          </dl>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>
