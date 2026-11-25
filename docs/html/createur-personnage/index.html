@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141918">
+<meta name="description" content="Créez votre personnage pour l’expédition LAST REFUGE.">
+<title>Créateur de personnage | LAST REFUGE</title>
+<link rel="icon" href="../../assets/svg/identite/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../css/createur-personnage/createur-personnage.css">
+</head>
+<body>
+<div class="device-notice"><div><p>LAST REFUGE · XM</p><h1>Un écran plus grand <em>vous attend.</em></h1><p>L’expérience est disponible sur tablette et ordinateur. Utilisez un écran d’au moins 768 pixels de largeur.</p></div></div>
+<header class="topbar">
+ <a class="brand" href="../../../index.html"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 41 11v12c0 10-7 17-17 21C14 40 7 33 7 23V11Z"/><circle cx="24" cy="24" r="8"/><path d="M24 19v10m-5-5h10"/></svg><span>LAST<span> REFUGE</span></span></a>
+ <span class="topbar__label">POSTE DE PERSONNALISATION <b> / XM</b></span>
+ <a class="return-link" href="../info/index.html">← Retour au hub</a>
+</header>
+<main class="creator">
+ <div class="creator-heading">
+  <div><p class="eyebrow"><span></span> PREMIÈRE ÉTAPE · VOTRE IDENTITÉ</p><h1>Créez votre <em>survivant.</em></h1><p>Préparez votre survivant avant de franchir le périmètre.</p></div>
+  <span class="prototype-tag"><i></i> CRÉATEUR EN DÉVELOPPEMENT</span>
+ </div>
+ <section class="card" id="stage" aria-labelledby="preview-title">
+  <div class="stage-heading"><div><p class="eyebrow">DOSSIER DU SURVIVANT</p><h2 id="preview-title">Votre aperçu</h2></div><span>XM / 01</span></div>
+  <div class="portrait-frame">
+  <svg id="character" viewBox="0 0 300 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Personnage">
+   <!-- Calques, du fond vers l’avant -->
+   <g id="layer-bg"></g><g id="layer-back"></g><g id="layer-hair-back"></g><g id="layer-neck"></g><g id="layer-outfit"></g>
+   <g id="layer-head"></g><g id="layer-beard"></g><g id="layer-nose"></g><g id="layer-eyes"></g><g id="layer-brows"></g><g id="layer-mouth"></g>
+   <g id="layer-hair-front"></g><g id="layer-over"></g><g id="layer-top"></g><g id="layer-extra"></g><g id="layer-glasses"></g><g id="layer-headwear"></g><g id="layer-name"></g>
+  </svg>
+  </div>
+  <div class="stage-caption"><span><i></i> APERÇU EN DIRECT</span><span>LAST REFUGE · XM</span></div>
+  <div class="stage-actions"><button id="rand" type="button">✦ &nbsp; Aléatoire</button><button id="reset" type="button">Réinitialiser</button></div>
+  <p class="stage-note">Votre personnage prend forme au fil de vos choix.</p>
+ </section>
+ <section class="card editor" aria-labelledby="editor-title">
+  <div class="editor-heading"><div><p class="eyebrow">DOSSIER DE SURVIE</p><h2 id="editor-title">Façonnez votre identité</h2></div><span>01 — 03</span></div>
+  <div class="steps" id="steps" aria-label="Étapes de personnalisation"></div>
+  <div class="editor-intro"><p class="eyebrow" id="step-label">ÉTAPE 01 / 03</p><h2 id="step-title">La base</h2><p id="step-description">Commencez par choisir votre silhouette et les traits de votre personnage.</p></div>
+  <h3 id="type-label">Type de personnage</h3>
+  <div class="tabs" id="tabs"></div>
+  <div id="nameBox" hidden><label for="name">Nom du personnage</label><input id="name" type="text" maxlength="20" placeholder="Écrivez un nom…"></div>
+  <div id="controls"></div>
+  <div id="jsonbox" hidden><h3>Sauvegarde du personnage</h3><p class="help">Copiez ou collez les données JSON pour retrouver un personnage créé précédemment.</p><textarea id="json" spellcheck="false" aria-label="JSON du personnage"></textarea>
+  <div class="tools"><button id="load" type="button">Charger ce JSON</button><button id="dl" type="button">Télécharger .json</button></div><small id="msg" role="status">Les choix sont enregistrés avec leurs index d’origine.</small></div>
+  <div class="nav"><button id="back" type="button">← Étape précédente</button><button class="p" id="next" type="button">Continuer <span>→</span></button><a class="finish" id="finish" href="../info/index.html" hidden>Retour au hub <span>↗</span></a></div>
+ </section>
+</main>
+<dialog id="gallery-dialog" class="gallery-dialog" aria-labelledby="gallery-title">
+ <div class="gallery-dialog__header"><div><p class="eyebrow">PERSONNALISATION · XM</p><h2 id="gallery-title"></h2></div><button id="gallery-close" type="button" aria-label="Fermer la sélection">×</button></div>
+ <div class="gallery-dialog__body"><div class="gallery-dialog__portrait"><p class="eyebrow">APERÇU EN DIRECT</p><div id="gallery-portrait"></div></div><div class="gallery-dialog__choices"><p class="gallery-dialog__hint">Choisissez une option pour voir le résultat.</p><div id="gallery-options" class="choice-grid"></div></div></div>
+</dialog>
+<footer class="footer"><span>LAST REFUGE · XM</span><span>RESTEZ EN ALERTE</span></footer>
+<script src="../../js/createur-personnage/outils.js" defer></script>
+<script src="../../js/createur-personnage/assets-generes.js" defer></script>
+<script src="../../js/createur-personnage/createur-personnage.js" defer></script>
+</body>
+</html>
