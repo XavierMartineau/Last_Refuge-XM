@@ -1,0 +1,82 @@
+{
+  "accueil": {
+    "overline": "APRÈS LA CHUTE",
+    "heading": "Le monde",
+    "headingEmphasis": "a changé.",
+    "intro": "Les villes sont silencieuses. Les infectés approchent. Trouvez une issue avant que la zone ne se referme.",
+    "start": "Démarrer",
+    "options": "Options",
+    "quit": "Quitter",
+    "closeFallback": "Votre navigateur ne permet pas de fermer cet onglet automatiquement. Fermez-le directement pour quitter l’expérience."
+  },
+  "mode": {
+    "heading": "Comment souhaitez-vous",
+    "headingEmphasis": "survivre ?",
+    "intro": "Avant de franchir le périmètre, choisissez comment affronter la zone.",
+    "soloTitle": "En solo",
+    "soloText": "Créez votre survivant et préparez-vous à explorer la zone en solitaire.",
+    "soloAction": "Préparer ma mission",
+    "multiTitle": "Multijoueur",
+    "multiText": "Une aventure à partager se prépare. Le mode multijoueur n’est pas encore disponible.",
+    "multiAction": "En construction"
+  },
+  "info": {
+    "heading": "Votre aventure",
+    "headingEmphasis": "prend forme.",
+    "intro": "Bienvenue dans LAST REFUGE, une expérience d’évasion et de survie en développement. Préparez votre survivant et découvrez les zones à venir avant le départ.",
+    "journeyTitle": "Préparez la mission",
+    "stepOneTitle": "Personnalisation du personnage",
+    "stepOneText": "Préparez votre survivant dans le prototype du créateur, actuellement en développement.",
+    "stepOneLink": "Personnaliser mon personnage",
+    "stepTwoTitle": "Salles & difficulté",
+    "stepTwoText": "Choisissez bientôt votre salle et son niveau de difficulté. Cette section est en construction.",
+    "roomWorkshop": "Quartier évacué",
+    "roomBoiler": "Station abandonnée",
+    "roomLaboratory": "Laboratoire",
+    "roomBunker": "Refuge",
+    "roomsStatus": "Salles et difficultés à venir",
+    "stepThreeTitle": "Prêt pour l’évasion ?",
+    "stepThreeText": "Retrouvez ici les derniers préparatifs avant de lancer votre escape room. Cette étape arrivera plus tard.",
+    "launchNote": "Disponible lorsque l’expérience sera prête.",
+    "note": "Le créateur est un prototype. Les salles, leurs difficultés et le lancement de l’aventure sont encore en développement."
+  },
+  "options": {
+    "heading": "Options ",
+    "headingEmphasis": "& commandes.",
+    "intro": "Personnalisez votre confort et gardez les commandes de l’expédition à portée de main.",
+    "settingsTitle": "Réglages",
+    "motionTitle": "Animations",
+    "motionDescription": "Intensité des animations de l’interface",
+    "soundTitle": "Retours sonores",
+    "soundDescription": "Signaux sonores de l’interface",
+    "contrastTitle": "Contraste renforcé",
+    "contrastDescription": "Contours et texte plus lisibles",
+    "controlsTitle": "Commandes desktop",
+    "controlsNote": "Ces commandes décrivent le fonctionnement prévu; les mécaniques de jeu sont encore en conception.",
+    "controls": [
+      { "action": "Interagir / inspecter", "mouse": "Clic gauche", "keyboard": [{"text": "—"}], "description": "Activer un point d’intérêt ou manipuler un objet." },
+      { "action": "Fermer zoom / annuler", "mouse": "Clic droit", "keyboard": [{"key": "Échap"}], "description": "Revenir à la vue d’ensemble." },
+      { "action": "Zoom dynamique", "mouse": "Molette", "keyboard": [{"key": "+"}, {"text": " "}, {"key": "−"}], "description": "Ajuster l’échelle de la scène." },
+      { "action": "Panoramique", "mouse": "Clic milieu maintenu / glisser", "keyboard": [{"key": "W"}, {"text": " "}, {"key": "A"}, {"text": " "}, {"key": "S"}, {"text": " "}, {"key": "D"}, {"text": " ou flèches"}], "description": "Déplacer la vue lorsqu’elle est zoomée." },
+      { "action": "Radar d’interactions", "mouse": "Appui court / maintenu", "keyboard": [{"key": "Tab"}, {"text": " ou "}, {"key": "H"}], "description": "Repérer les éléments interactifs découverts." },
+      { "action": "Outil de l’avatar", "mouse": "—", "keyboard": [{"key": "F"}], "description": "Activer ou désactiver l’outil équipé." },
+      { "action": "Afficher l’inventaire", "mouse": "—", "keyboard": [{"key": "E"}], "description": "Afficher ou masquer l’inventaire." },
+      { "action": "Inventaire", "mouse": "Clic sur la barre d’objets", "keyboard": [{"key": "1"}, {"text": " à "}, {"key": "5"}], "description": "Sélectionner un objet de l’inventaire." },
+      { "action": "Carnet / journal", "mouse": "Clic sur le carnet", "keyboard": [{"key": "I"}], "description": "Afficher ou masquer les notes trouvées." },
+      { "action": "Gestion du son", "mouse": "Clic sur l’icône audio", "keyboard": [{"key": "M"}], "description": "Couper ou rétablir les sons du jeu." }
+    ]
+  },
+  "dev": {
+    "heading": "Centre",
+    "headingSuffix": "de ",
+    "headingEmphasis": "contrôle.",
+    "intro": "Un espace pour observer les réglages du poste et préparer les futurs outils de développement.",
+    "dashboardTitle": "État du système",
+    "note": "Première version : ces informations sont affichées localement. Les outils de développement seront ajoutés plus tard."
+  },
+  "notFound": {
+    "heading": "Cette page",
+    "headingEmphasis": "s’est égarée.",
+    "intro": "Le signal est perdu. La page demandée n’existe pas ou a changé de chemin."
+  }
+}
