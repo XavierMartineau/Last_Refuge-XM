@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <title>LAST REFUGE XM</title>
-  <rect width="64" height="64" rx="8" fill="#121a14"/>
-  <path d="M32 6 53 15v15c0 12-9 22-21 27C20 52 11 42 11 30V15Z" fill="#344735" stroke="#bccbb2" stroke-width="2"/>
-  <circle cx="32" cy="31" r="13" fill="none" stroke="#ee9b7c" stroke-width="2"/>
-  <path d="M32 22v18m-9-9h18" stroke="#ee9b7c" stroke-width="3"/>
+  <rect width="64" height="64" rx="6" fill="#141413"/>
+  <path d="M0 52 12 64H4L0 60zM10 64 22 52h8L18 64zm16 0 12-12h8L34 64zm16 0 12-12v8l-4 4z" fill="#f2b705"/>
+  <path d="M32 6 52 13v14c0 12-8 19-20 24-12-5-20-12-20-24V13Z" fill="#26241f" stroke="#f2b705" stroke-width="2.5"/>
+  <path d="M24 17v26M32 14v32M40 17v26" stroke="#d6d0bd" stroke-width="3"/>
+  <circle cx="32" cy="28" r="4" fill="#e0372c"/>
 </svg>

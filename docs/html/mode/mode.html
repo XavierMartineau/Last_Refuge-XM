@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#111310">
-    <meta name="description" content="Choisissez votre mode d’expédition LAST REFUGE.">
-    <title>Choisir une expédition | LAST REFUGE</title>
+    <meta name="theme-color" content="#0e0e0d">
+    <meta name="description" content="Choisissez votre plan d’évasion LAST REFUGE.">
+    <title>Plan d’évasion | LAST REFUGE</title>
     <link rel="icon" type="image/svg+xml" href="../../assets/svg/identite/favicon.svg">
     <link rel="stylesheet" href="../../css/commun/site.css">
     <link rel="stylesheet" href="../../css/mode/mode.css">
@@ -16,144 +16,132 @@
   <body class="page-redesign page-mode" data-device-gate>
     <div class="device-notice"><div class="device-notice__panel">
       <p class="device-notice__brand">LAST REFUGE · XM</p>
-      <h1>Un écran plus grand<br><em>vous attend.</em></h1>
-      <p>L’expérience est disponible sur tablette et ordinateur. Utilisez un écran d’au moins 768 pixels de largeur.</p>
+      <h1>Écran trop petit<br><em>accès refusé.</em></h1>
+      <p>Le terminal du pénitencier exige une tablette ou un ordinateur d’au moins 768 pixels de largeur.</p>
     </div></div>
-    <a class="skip-link" href="#mode-content">Choisir une expédition</a>
+    <a class="skip-link" href="#mode-content">Choisir un plan d’évasion</a>
     <header class="site-header section-shell mode-header">
       <a class="brand" href="../../../index.html" aria-label="LAST REFUGE, accueil">
-        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 41 11v12c0 10-7 17-17 21C14 40 7 33 7 23V11Z"/><circle cx="24" cy="24" r="8"/><path d="M24 19v10m-5-5h10"/></svg>
-        <span class="brand__word">LAST<span> REFUGE</span></span>
+        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 10v13c0 11-7 18-18 22C13 41 6 34 6 23V10Z"/><path class="brand__bars" d="M17 15v20M24 12v26M31 15v20M12 22h24"/><circle class="brand__light" cx="24" cy="7.5" r="2.2"/></svg>
+        <span class="brand__word">LAST<span> REFUGE</span><small class="brand__tag">PÉNITENCIER MILITAIRE · XM</small></span>
       </a>
+      <div class="header-status"><i></i> ALERTE ÉVASION</div>
     </header>
     <main class="mode section-shell" id="mode-content">
       <div class="mode-intro">
         <div class="mode-intro__copy">
-          <p class="mode-kicker"><span aria-hidden="true"></span> POSTE DE COMMANDEMENT <b>/</b> SECTEUR 07</p>
-          <h1><span data-content="heading">Comment souhaitez-vous</span><br><em data-content="headingEmphasis">survivre ?</em></h1>
-          <p class="mode-intro__description" data-content="intro">Avant de franchir le périmètre, choisissez comment affronter la zone.</p>
+          <p class="mode-kicker"><span aria-hidden="true"></span> POSTE DE GARDE <b>/</b> BLOC C</p>
+          <h1><span data-content="heading">Comment comptez-vous</span><br><em data-content="headingEmphasis">vous évader ?</em></h1>
+          <p class="mode-intro__description" data-content="intro">Les cellules sont ouvertes, les gardes ont disparu. Choisissez votre plan d’évasion avant que les infectés ne remplissent le bloc.</p>
         </div>
         <div class="mode-intro__stamp" aria-hidden="true">
           <svg viewBox="0 0 100 100" fill="none">
-            <path d="M4 28V12h16M80 12h16v16M4 72v16h16M80 88h16V72" stroke="currentColor" stroke-width="2"/>
-            <circle class="mode-intro__ring" cx="50" cy="50" r="44" stroke="currentColor" stroke-dasharray="2 5"/>
-            <circle cx="50" cy="50" r="35" stroke="currentColor"/>
-            <path d="M50 8v9M50 83v9M8 50h9M83 50h9" stroke="currentColor"/>
-            <path d="M50 24 72 33v15c0 15-9 24-22 30C37 72 28 63 28 48V33zM50 37v20M40 47h20" stroke="currentColor" stroke-width="2"/>
-            <circle class="mode-intro__signal" cx="78" cy="22" r="3" fill="currentColor"/>
+            <circle class="mode-intro__ring" cx="50" cy="50" r="45" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
+            <circle cx="50" cy="50" r="36" stroke="currentColor" stroke-width="3"/>
+            <path d="M50 26 31 59h38z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M50 38v11" stroke="currentColor" stroke-width="4"/><circle cx="50" cy="54" r="2.4" fill="currentColor"/>
+            <circle class="mode-intro__signal" cx="80" cy="20" r="4" fill="#ff4a3a"/>
           </svg>
-          <span>REFUGE XM<br><b>ORDRE DE MISSION</b></span>
+          <span>ORDRE N°07<br><b>ÉVASION AUTORISÉE</b></span>
         </div>
       </div>
       <div class="bunker-strip" aria-hidden="true">
-        <img src="../../assets/svg/commun/perimetre.svg" alt="">
-        <div class="bunker-strip__copy"><span>CARTE TACTIQUE / EXTÉRIEUR</span><strong>FRANCHIR LE PÉRIMÈTRE</strong><small>RECONNAISSANCE · SECTEUR 07</small></div>
+        <img src="../../assets/svg/commun/enceinte.svg" alt="">
+        <div class="bunker-strip__copy"><span>CARTE TACTIQUE / ENCEINTE</span><strong>FRANCHIR LE MUR</strong><small>RECONNAISSANCE · MIRADOR NORD</small></div>
         <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
       </div>
-      <div class="mode-section-label"><span><b>01</b> / CHOIX DE L’EXPÉDITION</span><span>ARCHIVES DU PÉRIMÈTRE <b>—</b> XM</span></div>
+      <div class="mode-section-label"><span><b>01</b> / CHOIX DU PLAN</span><span>REGISTRE DES DÉTENUS <b>—</b> XM</span></div>
       <div class="mode-grid">
         <section class="mode-card mode-card--solo" aria-labelledby="solo-title">
-          <div class="mode-card__top"><span>DOSSIER <b>01</b> / EXPÉDITION</span><span class="mode-status"><i aria-hidden="true"></i> DISPONIBLE</span></div>
+          <div class="mode-card__top"><span>DOSSIER <b>N°01</b> / ÉVASION</span><span class="mode-status"><i aria-hidden="true"></i> DISPONIBLE</span></div>
           <div class="mode-card__art" aria-hidden="true">
             <svg viewBox="0 0 560 250" preserveAspectRatio="xMidYMid slice" fill="none">
               <defs>
-                <linearGradient id="solo-sky" x1="0" y1="0" x2="0" y2="250" gradientUnits="userSpaceOnUse"><stop stop-color="#6b4c37"/><stop offset="1" stop-color="#171c17"/></linearGradient>
-                <radialGradient id="solo-light"><stop stop-color="#d9a16d" stop-opacity=".3"/><stop offset="1" stop-color="#d9a16d" stop-opacity="0"/></radialGradient>
+                <linearGradient id="solo-wall" x1="0" y1="0" x2="0" y2="250" gradientUnits="userSpaceOnUse"><stop stop-color="#3b3833"/><stop offset="1" stop-color="#121110"/></linearGradient>
+                <radialGradient id="solo-lamp" cx="280" cy="0" r="220" gradientUnits="userSpaceOnUse"><stop stop-color="#ffe7a6" stop-opacity=".35"/><stop offset="1" stop-color="#ffe7a6" stop-opacity="0"/></radialGradient>
+                <pattern id="solo-bars" width="20" height="250" patternUnits="userSpaceOnUse"><rect x="8" width="5" height="250" fill="#5d5a52"/></pattern>
               </defs>
-              <rect width="560" height="250" fill="url(#solo-sky)"/>
-              <circle cx="377" cy="89" r="138" fill="url(#solo-light)"/>
-              <path d="M0 166h55v-31h35V93h28v73h31v-45h43V80h30v86h53V110h37v56h30v-37h32V89h22v77h29v-38h54v38h81v84H0z" fill="#222820"/>
-              <path d="M0 190 96 167l75 10 69-17 73 16 70-12 177 24v62H0z" fill="#171d18"/>
-              <path d="M0 211 93 192l100 11 89-20 99 17 74-11 105 13M0 228l115-13 107 7 110-16 121 18 107-7" stroke="#a3a383" stroke-opacity=".18"/>
-              <path d="M48 174v-53m-7 11 7-11 7 11m-20 32h26m-21-19h16M452 169V84m-11 23 11-23 11 23m-24 30h26m-21-17h16" stroke="#afb39a" stroke-opacity=".35" stroke-width="2"/>
-              <path d="M418 180v-32h33v32m-28 0v-25h23v25m-12-25v25" stroke="#c6ba98" stroke-opacity=".35" stroke-width="2"/>
-              <g class="mode-art__outpost">
-                <path d="M28 181 39 105h31l11 76M34 145h41M38 118h33M40 105l14-17 15 17M39 145l34 36M73 145l-34 36" stroke="#b09a76" stroke-opacity=".7" stroke-width="2"/>
-                <path d="M36 103h36v14H36z" fill="#171c17" stroke="#b09a76" stroke-opacity=".7"/>
-                <path d="M42 110h8m7 0h8" stroke="#e5aa72" stroke-width="2"/>
-                <circle class="mode-art__beacon" cx="54" cy="88" r="3" fill="#f3ae74"/>
-                <path d="M0 180h115m-90-12v20m64-20v20M0 186h115M8 180l8 6 8-6 8 6 8-6 8 6 8-6 8 6 8-6 8 6 8-6 8 6" stroke="#a08f73" stroke-opacity=".55" stroke-width="1.5"/>
-              </g>
-              <g transform="translate(142 158)" fill="#121811">
-                <g class="mode-art__infected">
-                  <g class="mode-art__infected-body"><circle cy="0" r="6"/><path d="M-6 7 4 6 8 19 5 31-7 31-9 18Z"/><path d="m4 10 7 9 10 3-2 4-13-3-6-7z"/></g>
-                  <g transform="translate(-4 28)"><path class="mode-art__infected-leg" d="M0 0h5l-1 12-4 12h-5l3-12z"/></g>
-                  <g transform="translate(3 28)"><path class="mode-art__infected-leg mode-art__infected-leg--rear" d="M0 0h5l2 12 3 12H5L0 13z"/></g>
+              <rect width="560" height="250" fill="url(#solo-wall)"/>
+              <path d="M0 200h560v50H0z" fill="#161514"/>
+              <path d="M40 30h150v170H40zM370 30h150v170H370z" fill="#0b0a0a"/>
+              <g fill="#050505">
+                <g class="mode-art__infected" transform="translate(445 110)">
+                  <g class="mode-art__infected-body"><circle r="13"/><path d="M-18 16h34l8 40-6 34h-36l-6-34z"/><path d="m14 26 34 12 26-2v10l-30 2-32-10z"/></g>
                 </g>
               </g>
-              <g transform="translate(478 160) scale(.85)" fill="#121811">
-                <g class="mode-art__infected mode-art__infected--distant">
-                  <g class="mode-art__infected-body"><circle cy="0" r="6"/><path d="M-6 7 4 6 8 19 5 31-7 31-9 18Z"/><path d="m4 10 7 9 10 3-2 4-13-3-6-7z"/></g>
-                  <g transform="translate(-4 28)"><path class="mode-art__infected-leg" d="M0 0h5l-1 12-4 12h-5l3-12z"/></g>
-                  <g transform="translate(3 28)"><path class="mode-art__infected-leg mode-art__infected-leg--rear" d="M0 0h5l2 12 3 12H5L0 13z"/></g>
-                </g>
+              <circle cx="440" cy="108" r="2" fill="#c6f24a"/><circle cx="450" cy="108" r="2" fill="#c6f24a"/>
+              <path d="M40 30h150v170H40zM370 30h150v170H370z" fill="url(#solo-bars)"/>
+              <path d="M40 30h150M40 110h150M370 30h150M370 110h150" stroke="#4d4a43" stroke-width="6"/>
+              <path d="M520 150h18l6-4 4 4-4 4 4 3-6 3h-22z" fill="#3e4a2a"/>
+              <text x="115" y="24" fill="#d7cfb8" fill-opacity=".6" font-family="Impact, sans-serif" font-size="16" text-anchor="middle" letter-spacing="3">C-07</text>
+              <text x="445" y="24" fill="#d7cfb8" fill-opacity=".6" font-family="Impact, sans-serif" font-size="16" text-anchor="middle" letter-spacing="3">C-08</text>
+              <path d="M250 0h60v10h-60z" fill="#22211f"/><rect width="560" height="250" fill="url(#solo-lamp)"/>
+              <g class="mode-art__survivor" fill="#0a0a09">
+                <circle cx="280" cy="128" r="13"/>
+                <path d="M262 146c2-6 9-9 18-9s16 3 18 9l8 34-8 4-6-14 2 30h-28l2-30-6 14-8-4z" fill="#b24f17"/>
+                <path d="m266 200-3 30h12l5-24 5 24h12l-4-30z" fill="#8f3f12"/>
+                <path d="M297 160l26-8 3 6-26 9z" fill="#2b2b2b"/>
               </g>
-              <circle class="mode-art__radar" cx="377" cy="98" r="67" stroke="#dfb587" stroke-opacity=".5" stroke-dasharray="3 7"/>
-              <circle cx="377" cy="98" r="54" stroke="#dfb587" stroke-opacity=".22"/>
-              <path d="M377 18v17m0 126v17m-80-80h17m126 0h17" stroke="#e2bb8d" stroke-opacity=".6"/>
-              <g class="mode-art__survivor" fill="#0c120f">
-                <path d="M278 135c-7-1-13-7-13-15v-7c0-10 6-16 14-16s14 6 14 16v7c0 8-6 14-13 15z"/>
-                <path d="M260 151c2-10 10-15 19-15s18 5 20 15l8 32-9 4-6-15 2 28h-29l1-28-6 15-9-4z"/>
-                <path d="m266 197-3 32h12l5-25 5 25h12l-4-32z"/>
-                <path d="M266 109h27l-3-7h-20z" fill="#242b20"/>
-              </g>
-              <path d="M0 235h560" stroke="#d4ae83" stroke-opacity=".3"/>
+              <path d="M0 200h560" stroke="#e8b10a" stroke-width="3" stroke-dasharray="18 12"/>
             </svg>
-            <span class="mode-card__art-label">ZONE 07 <b>/</b> RECONNAISSANCE</span>
+            <span class="mode-card__art-label">BLOC C <b>/</b> COULOIR 07</span>
             <span class="mode-card__art-index">01</span>
           </div>
           <div class="mode-card__body">
             <div class="mode-card__heading">
-              <div><p class="mode-card__eyebrow">UNE AVENTURE À VOTRE RYTHME</p><h2 id="solo-title" data-content="soloTitle">En solo</h2></div>
-              <span class="mode-card__symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5M12 10v4m-2-2h4" stroke="currentColor" stroke-width="1.5"/></svg></span>
+              <div><p class="mode-card__eyebrow">UN DÉTENU, UNE CHANCE</p><h2 id="solo-title" data-content="soloTitle">En solo</h2></div>
+              <span class="mode-card__symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3v18M12 3v18M17 3v18M3 8h18M3 16h18" stroke="currentColor" stroke-width="1.6"/></svg></span>
             </div>
-            <p class="mode-card__description" data-content="soloText">Créez votre survivant et préparez-vous à explorer la zone en solitaire.</p>
-            <div class="mode-card__tags" aria-label="Préparation de l’expédition"><span>PERSONNAGE</span><span>SALLES</span><span>PRÉPARATION</span></div>
-            <a class="mode-action" href="../info/info.html"><span data-content="soloAction">Préparer ma mission</span><span class="mode-action__arrow" aria-hidden="true">↗</span></a>
+            <p class="mode-card__description" data-content="soloText">Un détenu, une cellule, une seule chance. Préparez votre survivant et tentez l’évasion seul.</p>
+            <div class="mode-card__tags" aria-label="Préparation de l’évasion"><span>FICHE D’ÉCROU</span><span>ARMURERIE</span><span>SECTEURS</span></div>
+            <a class="mode-action" href="../info/info.html"><span data-content="soloAction">Préparer l’évasion</span><span class="mode-action__arrow" aria-hidden="true">▶</span></a>
           </div>
         </section>
         <section class="mode-card mode-card--multi" aria-labelledby="multi-title">
-          <div class="mode-card__top"><span>DOSSIER <b>02</b> / EXPÉDITION</span><span class="mode-status mode-status--future">À VENIR</span></div>
+          <div class="mode-card__top"><span>DOSSIER <b>N°02</b> / MUTINERIE</span><span class="mode-status mode-status--future">À VENIR</span></div>
           <div class="mode-card__art" aria-hidden="true">
             <svg viewBox="0 0 560 250" preserveAspectRatio="xMidYMid slice" fill="none">
-              <defs><linearGradient id="multi-sky" x1="0" y1="0" x2="0" y2="250" gradientUnits="userSpaceOnUse"><stop stop-color="#475247"/><stop offset="1" stop-color="#1b211c"/></linearGradient></defs>
+              <defs>
+                <linearGradient id="multi-sky" x1="0" y1="0" x2="0" y2="250" gradientUnits="userSpaceOnUse"><stop stop-color="#140d0c"/><stop offset=".7" stop-color="#5a2214"/><stop offset="1" stop-color="#2a1611"/></linearGradient>
+                <linearGradient id="multi-beam" x1="1" y1="0" x2="0" y2="1"><stop stop-color="#fff1bd" stop-opacity=".4"/><stop offset="1" stop-color="#fff1bd" stop-opacity="0"/></linearGradient>
+                <pattern id="multi-fence" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0H14M0 0V14" stroke="#9b978b" stroke-opacity=".3"/></pattern>
+              </defs>
               <rect width="560" height="250" fill="url(#multi-sky)"/>
-              <path d="M0 172h64v-34h47V96h34v76h43v-49h53v49h38V90h27v82h29v-54h50v54h42v-38h39v38h94v78H0z" fill="#252e26"/>
-              <path d="M0 195 94 174l92 15 79-19 82 20 81-18 132 22v56H0z" fill="#19201b"/>
-              <path d="M0 215l95-19 87 12 86-17 83 16 85-16 124 17M0 232l119-13 95 8 100-17 109 18 137-9" stroke="#b3bf9e" stroke-opacity=".17"/>
-              <path d="M71 179V96m-11 23 11-23 11 23m-25 31h28m-21-17h15M451 178V93m-10 22 10-22 10 22m-23 31h26" stroke="#b4c2a9" stroke-opacity=".3" stroke-width="2"/>
               <g class="mode-art__outpost">
-                <path d="M375 181v-42l22-17 22 17v42M381 181v-36h32v36M391 181v-25h12v25M370 181h54" fill="#18221c" stroke="#a5bba4" stroke-opacity=".7" stroke-width="2"/>
-                <path d="M397 122V98m-9 8a13 13 0 0 1 18 0m-23-5a20 20 0 0 1 28 0" stroke="#a5c9ae" stroke-width="2" stroke-linecap="round"/>
-                <circle class="mode-art__beacon" cx="397" cy="95" r="3" fill="#b9ddba"/>
-                <path d="M448 181h112m-95-13v21m69-21v21M448 187h112M450 181l8 6 8-6 8 6 8-6 8 6 8-6 8 6 8-6 8 6 8-6 8 6 8-6" stroke="#9eaf99" stroke-opacity=".55" stroke-width="1.5"/>
+                <path d="M440 170 452 70h36l12 100" fill="#181615"/>
+                <path d="M430 70h80V40h-80z" fill="#22201e"/><path d="M438 46h64v18h-64z" fill="#0b0a09"/>
+                <circle class="mode-art__beacon" cx="470" cy="34" r="4" fill="#ff3b2c"/>
+                <path d="M434 60 180 250h170z" fill="url(#multi-beam)"/>
               </g>
-              <circle class="mode-art__radar" cx="289" cy="100" r="71" stroke="#b4c2a9" stroke-opacity=".38" stroke-dasharray="3 8"/>
-              <circle cx="289" cy="100" r="56" stroke="#b4c2a9" stroke-opacity=".2"/>
-              <path d="M289 18v19m0 126v19m-82-82h19m126 0h19" stroke="#c8d0b6" stroke-opacity=".45"/>
-              <g class="mode-art__survivor" fill="#111915">
-                <circle cx="263" cy="134" r="11"/><path d="M251 147c2-4 6-6 12-6s10 2 12 6l5 23-5 3-4-9 1 17h-18l1-17-4 9-5-3zM254 178l-2 23h8l3-17 4 17h8l-3-23z"/>
-                <circle cx="307" cy="130" r="12"/><path d="M294 144c2-5 7-7 13-7s11 2 13 7l6 25-6 3-4-10 1 18h-20l1-18-4 10-6-3zM297 177l-3 25h9l4-19 4 19h9l-3-25z"/>
+              <path d="M0 160h560v90H0z" fill="#1b1a18"/>
+              <rect y="120" width="560" height="60" fill="url(#multi-fence)"/>
+              <path d="M0 120h560" stroke="#8b877c" stroke-opacity=".5" stroke-width="2"/>
+              <path d="M40 116v66M180 116v66M320 116v66M520 116v66" stroke="#252321" stroke-width="5"/>
+              <path d="M0 112c10-8 20 8 30 0s20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0 20 8 30 0" stroke="#8e8a80" stroke-width="1.5"/>
+              <circle class="mode-art__radar" cx="140" cy="80" r="56" stroke="#9cc23a" stroke-opacity=".4" stroke-dasharray="3 7"/>
+              <g class="mode-art__survivor" fill="#0a0a09">
+                <circle cx="230" cy="168" r="11"/><path d="M218 181c2-4 6-6 12-6s10 2 12 6l5 23-5 3-4-9 1 17h-18l1-17-4 9-5-3z" fill="#b24f17"/><path d="M221 212l-2 26h8l3-17 4 17h8l-3-26z" fill="#2c3a22"/>
+                <circle cx="276" cy="164" r="12"/><path d="M263 178c2-5 7-7 13-7s11 2 13 7l6 25-6 3-4-10 1 18h-20l1-18-4 10-6-3z" fill="#4b5a2e"/><path d="M266 211l-3 27h9l4-19 4 19h9l-3-27z" fill="#2c3a22"/>
               </g>
-              <path d="M0 235h560" stroke="#b4c2a9" stroke-opacity=".3"/>
+              <g fill="#050505"><g transform="translate(90 190)" class="mode-art__infected mode-art__infected--distant"><g class="mode-art__infected-body"><circle r="7"/><path d="M-7 8h12l4 20-3 20h-5l-2-14-3 14h-5l-1-18-6 6-3-3 9-15z"/></g></g></g>
             </svg>
-            <span class="mode-card__art-label">SIGNAL <b>/</b> EN ATTENTE</span>
+            <span class="mode-card__art-label">COUR DE PROMENADE <b>/</b> EN ATTENTE</span>
             <span class="mode-card__art-index">02</span>
           </div>
           <div class="mode-card__body">
             <div class="mode-card__heading">
-              <div><p class="mode-card__eyebrow">UNE EXPÉDITION ENSEMBLE</p><h2 id="multi-title" data-content="multiTitle">Multijoueur</h2></div>
+              <div><p class="mode-card__eyebrow">UNE MUTINERIE EN ÉQUIPE</p><h2 id="multi-title" data-content="multiTitle">Multijoueur</h2></div>
               <span class="mode-card__symbol mode-card__symbol--locked" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v10H5zM12 14v3" stroke="currentColor" stroke-width="1.5"/></svg>
+                <svg viewBox="0 0 24 24" fill="none"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v10H5zM12 14v3" stroke="currentColor" stroke-width="1.6"/></svg>
               </span>
             </div>
-            <p class="mode-card__description" data-content="multiText">Une aventure à partager se prépare. Le mode multijoueur n’est pas encore disponible.</p>
-            <div class="mode-card__tags"><span>COMMUNICATION</span><span>COOPÉRATION</span></div>
-            <button class="mode-action mode-action--disabled" type="button" disabled><span data-content="multiAction">En construction</span><span class="mode-action__arrow" aria-hidden="true">◇</span></button>
+            <p class="mode-card__description" data-content="multiText">Une évasion en équipe se prépare dans la cour. Le mode multijoueur n’est pas encore disponible.</p>
+            <div class="mode-card__tags"><span>RADIO</span><span>COOPÉRATION</span></div>
+            <button class="mode-action mode-action--disabled" type="button" disabled><span data-content="multiAction">Cellule verrouillée</span><span class="mode-action__arrow" aria-hidden="true">🔒︎</span></button>
           </div>
         </section>
       </div>
-      <footer class="mode-footer"><span>LAST REFUGE <b>·</b> XM</span><span>TRANSMISSION TERMINÉE <b>///</b> RESTEZ EN ALERTE</span><a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a><a href="../../../index.html">← RETOUR À L’ACCUEIL</a></footer>
+      <footer class="mode-footer"><span>LAST REFUGE <b>·</b> XM</span><span>FIN DE TRANSMISSION <b>///</b> RESTEZ DANS L’OMBRE</span><a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a><a href="../../../index.html">← RETOUR À L’ACCUEIL</a></footer>
     </main>
   </body>
 </html>

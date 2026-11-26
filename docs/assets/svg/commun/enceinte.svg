@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice">
+  <title>Enceinte du pénitencier</title>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#120c0b"/><stop offset=".7" stop-color="#5a2214"/><stop offset="1" stop-color="#2a1611"/></linearGradient>
+    <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#4d4943"/><stop offset="1" stop-color="#1a1917"/></linearGradient>
+    <linearGradient id="beam" x1="1" y1="0" x2="0" y2="1"><stop stop-color="#fff1bd" stop-opacity=".45"/><stop offset="1" stop-color="#fff1bd" stop-opacity="0"/></linearGradient>
+    <pattern id="fence" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0H18M0 0V18" fill="none" stroke="#9b978b" stroke-opacity=".3" stroke-width="1.2"/></pattern>
+    <pattern id="coil" width="24" height="20" patternUnits="userSpaceOnUse"><ellipse cx="12" cy="10" rx="10" ry="8" fill="none" stroke="#8e8a80" stroke-width="1.6"/></pattern>
+  </defs>
+  <rect width="1200" height="220" fill="url(#sky)"/>
+  <path d="M0 150V110h120V90h80v20h140v-30h70v30h180v40z" fill="#1d1a18"/>
+  <g transform="translate(900 0)">
+    <path d="M40 160 54 40h40l14 120" fill="#191716"/>
+    <path d="M30 40h88V8H30z" fill="#22201e"/><path d="M38 14h72v20H38z" fill="#0b0a09"/>
+    <circle cx="74" cy="24" r="4" fill="#ff3b2c"/>
+    <path d="M30 30-420 220h260z" fill="url(#beam)"/>
+    <circle cx="32" cy="30" r="7" fill="#fff4c7"/>
+  </g>
+  <path d="M0 140h1200v80H0z" fill="url(#wall)"/>
+  <path d="M0 140h1200" stroke="#6c675e" stroke-width="4"/>
+  <path d="M150 142v78M330 142v78M510 142v78M690 142v78M870 142v78M1050 142v78" stroke="#1b1a18" stroke-width="2"/>
+  <rect x="0" y="120" width="1200" height="20" fill="url(#coil)"/>
+  <rect x="0" y="160" width="1200" height="60" fill="url(#fence)"/>
+  <path d="M60 150v70M300 150v70M540 150v70M780 150v70M1020 150v70" stroke="#252321" stroke-width="6"/>
+  <g fill="#060606">
+    <g transform="translate(640 172)"><circle r="7"/><path d="M-7 8h12l4 20-3 20h-5l-2-14-3 14h-5l-1-18-6 6-3-3 9-15z"/><path d="m4 12 14 6 2 4-16-4z"/></g>
+    <g transform="translate(700 176) scale(.85)"><circle r="7"/><path d="M-7 8h12l4 20-3 20h-5l-2-14-3 14h-5l-1-18-6 6-3-3 9-15z"/></g>
+  </g>
+</svg>

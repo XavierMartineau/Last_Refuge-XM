@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Créateur de survivant 3D</title>
+<style>
+:root{--ink:#0b0d0c;--panel:#14181a;--line:#2a312e;--amber:#ffb347;--txt:#dfe3d6;--mut:#8b9288;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--ink);color:var(--txt);font:15px/1.35 "Segoe UI",system-ui,sans-serif}
+body{display:grid;grid-template-rows:minmax(280px,52dvh) minmax(0,1fr);grid-template-columns:minmax(0,1fr);height:100dvh}
+#left{position:relative;min-height:0;display:flex;flex-direction:column}
+#stage{position:relative;flex:1;min-height:0;overflow:hidden}
+#stage canvas{display:block;position:absolute;inset:0;touch-action:none}
+#stage::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 52%,rgba(0,0,0,.5) 100%)}
+.hud{position:absolute;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
+#shots{left:12px;top:12px}#stage-actions{left:12px;bottom:12px}#title{right:14px;top:12px;text-align:right;pointer-events:none;color:var(--mut);font-size:12px;letter-spacing:.14em}
+button{font:inherit;color:var(--txt);background:#1d2321;border:1px solid var(--line);padding:7px 12px;border-radius:7px;cursor:pointer}
+button:hover{border-color:var(--amber)}button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+button[aria-pressed=true],button[aria-current=true]{background:var(--amber);color:#17120a;border-color:var(--amber)}
+button.p{background:var(--amber);color:#17120a;border-color:var(--amber);font-weight:600}button.no{color:#e88}
+aside{background:var(--panel);border-top:1px solid var(--line);overflow:auto;padding:16px max(16px,calc((100% - 760px)/2)) 40px;min-height:0;scroll-behavior:smooth}
+.eyebrow{margin:0;font-size:11px;letter-spacing:.16em;color:var(--amber)}h2{margin:2px 0 4px;font-size:21px}h3{margin:14px 0 6px;font-size:14px;color:var(--mut);font-weight:600}
+.steps{display:flex;gap:6px;margin:10px 0 14px}.steps button{flex:1;padding:8px 4px}
+#tabs{display:flex;gap:6px;margin-bottom:6px}#tabs button{flex:1}
+.row{display:grid;grid-template-columns:118px 34px 1fr 34px;gap:5px;align-items:center;margin:6px 0}.lab{color:var(--mut);font-size:13px}
+.arr{padding:7px 0;font-size:18px;line-height:1}.val{display:flex;align-items:center;gap:8px;text-align:left;min-width:0}.val span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.val small{color:var(--mut)}
+.sw{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid #fff4;flex:none}
+#nameBox label{display:block;margin:8px 0 4px;color:var(--mut)}input[type=text]{width:100%;padding:9px 10px;background:#0c0f0e;border:1px solid var(--line);color:var(--txt);border-radius:7px;font:inherit}
+textarea{width:100%;height:130px;background:#0c0f0e;color:#bfd0b8;border:1px solid var(--line);border-radius:7px;padding:8px;font:12px/1.3 ui-monospace,Consolas,monospace;resize:vertical}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.help,small{color:var(--mut)}
+.nav{display:flex;gap:8px;margin-top:18px;align-items:center}.nav .p{margin-left:auto}a.finish{margin-left:auto;color:var(--amber);text-decoration:none}
+#saved{display:flex;gap:8px;flex-wrap:wrap}.card2{width:96px;font-size:12px;text-align:center}.card2 img{width:96px;height:120px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}.card2 b{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.card2 button{padding:3px 6px;font-size:12px}
+dialog{background:var(--panel);color:var(--txt);border:1px solid var(--amber);border-radius:12px;padding:0;width:min(560px,94vw);max-height:84dvh}
+dialog::backdrop{background:#000a}.gd{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}.gd h2{margin:0}
+#gallery-options{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:14px 16px;overflow:auto;max-height:62dvh}
+.thumb{width:100%;height:92px;object-fit:cover;border-radius:8px;display:block;background:#0b0d0f}.opt:has(.thumb){flex-direction:column;align-items:stretch;gap:6px}.val .thumb{width:58px;height:38px;flex:none;border-radius:6px}.opt{display:flex;align-items:center;gap:8px;text-align:left;padding:9px}.opt .sw{width:22px;height:22px}.opt span{overflow:hidden;text-overflow:ellipsis}
+.st{display:grid;grid-template-columns:84px 1fr 86px;gap:8px;align-items:center;margin:5px 0;font-size:13px}.st>div{height:8px;background:#0c0f0e;border-radius:4px;overflow:hidden}.st i{display:block;height:100%;background:linear-gradient(90deg,#c97b1a,var(--amber))}.st b{text-align:right;font-weight:600}#wstats{margin:14px 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#101412}
+.gh{padding:0 16px 12px;color:var(--mut);font-size:13px}
+@media (max-width:860px){.row{grid-template-columns:96px 30px 1fr 30px}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div id="left">
+  <div id="stage">
+    <div class="hud" id="shots"><button data-shot="full" aria-pressed="true">Corps entier</button><button data-shot="bust" aria-pressed="false">Buste</button><button data-shot="face" aria-pressed="false">Visage</button><button data-shot="back" aria-pressed="false">Dos</button><button id="spin" aria-pressed="false">⟳ Rotation</button></div>
+    <div class="hud" id="stage-actions"><button id="rand">✦ Aléatoire</button><button id="reset">Réinitialiser</button><button id="save">★ Enregistrer</button></div>
+  </div>
+</div>
+<aside>
+  <p class="eyebrow">DOSSIER DE SURVIE</p><h2>Façonnez votre identité</h2>
+  <div class="steps" id="steps"></div>
+  <p class="eyebrow" id="step-label"></p><h2 id="step-title"></h2><p class="help" id="step-description"></p>
+  <h3 id="type-label">Type de personnage</h3><div id="tabs"></div>
+  <div id="nameBox" hidden><label for="name">Nom du personnage</label><input id="name" type="text" maxlength="20" placeholder="Écrivez un nom…"></div>
+  <div id="controls"></div>
+  <div id="wstats" hidden></div>
+  <div id="jsonbox" hidden>
+    <h3>Sauvegarde du personnage (JSON)</h3><p class="help">Les choix sont enregistrés avec leurs index d’origine : compatible avec la version 2D.</p>
+    <textarea id="json" spellcheck="false" aria-label="JSON du personnage"></textarea>
+    <div class="tools"><button id="load">Charger ce JSON</button><button id="copy">Copier</button><button id="dl">Télécharger .json</button><button onclick="document.getElementById('file').click()">Ouvrir un .json…</button><input id="file" type="file" accept=".json,application/json" hidden></div>
+    <h3>Exporter le modèle</h3>
+    <div class="tools"><button class="p" id="glb">Modèle 3D (.glb)</button><button id="png">Image (.png)</button></div>
+    <small id="msg" role="status"></small>
+    <h3>Mes personnages</h3><div id="saved"></div>
+  </div>
+  <div class="nav"><button id="back">← Étape précédente</button><button class="p" id="next">Continuer →</button><a class="finish" id="finish" href="../info/info.html" hidden>Retour au hub ↗</a></div>
+</aside>
+<dialog id="gallery-dialog" aria-labelledby="gallery-title">
+  <div class="gd"><div><p class="eyebrow">PERSONNALISATION</p><h2 id="gallery-title"></h2></div><button id="gallery-close" aria-label="Fermer">×</button></div>
+  <p class="gh">Choisissez une option : le personnage 3D se met à jour en direct (vous pouvez le faire tourner derrière).</p>
+  <div id="gallery-options"></div>
+</dialog>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const CL=(()=>{
+const QUALITY={rounded:true,anisotropy:16};      // réglages de qualité : arêtes arrondies (reflets sur les bords), filtrage des textures
+
+/* ════════════════════════════════════════════════════════════════
+   1. DONNÉES — palettes et listes reprises telles quelles de assets-generes.js
+      (le JSON du personnage reste donc 100 % compatible avec la version 2D)
+   ════════════════════════════════════════════════════════════════ */
+const D={"HUMAN":["#ffe0c8","#f8d2b0","#f1c27d","#e0ac69","#c68642","#a9733e","#8d5524","#6f4018","#4a2c14","#f5cdb9","#ffd9a8","#d8a47f","#c58c5a","#8a5a3b"],"FANT":["#7a9070","#718e8c","#897d86","#9aa3a0","#985f50","#ae8c80","#638a79","#b0a378","#c9c8b7","#3d4941","#a97956","#87966a","#6c7881","#a9b0a6"],"HAIRCOL":["#16120f","#3a2616","#5c3a1e","#7a4a24","#8f3b1b","#c0501b","#d9b13a","#efe2b0","#8d8d8d","#eeeeee","#2a6bd7","#2f9e5a","#e0457a","#8a3fd0"],"EYECOL":["#6b3f1d","#3e2412","#8a6a2f","#3f8a4f","#3b7fc4","#7bb6e0","#7a8794","#d98a1f","#8a4fd0","#2a9d9d","#222222","#e03a3a"],"OUTCOL":["#3e503a","#6b4236","#596c59","#b5a17b","#252e28","#758076","#a89462","#4a3f32","#5f6650","#34493e"],"BGP":[["#c5cabb","#8e9b87"],["#d7c9a9","#9e8d6e"],["#b8c2bd","#77867e"],["#c4c0a9","#858a70"],["#c7aea2","#8a6c5e"],["#39493e","#19251e"],["#4a3b32","#211a16"],["#c0c3ba","#798078"],["#bac8ac","#778c6d"],["#c8b7a3","#8d7866"],["#d5c9a7","#a18e66"],["#bbc4b6","#728676"],["#b2bbb0","#687869"],["#ccb9a3","#937965"],["#334638","#111d15"],["#57382f","#211612"],["#303b37","#151e1a"],["#343a34","#111712"],["#a9bca9","#698371"],["#d2d3c4","#9a9f90"]],"ACCCOL":["#4e6148","#6b4236","#727e68","#b5a17b","#252e28","#758076","#a89462","#4a3f32","#5f6650","#34493e","#a6b0a1","#865e46","#798361","#c0b49a"],"NCOL":["#ffffff","#16211f","#f5c518","#e0524d","#f08fc0","#a78bfa","#4fb3e8","#3dc9b0","#7fd16a","#f59a3a","#c0501b","#2a6bd7","#8a3fd0","#9aa3ad"],"NFONTS":[["Classique","'Segoe UI',system-ui,sans-serif"],["Serif","Georgia,'Times New Roman',serif"],["Impact","Impact,'Arial Black',sans-serif"],["Machine","'Courier New',monospace"],["Cursive","'Brush Script MT','Segoe Script',cursive"],["Fantaisie","Papyrus,fantasy"],["Trebuchet","'Trebuchet MS',sans-serif"],["Verdana","Verdana,Geneva,sans-serif"],["Palatino","'Palatino Linotype',Palatino,serif"],["Comic","'Comic Sans MS','Chalkboard SE',cursive"],["Copperplate","Copperplate,'Copperplate Gothic Light',fantasy"],["Condensé","'Arial Narrow','Franklin Gothic Medium',sans-serif"]],"NSTYLE":["Contour","Ombre","Épais","Bandeau","Néon","Simple"],"NSIZE":["S","M","L","XL"],"NPOS":["Bas","Haut"],"PNAMES":["Aucun","Repères tactiques","Bandes de danger","Grille tactique","Avertissements","Barbelés","Radar"],"FACES":[[54,40,206],[58,52,202],[56,54,206],[50,36,216],[60,48,204],[52,28,210],[57,44,212],[62,56,204]],"SPNAMES":["Survivant atypique","Mutant à antennes","Mutant aux oreilles pointues","Mutant cornu","Infecté aux crocs","Zombie","Cyborg","Mutant cyclope","Mutant ailé","Mutant félin","Mutant massif","Mutant à trois yeux","Mutant reptilien","Mutant aux ailes fines"],"PRESETS":[{"skin":8,"eyeColor":4,"eyes":0,"hair":6,"hairColor":2,"outfit":5,"outfitColor":7,"headwear":0,"accColor":0,"glasses":0,"extra":0,"beard":0},{"skin":0,"eyeColor":10,"eyes":6,"hair":0,"hairColor":0,"outfit":0,"outfitColor":9,"headwear":0,"accColor":0,"glasses":0,"extra":0,"beard":0},{"skin":8,"eyeColor":3,"eyes":1,"hair":6,"hairColor":6,"outfit":5,"outfitColor":2,"headwear":15,"accColor":6,"glasses":0,"extra":0,"beard":0},{"skin":4,"eyeColor":11,"eyes":10,"hair":3,"hairColor":4,"outfit":6,"outfitColor":1,"headwear":0,"accColor":0,"glasses":0,"extra":14,"beard":0},{"skin":8,"eyeColor":11,"eyes":0,"hair":9,"hairColor":0,"outfit":6,"outfitColor":1,"headwear":0,"accColor":0,"glasses":0,"extra":0,"beard":0},{"skin":11,"eyeColor":6,"eyes":3,"hair":2,"hairColor":8,"outfit":9,"outfitColor":7,"headwear":0,"accColor":0,"glasses":0,"extra":4,"beard":0},{"skin":13,"eyeColor":4,"eyes":0,"hair":0,"hairColor":0,"outfit":4,"outfitColor":9,"headwear":0,"accColor":0,"glasses":0,"extra":0,"beard":0},{"skin":10,"eyeColor":3,"eyes":0,"hair":0,"hairColor":0,"outfit":8,"outfitColor":6,"headwear":0,"accColor":0,"glasses":0,"extra":0,"beard":0},{"skin":8,"eyeColor":5,"eyes":1,"hair":6,"hairColor":6,"outfit":5,"outfitColor":3,"headwear":0,"accColor":0,"glasses":0,"extra":0,"beard":0},{"skin":10,"eyeColor":7,"eyes":10,"hair":0,"hairColor":0,"outfit":8,"outfitColor":4,"headwear":0,"accColor":0,"glasses":0,"extra":0,"beard":0},{"skin":0,"eyeColor":11,"eyes":4,"hair":8,"hairColor":0,"outfit":3,"outfitColor":7,"headwear":11,"accColor":5,"glasses":0,"extra":14,"beard":0},{"skin":2,"eyeColor":8,"eyes":12,"hair":7,"hairColor":13,"outfit":1,"outfitColor":8,"headwear":0,"accColor":0,"glasses":0,"extra":11,"beard":0},{"skin":6,"eyeColor":7,"eyes":0,"hair":0,"hairColor":0,"outfit":3,"outfitColor":2,"headwear":0,"accColor":0,"glasses":0,"extra":0,"beard":0},{"skin":5,"eyeColor":9,"eyes":1,"hair":7,"hairColor":12,"outfit":5,"outfitColor":9,"headwear":15,"accColor":10,"glasses":0,"extra":11,"beard":0}]};
+
+// Nombre de choix par catégorie (identique à la version 2D)
+const LEN={species:14,skin:14,face:8,eyes:14,eyeColor:12,brows:10,nose:9,mouth:13,beard:10,hair:{male:14,female:13,other:10},hairColor:14,outfit:10,outfitColor:10,glasses:12,headwear:18,accColor:14,extra:17,specialBack:4,specialHead:4,specialFace:4,background:20,pattern:7,nameFont:12,nameColor:14,nameStyle:6,nameSize:4,namePos:2};
+// Noms des modèles 3D (modifiables librement)
+const NAMES={
+  face:['Ovale','Rond','Carré','Allongé','Anguleux','Pointu','Doux','Large'],
+  eyes:['Ronds naturels','Amande','Grands yeux','Petits yeux','Mi-clos','Endormis','Sévères','Doux','Pupille en fente','Lumineux','Noirs','Blancs','Cybernétiques','Cernés'],
+  brows:['Aucun','Naturels','Épais','Fins arqués','Droits','En colère','Tristes','Longs','Courts','Broussailleux'],
+  nose:['Petit','Droit','Long','Large','Pointu','Retroussé','Aquilin','Plat','Bulbeux'],
+  mouth:['Neutre','Sourire','Grand sourire','Moue','Ouverte','Sourire en coin','Cri','Dents serrées','Crocs','Langue','Petite','Lèvres épaisses','Moqueur'],
+  beard:['Aucune','Trois jours','Moustache','Bouc','Courte','Pleine','Longue','Favoris','Mentonnière','Tressée'],
+  hair:{male:['Aucun','Courts','Rasés','Undercut','Hérissés','Banane','Mèche','Mi-longs','Longs','Queue de cheval','Chignon','Crête','Afro','Bouclés'],
+        female:['Aucun','Courts','Carré','Carré long','Longs lisses','Longs bouclés','Queue de cheval','Couettes','Chignon','Tresses','Frange et longs','Mi-longs','Afro'],
+        other:['Aucun','Courts','Hérissés','Crête','Longs','Chignon','Tresses','Afro','Bouclés','Queue de cheval']},
+  outfit:['Tee-shirt','Manches longues','Sweat à capuche','Veste de survie','Gilet tactique','Manteau long','Débardeur','Plaque de blindage','Poncho','Blouse de laboratoire'],
+  glasses:['Aucune','Rondes','Carrées','Aviateur','Soleil','Tactiques','Monocle','Visière','Cache-œil','Soudeur','Cyber-visière','Demi-lunes'],
+  headwear:['Aucun','Bonnet','Casquette','Casque militaire','Bandana','Bandeau','Chapeau à large bord','Casque de chantier','Chapka','Cagoule','Béret','Capuche','Chapeau de cowboy','Casque audio','Masque à gaz','Casque tactique','Haut-de-forme','Couronne'],
+  extra:['Aucun','Taches de rousseur','Cicatrice','Pansement','Boucles d’oreilles','Piercing au nez','Tatouage','Peinture de guerre','Masque chirurgical','Écharpe','Plaques d’identité','Cernes','Larme tatouée','Bandage','Griffures','Piercing sourcil','Foulard'],
+  specialBack:['Aucun','Ailes de chauve-souris','Ailes de plumes','Appendices mutants'],
+  specialHead:['Aucun','Cornes','Antennes','Crête mutante'],
+  specialFace:['Aucun','Cicatrices','Implant cybernétique','Marques mutantes']
+};
+const LABEL={species:'Style (espèce)',skin:'Teint',face:'Visage',eyes:'Yeux',eyeColor:'Couleur yeux',brows:'Sourcils',nose:'Nez',mouth:'Bouche',beard:'Barbe',hair:'Cheveux',hairColor:'Couleur cheveux',outfit:'Tenue',outfitColor:'Couleur tenue',glasses:'Lunettes',headwear:'Couvre-chef',extra:'Détail',specialBack:'Ailes et appendices',specialHead:'Cornes et antennes',specialFace:'Détails spéciaux',background:'Fond',accColor:'Couleur couvre-chef',pattern:'Motif du fond',nameFont:'Police du nom',nameColor:'Couleur du nom',nameStyle:'Style du nom',nameSize:'Taille',namePos:'Position'};
+const GENDERS={male:'Homme',female:'Femme',other:'Autres'};
+const DEF={species:1,skin:3,face:0,eyes:0,eyeColor:1,brows:1,nose:0,mouth:0,beard:0,hair:3,hairColor:2,outfit:0,outfitColor:0,glasses:0,headwear:0,extra:0,specialBack:0,specialHead:0,specialFace:0,background:0,accColor:0,pattern:0,nameFont:0,nameColor:0,nameStyle:0,nameSize:1,namePos:0};
+const STEPS=[{t:'1. Base',keys:['species','skin','face','eyes','eyeColor','brows','nose','mouth','beard','hair','hairColor','outfit','outfitColor']},
+  {t:'2. Accessoires',keys:['headwear','accColor','glasses','extra','specialBack','specialHead','specialFace']},
+  {t:'3. Fond & nom',keys:['background','pattern','nameFont','nameColor','nameStyle','nameSize','namePos']}];
+const STEP_DETAILS=[['La base','Choisissez la silhouette et les traits de votre survivant.'],['Les accessoires','Complétez votre équipement avant la mission.'],['Fond & nom','Terminez votre portrait et exportez votre personnage en JSON ou en .glb.']];
+const emptyChoices=new Set(['hair','beard','glasses','headwear','extra']);
+const REGS=g=>({...(g==='other'?{species:LEN.species,specialBack:4,specialHead:4,specialFace:4}:{}),skin:LEN.skin,face:LEN.face,eyes:LEN.eyes,eyeColor:LEN.eyeColor,brows:LEN.brows,nose:LEN.nose,mouth:LEN.mouth,...(g==='female'?{}:{beard:LEN.beard}),
+  hair:LEN.hair[g],hairColor:LEN.hairColor,outfit:LEN.outfit,outfitColor:LEN.outfitColor,camo:LEN.camo,pants:LEN.pants,pantsColor:LEN.pantsColor,boots:LEN.boots,bootsColor:LEN.bootsColor,gloves:LEN.gloves,glovesColor:LEN.glovesColor,arms:LEN.arms,gear:LEN.gear,backpack:LEN.backpack,weapon:LEN.weapon,wMuzzle:LEN.wMuzzle,wOptic:LEN.wOptic,wUnder:LEN.wUnder,wStock:LEN.wStock,wMag:LEN.wMag,wFinish:LEN.wFinish,glasses:LEN.glasses,headwear:LEN.headwear,accColor:LEN.accColor,extra:LEN.extra,background:LEN.background,pattern:LEN.pattern,nameFont:LEN.nameFont,nameColor:LEN.nameColor,nameStyle:LEN.nameStyle,nameSize:LEN.nameSize,namePos:LEN.namePos});
+function choiceName(k,i,g){
+  if(k==='hair')return NAMES.hair[g][i];
+  if(k==='species')return D.SPNAMES[i];
+  if(WALT[k]&&WALT[k][WCTX.w])return WALT[k][WCTX.w][i];
+  if(k==='pattern')return D.PNAMES[i];if(k==='nameFont')return D.NFONTS[i][0];if(k==='nameStyle')return D.NSTYLE[i];if(k==='nameSize')return D.NSIZE[i];if(k==='namePos')return D.NPOS[i];
+  if(NAMES[k])return NAMES[k][i]??('Choix '+(i+1));
+  return 'Choix '+(i+1)}
+function sanitize(raw){            // même validation que la version 2D
+  const g=GENDERS[raw?.gender]?raw.gender:'male',reg=REGS(g),o={gender:g};
+  for(const k in reg){const v=raw?.[k];o[k]=Number.isInteger(v)&&v>=0&&v<reg[k]?v:(DEF[k]<reg[k]?DEF[k]:0)}
+  o.name=typeof raw?.name==='string'?raw.name.slice(0,20):'';return o}
+
+/* ════════════════════════════════════════════════════════════════
+   2. OUTILS 3D (matériaux partagés, primitives, tronçons…)
+   ════════════════════════════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
+const hx=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)),th=v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0');
+const sh=(h,a)=>'#'+hx(h).map(v=>th(a<0?v*(1+a):v+(255-v)*a)).join('');          // éclaircit / assombrit une couleur
+let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646};  // aléatoire reproductible : même personnage = même rendu
+const MC=new Map();
+const mat=(c,o={})=>{const k=c+'|'+JSON.stringify(o);let m=MC.get(k);if(!m){m=new THREE.MeshStandardMaterial({color:c,roughness:.7,metalness:0,...o});MC.set(k,m)}return m};
+const V=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z),UP=V(0,1,0);
+const mk=(geo,m,x=0,y=0,z=0,p=null)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;if(p)p.add(o);return o};
+const grp=(x=0,y=0,z=0,p=null)=>{const o=new THREE.Group();o.position.set(x,y,z);if(p)p.add(o);return o};
+const ell=(rx,ry,rz,m,x=0,y=0,z=0,p=null)=>{const o=mk(new THREE.SphereGeometry(1,28,20),m,x,y,z,p);o.scale.set(rx,ry,rz);return o};
+const box=(w,h,d,m,x=0,y=0,z=0,p=null)=>{const r=Math.min(w,h,d)*.22;return mk(QUALITY.rounded&&typeof RoundedBoxGeometry!=='undefined'?new RoundedBoxGeometry(w,h,d,2,r):new THREE.BoxGeometry(w,h,d),m,x,y,z,p)};   // boîte aux arêtes légèrement arrondies
+const cyl=(rt,rb,h,m,x=0,y=0,z=0,p=null,seg=24,open=false)=>mk(new THREE.CylinderGeometry(rt,rb,h,seg,1,open),m,x,y,z,p);
+const tube=(pts,r,m,p,seg=24,rad=6)=>mk(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(a=>V(a[0],a[1],a[2]))),seg,r,rad,false),m,0,0,0,p);
+function limb(a,b,r0,r1,m,p,seg=10){          // tronc de cône entre deux points (cornes, tentacules, os…)
+  const A=V(a[0],a[1],a[2]),B=V(b[0],b[1],b[2]),d=B.clone().sub(A),L=d.length()||.001;
+  const o=mk(new THREE.CylinderGeometry(r1,r0,L,seg),m);o.position.copy(A).addScaledVector(d,.5);o.quaternion.setFromUnitVectors(UP,d.normalize());if(p)p.add(o);return o}
+function chain(pts,r0,r1,m,p){const n=pts.length-1;for(let i=0;i<n;i++)limb(pts[i],pts[i+1],lerp(r0,r1,i/n),lerp(r0,r1,(i+1)/n),m,p)}
+function spike(base,dir,r,h,m,p,seg=8){          // cône posé par sa base, dirigé selon dir
+  const d=V(dir[0],dir[1],dir[2]).normalize(),o=mk(new THREE.ConeGeometry(r,h,seg),m);
+  o.position.set(base[0],base[1],base[2]).addScaledVector(d,h/2);o.quaternion.setFromUnitVectors(UP,d);if(p)p.add(o);return o}
+const safe=(fn,name)=>{try{fn()}catch(e){console.warn('Asset 3D « '+name+' » :',e)}};
+/* ───────── MATÉRIAUX PBR RÉALISTES : cartes de normales / rugosité générées en code (aucune image externe) ───────── */
+const _vn=(size,cell)=>{const n=Math.max(1,Math.ceil(size/cell)),g=Array.from({length:n*n},()=>Math.random());
+  return(i,j)=>{const x=i/cell,y=j/cell,x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy),X0=x0%n,X1=(x0+1)%n,Y0=y0%n,Y1=(y0+1)%n;
+    const a=g[Y0*n+X0],b=g[Y0*n+X1],c=g[Y1*n+X0],d=g[Y1*n+X1];return a+(b-a)*sx+(c-a)*sy+(a-b-c+d)*sx*sy}};
+function _hmap(size,fn){const h=new Float32Array(size*size);for(let j=0;j<size;j++)for(let i=0;i<size;i++)h[j*size+i]=fn(i,j);return h}
+function _normalTex(h,size,strength,rx,ry){const c=cvs(size,size),x=c.getContext('2d'),id=x.createImageData(size,size),W=size;
+  for(let j=0;j<size;j++)for(let i=0;i<size;i++){
+    const L=h[j*W+(i+W-1)%W],R=h[j*W+(i+1)%W],U=h[((j+W-1)%W)*W+i],Dn=h[((j+1)%W)*W+i];
+    let nx=(L-R)*strength,ny=(Dn-U)*strength,nz=1;const l=Math.hypot(nx,ny,nz);nx/=l;ny/=l;nz/=l;
+    const o=(j*W+i)*4;id.data[o]=(nx*.5+.5)*255;id.data[o+1]=(ny*.5+.5)*255;id.data[o+2]=(nz*.5+.5)*255;id.data[o+3]=255}
+  x.putImageData(id,0,0);return mkTex(c,rx,ry,false)}
+function _grayTex(h,size,lo,hi,rx,ry){const c=cvs(size,size),x=c.getContext('2d'),id=x.createImageData(size,size);
+  for(let i=0;i<size*size;i++){const v=(lo+(hi-lo)*h[i])*255;id.data[i*4]=id.data[i*4+1]=id.data[i*4+2]=v;id.data[i*4+3]=255}
+  x.putImageData(id,0,0);return mkTex(c,rx,ry,false)}
+const _cache=(k,f)=>{if(TEXC.has(k))return TEXC.get(k);const v=f();TEXC.set(k,v);return v};
+// peau : pores + micro-relief (normale) et rugosité variable (zones grasses / sèches)
+const skinNorm=()=>_cache('skinN',()=>{const S=256,n1=_vn(S,4),n2=_vn(S,16),n3=_vn(S,64),pores=[];for(let k=0;k<900;k++)pores.push([Math.random()*S,Math.random()*S,.8+Math.random()*1.4]);
+  const h=_hmap(S,(i,j)=>.35*n1(i,j)+.3*n2(i,j)+.35*n3(i,j));
+  pores.forEach(([px,py,r])=>{for(let dj=-3;dj<=3;dj++)for(let di=-3;di<=3;di++){const d=Math.hypot(di,dj);if(d<r*2){const ii=((px|0)+di+S)%S,jj=((py|0)+dj+S)%S;h[jj*S+ii]-=.5*Math.exp(-d*d/(r*r))}}});
+  return _normalTex(h,S,3.2,5,3)});
+const skinRough=()=>_cache('skinR',()=>{const S=128,n=_vn(S,16),n2=_vn(S,4);return _grayTex(_hmap(S,(i,j)=>.7*n(i,j)+.3*n2(i,j)),S,.78,1,2,2)});
+const skinMat=hex=>new THREE.MeshPhysicalMaterial({color:hex,roughness:.62,roughnessMap:skinRough(),normalMap:skinNorm(),normalScale:new THREE.Vector2(.55,.55),sheen:.6,sheenColor:new THREE.Color('#ffd8c8'),sheenRoughness:.55,clearcoat:.07,clearcoatRoughness:.45});
+// tissu : trame en sergé + pelucheux (sheen)
+const twillNorm=()=>_cache('twillN',()=>{const S=128,n=_vn(S,2);const h=_hmap(S,(i,j)=>.5+.35*Math.sin((i+j)*Math.PI/2)*(((i>>1)+(j>>1))%2?1:.55)+.15*n(i,j));return _normalTex(h,S,3.6,9,9)});
+const fab=(hex,kind=0,o={})=>new THREE.MeshPhysicalMaterial({color:'#ffffff',map:fabricTex(kind,hex),normalMap:twillNorm(),normalScale:new THREE.Vector2(.9,.9),roughness:.96,envMapIntensity:.55,sheen:.35,sheenColor:new THREE.Color(hex||'#888').lerp(new THREE.Color('#ffffff'),.15),sheenRoughness:.8,...o});
+// cuir : grain cellulaire + vernis usé
+const leatherNorm=()=>_cache('leatherN',()=>{const S=256,P=[];for(let k=0;k<110;k++)P.push([Math.random()*S,Math.random()*S]);
+  const h=_hmap(S,(i,j)=>{let d1=1e9,d2=1e9;for(const[px,py]of P){let dx=Math.abs(i-px),dy=Math.abs(j-py);dx=Math.min(dx,S-dx);dy=Math.min(dy,S-dy);const d=dx*dx+dy*dy;if(d<d1){d2=d1;d1=d}else if(d<d2)d2=d}return Math.min(1,(Math.sqrt(d2)-Math.sqrt(d1))/5)});
+  return _normalTex(h,S,2.6,4,4)});
+const leather=(hex,r=.55)=>new THREE.MeshPhysicalMaterial({color:hex,roughness:r+.08,roughnessMap:skinRough(),normalMap:leatherNorm(),normalScale:new THREE.Vector2(.9,.9),clearcoat:.12,clearcoatRoughness:.5,metalness:.02});
+// métal : brossé + rayures fines
+const metalNorm=()=>_cache('metalN',()=>{const S=256,row=Float32Array.from({length:S},()=>Math.random()),n=_vn(S,32);const h=_hmap(S,(i,j)=>.55*row[j]+.2*n(i,j)+.25*Math.random()*.5);
+  for(let k=0;k<70;k++){let x=Math.random()*S,y=Math.random()*S;const a=Math.random()*Math.PI,l=15+Math.random()*60,dx=Math.cos(a),dy=Math.sin(a);for(let t=0;t<l;t++){const ii=(Math.floor(x+dx*t)+S)%S,jj=(Math.floor(y+dy*t)+S)%S;h[jj*S+ii]-=.5}}
+  return _normalTex(h,S,1.8,3,3)});
+const metalRough=()=>_cache('metalR',()=>{const S=256,n=_vn(S,8),row=Float32Array.from({length:S},()=>Math.random());return _grayTex(_hmap(S,(i,j)=>.5*n(i,j)+.5*row[j]),S,.6,1,3,3)});
+const metal=(c,r=.35)=>{const k='mt'+c+r;if(MC.has(k))return MC.get(k);const m=new THREE.MeshPhysicalMaterial({color:c,metalness:.92,roughness:r+.2,roughnessMap:metalRough(),normalMap:metalNorm(),normalScale:new THREE.Vector2(.45,.45),envMapIntensity:1.25,anisotropy:.55});MC.set(k,m);return m};
+// peinture / parkérisation d’arme usée : couleur avec rayures claires et usure aux arêtes
+function _wearTex(hex){return _cache('wear'+hex,()=>{const S=256,c=cvs(S,S),x=c.getContext('2d');x.fillStyle=hex;x.fillRect(0,0,S,S);const base=new THREE.Color(hex),lt=base.clone().lerp(new THREE.Color('#aab0b0'),.6).getStyle(),dk=base.clone().multiplyScalar(.55).getStyle();
+  for(let i=0;i<260;i++){x.strokeStyle=Math.random()<.65?lt:dk;x.globalAlpha=.12+Math.random()*.3;x.lineWidth=.5+Math.random()*1.2;const px=Math.random()*S,py=Math.random()*S,a=Math.random()*Math.PI,l=6+Math.random()*40;x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l);x.stroke()}
+  for(let i=0;i<40;i++){x.globalAlpha=.1;x.fillStyle=Math.random()<.5?lt:dk;x.beginPath();x.arc(Math.random()*S,Math.random()*S,3+Math.random()*14,0,6.3);x.fill()}x.globalAlpha=1;return mkTex(c,3,3)})}
+const gunPaint=hex=>{const k='gp'+hex;if(MC.has(k))return MC.get(k);const m=new THREE.MeshPhysicalMaterial({color:'#ffffff',map:_wearTex(hex),metalness:.75,roughness:.62,roughnessMap:metalRough(),normalMap:metalNorm(),normalScale:new THREE.Vector2(.4,.4),clearcoat:.15,clearcoatRoughness:.4,envMapIntensity:1.15,anisotropy:.4});MC.set(k,m);return m};
+// polymère : surface piquetée
+const polyNorm=()=>_cache('polyN',()=>{const S=128,n=_vn(S,2);return _normalTex(_hmap(S,(i,j)=>.6*Math.random()+.4*n(i,j)),S,2.4,6,6)});
+const polyMat=hex=>{const k='pl'+hex;if(MC.has(k))return MC.get(k);const m=new THREE.MeshPhysicalMaterial({color:hex,roughness:.7,normalMap:polyNorm(),normalScale:new THREE.Vector2(.8,.8),sheen:.3,sheenColor:new THREE.Color('#556'),sheenRoughness:.6});MC.set(k,m);return m};
+// bois : veines + pores
+const woodMat=()=>_cache('woodM',()=>{const S=256,c=cvs(S,S),x=c.getContext('2d'),n=_vn(S,32),h=new Float32Array(S*S);const id=x.createImageData(S,S);
+  for(let j=0;j<S;j++)for(let i=0;i<S;i++){const w=Math.sin((j+n(i,j)*40)*.18)*.5+.5,f=.5*w+.5*_n2(i,j),o=(j*S+i)*4;h[j*S+i]=w*.6+(Math.random()-.5)*.25;
+    id.data[o]=100+f*55;id.data[o+1]=60+f*38;id.data[o+2]=28+f*20;id.data[o+3]=255}
+  x.putImageData(id,0,0);const t=mkTex(c,1,1);const m=new THREE.MeshPhysicalMaterial({color:'#ffffff',map:t,roughness:.55,normalMap:_normalTex(h,S,2.2,1,1),normalScale:new THREE.Vector2(.6,.6),clearcoat:.25,clearcoatRoughness:.35});return m;
+  function _n2(i,j){return n(i*3%S,j)}});
+// yeux : sclère brillante, iris avec fibres + anneau limbique, cornée transparente (reflet vitreux)
+const scleraMat=()=>_cache('sclera',()=>new THREE.MeshPhysicalMaterial({color:'#efe9df',roughness:.32,clearcoat:.5,clearcoatRoughness:.15}));
+const corneaMat=()=>_cache('cornea',()=>new THREE.MeshPhysicalMaterial({color:'#ffffff',transparent:true,opacity:.1,roughness:.02,metalness:0,clearcoat:1,clearcoatRoughness:.02,envMapIntensity:1.6,depthWrite:false}));
+const irisMat=col=>_cache('iris'+col,()=>{const S=128,c=cvs(S,S),x=c.getContext('2d'),base=new THREE.Color(col),lt=base.clone().lerp(new THREE.Color('#ffffff'),.35).getStyle(),dk=base.clone().multiplyScalar(.45).getStyle();
+  x.fillStyle=base.getStyle();x.fillRect(0,0,S,S);
+  for(let i=0;i<220;i++){const a=Math.random()*6.283,r0=S*(.1+Math.random()*.12),r1=S*(.32+Math.random()*.18);x.strokeStyle=Math.random()<.5?lt:dk;x.globalAlpha=.25+Math.random()*.4;x.lineWidth=.6+Math.random()*1.4;x.beginPath();x.moveTo(S/2+Math.cos(a)*r0,S/2+Math.sin(a)*r0);x.lineTo(S/2+Math.cos(a)*r1,S/2+Math.sin(a)*r1);x.stroke()}
+  x.globalAlpha=1;const g=x.createRadialGradient(S/2,S/2,S*.28,S/2,S/2,S*.5);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.8,'rgba(0,0,0,.35)');g.addColorStop(1,'rgba(0,0,0,.85)');x.fillStyle=g;x.fillRect(0,0,S,S);
+  const g2=x.createRadialGradient(S/2,S/2,S*.05,S/2,S/2,S*.2);g2.addColorStop(0,'rgba(0,0,0,.7)');g2.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g2;x.fillRect(0,0,S,S);
+  return new THREE.MeshStandardMaterial({color:'#ffffff',map:mkTex(c),roughness:.28})});
+
+const glowM=(c,i=1.6)=>mat(c,{emissive:c,emissiveIntensity:i,roughness:.4});
+
+/* ───────── Tête : sphère déformée + « coques » qui épousent le crâne ─────────
+   shell(H, test, offset, matériau) copie la partie de la tête choisie par test(ux,uy,uz)
+   et la gonfle de « offset » : c’est la base des cheveux, barbes, casques, masques et décalques. */
+const R=.15;
+function makeHead(face,fem){
+  let [cw,f1,f2]=D.FACES[face];if(fem)f1*=.82;
+  const sx=cw/56*.98,sy=f2/206*1.07,sz=.97,chinW=.6+.4*clamp(f1/56,0,1);
+  const taper=uy=>1-(1-chinW)*Math.pow(clamp(-uy,0,1),1.4);
+  const dz=uy=>1-.08*clamp(-uy,0,1);
+  const def=(ux,uy,uz)=>{const t=taper(uy);return[ux*R*sx*t,uy*R*sy,uz*R*sz*dz(uy)]};
+  const surf=(x,y)=>{const uy=y/(R*sy);if(Math.abs(uy)>=.999)return 0;const t=taper(uy),ux=x/(R*sx*t),r2=ux*ux+uy*uy;if(r2>=.999)return 0;return Math.sqrt(1-r2)*R*sz*dz(uy)};
+  const geo=new THREE.SphereGeometry(1,48,32),U=geo.attributes.position.array.slice(),P=new Float32Array(U.length),N=new Float32Array(U.length);
+  for(let i=0;i<U.length;i+=3){
+    const d=def(U[i],U[i+1],U[i+2]);P[i]=d[0];P[i+1]=d[1];P[i+2]=d[2];
+    const t=taper(U[i+1])||1,nx=U[i]/(R*sx*t),ny=U[i+1]/(R*sy),nz=U[i+2]/(R*sz),l=Math.hypot(nx,ny,nz)||1;N[i]=nx/l;N[i+1]=ny/l;N[i+2]=nz/l}
+  geo.setAttribute('position',new THREE.BufferAttribute(P,3));geo.setAttribute('normal',new THREE.BufferAttribute(N,3));
+  return{geo,U,P,N,idx:geo.index.array,uv:geo.attributes.uv,def,surf,sx,sy,sz,taper}}
+function shell(H,test,off,m){
+  const{U,P,N,idx}=H,keep=[];
+  for(let i=0;i<idx.length;i+=3){const a=idx[i]*3,b=idx[i+1]*3,c=idx[i+2]*3;
+    if(test((U[a]+U[b]+U[c])/3,(U[a+1]+U[b+1]+U[c+1])/3,(U[a+2]+U[b+2]+U[c+2])/3))keep.push(idx[i],idx[i+1],idx[i+2])}
+  const g=new THREE.BufferGeometry(),n=P.length,pos=new Float32Array(n);
+  for(let i=0;i<n;i+=3){const l=Math.hypot(P[i],P[i+1],P[i+2])||1;pos[i]=P[i]+P[i]/l*off;pos[i+1]=P[i+1]+P[i+1]/l*off;pos[i+2]=P[i+2]+P[i+2]/l*off}
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('normal',new THREE.BufferAttribute(N,3));g.setAttribute('uv',H.uv);g.setIndex(keep);
+  const o=new THREE.Mesh(g,m);o.castShadow=true;o.receiveShadow=true;return o}
+
+/* ───────── Décalques peints (taches, cicatrices, tatouages…) sur le visage ───────── */
+function dctx(C,kind='base'){if(!C.dc[kind]){const cv=document.createElement('canvas');cv.width=1024;cv.height=512;C.dc[kind]={cv,ctx:cv.getContext('2d')}}return C.dc[kind].ctx}
+function cvp(C,x,y){                       // point du visage (mètres) → pixel du canvas (projection de la sphère)
+  const H=C.H,uy=clamp(y/(R*H.sy),-.999,.999),t=H.taper(uy),ux=clamp(x/(R*H.sx*t),-.999,.999),uz=Math.sqrt(Math.max(0,1-ux*ux-uy*uy));
+  let ph=Math.atan2(uz,-ux);if(ph<0)ph+=Math.PI*2;
+  return[ph/(Math.PI*2)*1024,Math.acos(uy)/Math.PI*512]}
+const px=m=>m/R*163;
+function dStroke(C,ctx,pts,col,w){ctx.strokeStyle=col;ctx.lineWidth=px(w);ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();pts.forEach((p,i)=>{const q=cvp(C,p[0],p[1]);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])});ctx.stroke()}
+function dDot(C,ctx,x,y,r,col,sy=1){const q=cvp(C,x,y);ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(q[0],q[1],px(r),px(r*sy),0,0,6.3);ctx.fill()}
+function dPoly(C,ctx,pts,fill,line){ctx.beginPath();pts.forEach((p,i)=>{const q=cvp(C,p[0],p[1]);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])});ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(line){ctx.strokeStyle=line;ctx.lineWidth=px(.002);ctx.stroke()}}
+function flushDecals(C){
+  for(const kind in C.dc){
+    const tex=new THREE.CanvasTexture(C.dc[kind].cv);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=4;C.tex.push(tex);
+    const m=new THREE.MeshStandardMaterial({map:tex,transparent:true,depthWrite:false,roughness:.8,polygonOffset:true,polygonOffsetFactor:-2,...(kind==='glow'?{emissive:'#ffffff',emissiveMap:tex,emissiveIntensity:1.3}:{})});
+    C.head.add(shell(C.H,(x,y,z)=>z>-.35,.003,m))}}
+
+/* ════════════════════════════════════════════════════════════════
+   3. ESPÈCES (type « Autres ») : chaque entrée active des particularités 3D
+   ════════════════════════════════════════════════════════════════ */
+const SPX=[
+  {es:1.35},                                         // 0 Survivant atypique : grands yeux
+  {antenna:1},                                       // 1 Mutant à antennes
+  {ears:'pointed'},                                  // 2 Mutant aux oreilles pointues
+  {horns:1},                                         // 3 Mutant cornu
+  {fangs:1},                                         // 4 Infecté aux crocs
+  {zombie:1},                                        // 5 Zombie
+  {cyber:1},                                         // 6 Cyborg
+  {cyclops:1},                                       // 7 Mutant cyclope
+  {wings:'bat'},                                     // 8 Mutant ailé
+  {ears:'cat',tail:'cat',slit:1},                    // 9 Mutant félin
+  {scale:1.18,tusks:1},                              // 10 Mutant massif
+  {eyes3:1},                                         // 11 Mutant à trois yeux
+  {slit:1,tail:'rep',crest:1,scales:1},              // 12 Mutant reptilien
+  {wings:'thin'}                                     // 13 Mutant aux ailes fines
+];
+
+/* ════════════════════════════════════════════════════════════════
+   4. CORPS : torse, bras, jambes (silhouette homme / femme)
+   ════════════════════════════════════════════════════════════════ */
+/* ────────── Tenues (10 par type) : coques autour du torse + détails ────────── */
+const OUT=[
+  {hem:.98,sleeve:'short'},                                         // 0 Tee-shirt
+  {hem:.96,sleeve:'long'},                                          // 1 Manches longues
+  {hem:.92,sleeve:'long',hood:1,pocket:1,cuffs:1},                  // 2 Sweat à capuche
+  {hem:.9,sleeve:'long',zip:1,collar:1,pockets:2,patch:1},          // 3 Veste de survie
+  {hem:.98,sleeve:'short',vest:1},                                  // 4 Gilet tactique
+  {hem:.52,sleeve:'long',collar:1,belt:1,flare:1,zip:1},            // 5 Manteau long
+  {hem:.98,sleeve:'none',straps:1},                                 // 6 Débardeur
+  {hem:1,sleeve:'short',plates:1,pouches:1},                        // 7 Plaque de blindage
+  {poncho:1,sleeve:'none'},                                         // 8 Poncho
+  {hem:.6,sleeve:'long',lapel:1,pockets:2,flare:.5}                 // 9 Blouse de laboratoire
+];
+function buildOutfit(C){
+  const o=OUT[C.s.outfit],{body,P}=C,main=fab(C.mainHex,C.s.camo,{side:THREE.DoubleSide}),dark=fab(sh(C.mainHex,-.3),0,{side:THREE.DoubleSide}),light=mat(sh(C.mainHex,.25),{roughness:.8}),
+    fabric=o.vest||o.plates?dark:main,zf=y=>(C.prof(y)+.03)*.64,hw=metal('#8a8f86',.4);
+  if(o.poncho){
+    const p=mk(new THREE.ConeGeometry(.36,.62,24,1,true),main,0,1.1,0,body);p.material=main;
+    const r=mk(new THREE.TorusGeometry(.075,.014,8,16),dark,0,1.4,0,body);r.rotation.x=Math.PI/2;
+    mk(new THREE.TorusGeometry(.3,.012,8,28),dark,0,.82,0,body).rotation.x=Math.PI/2;
+    return}
+  C.torso(o.hem,1.385,.012,fabric,o.flare||0);
+  if(o.vest){C.torso(.98,1.385,.03,main);
+    for(const side of[-1,1]){box(.07,.07,.035,light,side*.075,1.08,zf(1.08)+.01,body);box(.07,.07,.035,light,side*.075,1.17,zf(1.17)+.01,body);box(.045,.2,.012,dark,side*.1,1.34,0,body).rotation.z=-side*.1}}
+  if(o.plates){C.torso(1.0,1.37,.02,dark);box(.2,.23,.035,metal('#3a3d3a',.5),0,1.2,zf(1.2)+.012,body);box(.2,.23,.035,metal('#3a3d3a',.5),0,1.2,-zf(1.2)-.012,body);
+    for(const side of[-1,1])box(.06,.075,.04,light,side*.09,1.04,zf(1.04)+.01,body);box(.3,.03,.2,dark,0,1.02,0,body)}
+  if(o.collar){const c=cyl(.074,.082,.06,main,0,1.44,0,body,18,true);c.material=main}
+  if(o.hood){ell(.12,.1,.1,dark,0,1.39,-.075,body);const t=mk(new THREE.TorusGeometry(.075,.022,8,18),dark,0,1.4,0,body);t.rotation.x=Math.PI/2}
+  if(o.straps)for(const side of[-1,1])box(.03,.1,.012,main,side*.07,1.37,.03,body);
+  if(o.lapel)for(const side of[-1,1]){const l=box(.05,.17,.01,light,side*.04,1.3,zf(1.3)+.004,body);l.rotation.z=side*.35}
+  if(o.zip)box(.007,1.37-o.hem-.03,.005,hw,0,(1.37+o.hem)/2,zf((1.37+o.hem)/2)-.012,body);
+  if(o.belt){const b=mk(new THREE.TorusGeometry(1,.016,8,28),dark,0,1.06,0,body);b.scale.set(C.prof(1.06)+.02,(C.prof(1.06)+.02)*.64,1);b.rotation.x=Math.PI/2;b.scale.set(C.prof(1.06)+.02,1,(C.prof(1.06)+.02)*.64);box(.04,.04,.01,hw,0,1.06,zf(1.06)-.004,body)}
+  for(let i=0;i<(o.pockets||0);i++)for(const side of[-1,1])box(.07,.065,.014,light,side*.09,1.08-i*.0,zf(1.08)-.003,body);
+  if(o.pocket)box(.14,.07,.016,dark,0,1.02,zf(1.02),body);
+  if(o.patch)for(const side of[-1,1])box(.04,.04,.01,mat('#b5a17b'),side*P.sw,1.31,C.prof(1.31)*0+.03,body).position.x=side*(P.sw+.025);
+  // manches
+  for(const a of C.arms){
+    const len=o.sleeve==='long'?.3:o.sleeve==='short'?.13:0;if(!len)continue;const r=P.arm+.011,sm=fabric===dark&&!o.vest?main:(o.vest||o.plates?dark:main);
+    cyl(r,r*.88,len,sm,0,-len/2,0,a.ag,14,true);
+    if(o.sleeve==='long'){cyl(r*.88,r*.74,.27,sm,0,-.135,0,a.eg,14,true);if(o.cuffs)cyl(r*.78,r*.78,.03,dark,0,-.26,0,a.eg,14,true)}}}
+
+/* ════════════════════════════════════════════════════════════════
+   5. TÊTE : oreilles, yeux, sourcils, nez, bouche, barbe (modèles paramétriques)
+   ════════════════════════════════════════════════════════════════ */
+function ears(C){
+  const{head,H,sp}=C;if(sp.ears==='none')return;
+  for(const side of[-1,1]){const x=side*R*H.sx*.96;
+    if(sp.ears==='pointed'){const o=spike([x,-.005,-.012],[side*.9,.45,0],.026,.1,C.skin,head)}
+    else if(sp.ears==='cat'){spike([side*.075,.115,-.01],[side*.35,1,0],.045,.1,C.skin,head);spike([side*.075,.118,-.005],[side*.35,1,0],.028,.085,mat('#d98a98'),head)}
+    else{const e=ell(.012,.03,.021,C.skin,x+side*.006,-.012,-.012,head);e.rotation.z=side*.1}}}
+const EYE=[{w:1,h:1,i:.62},{w:1.1,h:.8,i:.58,lid:.15,tilt:.12},{w:1.25,h:1.3,i:.72},{w:.75,h:.7,i:.55,lid:.1},{w:1.05,h:.9,i:.6,lid:.45},{w:1.05,h:.8,i:.58,lid:.62},
+  {w:1.05,h:.85,i:.6,lid:.28,tilt:-.2},{w:1.1,h:1,i:.66,lid:.05,tilt:.2},{w:1.05,h:1.05,i:.7,p:'slit'},{w:1.05,h:1,i:.64,glow:1},{w:1.05,h:1,i:.55,white:0},{w:1.05,h:1,i:.01,p:'none'},{w:1.05,h:1,i:.6,p:'ring',glow:1},{w:1.05,h:.95,i:.6,lid:.35,bags:1}];
+function makeEye(C,x,y,e,k,col,side=0,glow=false){
+  const{head,H}=C,re=.026*e.w*k,rh=.03*e.h*k,g=grp(x,y,H.surf(x,y)-.004,head);g.rotation.y=side*.2;if(e.tilt)g.rotation.z=side*e.tilt;
+  ell(re,rh,re*.8,e.white===0?mat('#101010',{roughness:.3}):scleraMat(),0,0,0,g);if(e.white!==0){const cn=ell(re*1.012,rh*1.012,re*.8*1.012+.0006,corneaMat(),0,0,0,g);cn.castShadow=false}
+  const zf=re*.8+.0008,ir=Math.min(re,rh)*e.i*.98,gl=glow||e.glow;
+  const disc=(r,m,a,b,c,sx=1,sy=1)=>{const o=new THREE.Mesh(new THREE.CircleGeometry(r,20),m);o.position.set(a,b,c);o.scale.set(sx,sy,1);g.add(o);return o};
+  if(e.white!==0)disc(ir,gl?mat(col,{emissive:col,emissiveIntensity:1.5,roughness:.3}):irisMat(col),0,0,zf);
+  const pk=C.sp.slit?'slit':e.p||'round';
+  if(pk==='round')disc(ir*.5,mat('#050505'),0,0,zf+.0006);
+  else if(pk==='slit')disc(ir*.9,mat('#050505'),0,0,zf+.0006,.22,1);
+  else if(pk==='ring'){const o=new THREE.Mesh(new THREE.RingGeometry(ir*.45,ir*.7,20),mat('#050505'));o.position.set(0,0,zf+.0006);g.add(o)}
+  if(e.white!==0&&pk!=='none')disc(ir*.2,mat('#ffffff',{emissive:'#ffffff',emissiveIntensity:.8}),re*.22,rh*.25,zf+.0012);
+  if(e.lid>.02){const lid=new THREE.Mesh(new THREE.SphereGeometry(1,18,10,0,Math.PI*2,0,e.lid*Math.PI*.6+.05),C.skin);lid.scale.set(re*1.1,rh*1.1,re*.9);lid.castShadow=true;g.add(lid)}
+  if(e.bags)ell(re*1.1,rh*.18,.003,C.skinD,0,-rh*1.25,re*.5,g);
+  if(C.fem){const l=box(re*2.3,.0028,.004,mat('#1a1411'),0,rh*1.02,re*.55,g);l.rotation.z=side*.06}
+  C.eyes.push(g)}
+function eyes(C){
+  const{s,sp}=C,e=EYE[s.eyes],ec=D.EYECOL[s.eyeColor],es=sp.es||1;
+  if(sp.cyclops){makeEye(C,0,.012,e,2.1*es,ec);return}
+  for(const side of[-1,1])makeEye(C,side*.05,.015,e,es,(sp.cyber&&side>0)?'#ff3030':ec,side,!!(sp.cyber&&side>0));
+  if(sp.eyes3)makeEye(C,0,.07,e,.7*es,ec,0)}
+const BROW=[null,{l:.05,t:.008,a:.006,tl:.004},{l:.05,t:.014,a:.005,tl:.002},{l:.05,t:.004,a:.013,tl:.004},{l:.05,t:.008,a:0,tl:0},{l:.05,t:.01,a:.002,tl:-.014},{l:.05,t:.008,a:.003,tl:.014},{l:.068,t:.008,a:.006,tl:.004},{l:.032,t:.011,a:.004,tl:0},{l:.052,t:.019,a:.004,tl:.002}];
+function brows(C){
+  const b=BROW[C.s.brows];if(!b||C.sp.cyclops)return;const m=mat(sh(C.hairHex,-.15),{roughness:.6});
+  for(const side of[-1,1]){const pts=[];for(let i=0;i<=5;i++){const t=i/5,x=side*(.02+b.l*t),y=.055+b.a*Math.sin(Math.PI*t)+b.tl*t;pts.push([x,y,C.H.surf(x,y)+b.t*.4])}
+    tube(pts,b.t/2,m,C.head,12,6)}}
+const NOSE=[{l:.022,w:.012,t:.011},{l:.03,w:.014,t:.013},{l:.04,w:.013,t:.012},{l:.03,w:.02,t:.016},{l:.04,w:.011,t:.009},{l:.026,w:.013,t:.012,up:.01},{l:.036,w:.013,t:.012,hook:.007},{l:.014,w:.019,t:.014},{l:.028,w:.017,t:.019}];
+function nose(C){
+  const n=NOSE[C.s.nose],{head,H}=C,y1=-.022+(n.up||0),y0=.03,zt=H.surf(0,y1)+n.l;
+  limb([0,y0,H.surf(0,y0)+.004],[0,y1+.004,zt-.004],n.w*.6,n.w*.9,C.skin,head);
+  if(n.hook)ell(n.w*.5,n.w*.5,n.w*.5,C.skin,0,y0-.012,H.surf(0,y0-.012)+n.l*.55+n.hook,head);
+  ell(n.t,n.t*.85,n.t*.9,C.skin,0,y1,zt-n.t*.3,head);
+  for(const side of[-1,1])ell(n.t*.55,n.t*.5,n.t*.5,C.skinD,side*n.w*.95,y1+.002,zt-n.t*.7,head)}
+const MOUTH=[{w:.032,s:0},{w:.036,s:.014},{w:.045,s:.02,o:.014,te:1},{w:.028,s:-.012},{w:.026,s:0,o:.026},{w:.034,s:.012,sm:.008},{w:.036,s:-.004,o:.045,te:1,to:1},{w:.04,s:.004,o:.012,te:1},{w:.034,s:.008,o:.012,fa:1},{w:.03,s:.012,o:.014,to:1},{w:.018,s:.004},{w:.034,s:0,t:.0065},{w:.036,s:.006,sm:-.01,t:.0045}];
+function mouth(C){
+  const m=MOUTH[C.s.mouth],{head,H}=C,y0=-.072,th=m.t||.0035,lip=mat(C.fem?'#c4506a':'#a85a52',{roughness:.45});
+  const line=(dy,k)=>{const pts=[];for(let i=0;i<=8;i++){const t=i/8*2-1,x=t*m.w,y=y0+dy+m.s*(t*t-.5)*k+(m.sm||0)*t;pts.push([x,y,H.surf(x,y)+th*.5])}return pts};
+  if(m.o){
+    const cav=new THREE.Mesh(new THREE.CircleGeometry(1,20),mat('#2a0d10',{roughness:.9}));cav.scale.set(m.w*.9,m.o*.55,1);cav.position.set(0,y0-m.o*.5,H.surf(0,y0-m.o*.5)+.0012);head.add(cav);
+    tube(line(0,1),th,lip,head,16,6);tube(line(-m.o,.6),th,lip,head,16,6);
+    if(m.te)box(m.w*1.2,.007,.004,mat('#f2efe2'),0,y0-.005,H.surf(0,y0-.005)+.0025,head);
+    if(m.to)ell(m.w*.45,m.o*.22,.006,mat('#c25a6a'),0,y0-m.o*.8,H.surf(0,y0-m.o*.8)+.002,head);
+    if(m.fa)for(const side of[-1,1])spike([side*m.w*.5,y0-.002,H.surf(side*m.w*.5,y0)+.003],[0,-1,.1],.004,.013,mat('#f4f1e6'),head)
+  }else tube(line(0,1),th,lip,head,16,6)}
+const JAW=(x,y,z)=>y<-.2&&y>-.99&&z>-.2&&(z>.1||Math.abs(x)>.55)&&!(Math.abs(x)<.3&&y>-.55&&y<-.36&&z>.4);
+function beard(C){
+  const b=C.s.beard;if(C.fem||!b)return;const{head,H}=C,m=C.hairM,fine=mat(C.hairHex,{roughness:.9,transparent:true,opacity:.5,depthWrite:false});
+  const stache=()=>{for(const side of[-1,1]){const pts=[];for(let i=0;i<=4;i++){const t=i/4,x=side*(.004+.034*t),y=-.047-.012*t*t;pts.push([x,y,H.surf(x,y)+.007])}tube(pts,.0065,m,head,10,6)}};
+  const chin=(w,h)=>ell(w,h,w*.9,m,0,-.125,H.surf(0,-.125)-.002,head);
+  switch(b){
+    case 1:head.add(shell(H,JAW,.003,fine));break;
+    case 2:stache();break;
+    case 3:chin(.018,.026);break;
+    case 4:head.add(shell(H,JAW,.012,m));break;
+    case 5:head.add(shell(H,JAW,.02,m));stache();chin(.03,.03);break;
+    case 6:head.add(shell(H,JAW,.02,m));stache();chain([[0,-.13,.08],[0,-.2,.09],[0,-.29,.1],[0,-.37,.1]],.04,.006,m,head);break;
+    case 7:head.add(shell(H,(x,y,z)=>Math.abs(x)>.7&&y<.1&&y>-.55&&z>-.2,.014,m));stache();break;
+    case 8:head.add(shell(H,(x,y,z)=>y<-.2&&y>-.99&&z>-.2&&(Math.abs(x)>.75||y<-.78),.013,m));break;
+    case 9:chin(.016,.022);for(const side of[-1,1])chain([[side*.012,-.14,.1],[side*.016,-.22,.115],[side*.012,-.3,.12],[side*.006,-.37,.11]],.012,.006,m,head);break}}
+
+/* ═════ Cheveux : 14 / 13 / 10 coiffures selon le type ═════ */
+const HSEQ={male:[null,'short','buzz','undercut','spiky','pomp','quiff','mid','long','pony','bun','mohawk','afro','curly'],
+  female:[null,'short','bob','bobLong','long','curlyLong','pony','pigtails','bun','braids','bangsLong','mid','afro'],
+  other:[null,'short','spiky','mohawk','long','bun','braids','afro','curly','pony']};
+const hcap=(C,f,b,off)=>C.head.add(shell(C.H,(x,y,z)=>y>(z>0?f:b)&&!(Math.abs(x)>.9&&y<.15),off,C.hairM));
+const hback=(C,len,top=.03)=>{const r=R*C.H.sx*1.02,o=mk(new THREE.CylinderGeometry(r,r*.92,len,24,1,true,Math.PI*.5-.45,Math.PI+.9),C.hairD,0,top-len/2,0,C.head);o.scale.z=C.H.sz*.98;return o};
+const hring=(C,len)=>{const r=R*C.H.sx*1.05,o=mk(new THREE.CylinderGeometry(r,r*1.03,len,24,1,true,.55,Math.PI*2-1.1),C.hairD,0,.01-len/2,0,C.head);o.scale.z=C.H.sz*1.0;return o};
+function capPts(n,ymin){const a=[];for(let i=0;i<n;i++){const uy=ymin+(.98-ymin)*rnd(),r=Math.sqrt(1-uy*uy),an=rnd()*Math.PI*2;a.push([r*Math.cos(an),uy,r*Math.sin(an)])}return a}
+function spikesAt(C,pts,len,r,m=C.hairM){for(const p of pts){const l=Math.hypot(p[0],p[1],p[2]),d=[p[0]/l,p[1]/l,p[2]/l],q=C.H.def(d[0],d[1],d[2]);spike([q[0]-d[0]*.01,q[1]-d[1]*.01,q[2]-d[2]*.01],d,r,len,m,C.head)}}
+const midline=(n,a0,a1)=>{const a=[];for(let i=0;i<n;i++){const t=a0+(a1-a0)*i/(n-1);a.push([0,Math.sin(t),Math.cos(t)])}return a};
+const HS={
+  buzz:C=>hcap(C,.35,-.1,.008),
+  short:C=>hcap(C,.3,-.2,.02),
+  undercut:C=>{hcap(C,.32,.25,.022);ell(.1,.055,.12,C.hairM,0,.125,.005,C.head)},
+  spiky:C=>{hcap(C,.3,-.15,.016);spikesAt(C,capPts(18,.3),.07,.02)},
+  pomp:C=>{hcap(C,.3,-.1,.02);const o=ell(.11,.07,.14,C.hairM,0,.145,.045,C.head);o.rotation.x=-.2},
+  quiff:C=>{hcap(C,.3,-.1,.02);const o=ell(.1,.06,.11,C.hairM,0,.15,.07,C.head);o.rotation.x=-.35},
+  mid:C=>{hcap(C,.25,-.45,.03);hback(C,.12)},
+  long:C=>{hcap(C,.22,-.6,.03);hback(C,C.fem?.46:.34);if(C.fem)for(const side of[-1,1])ell(.026,.17,.02,C.hairM,side*.125,-.1,.04,C.head)},
+  curlyLong:C=>{HS.curly(C);hback(C,.34);for(const side of[-1,1])ell(.03,.16,.03,C.hairM,side*.125,-.08,.03,C.head)},
+  bangsLong:C=>{hcap(C,.08,-.6,.03);hback(C,.4)},
+  bob:C=>{hcap(C,.25,-.4,.03);hring(C,.12)},
+  bobLong:C=>{hcap(C,.25,-.4,.03);hring(C,.22)},
+  pony:C=>{hcap(C,.28,-.3,.025);const m=C.hairM;chain([[0,.08,-.13],[0,.03,-.2],[0,-.06,-.23],[0,-.18,-.21],[0,-.3,-.18]],.034,.012,m,C.head);ell(.04,.02,.04,mat(sh(C.hairHex,-.4)),0,.075,-.13,C.head)},
+  bun:C=>{hcap(C,.28,-.3,.025);ell(.065,.06,.065,C.hairM,0,.15,-.07,C.head)},
+  pigtails:C=>{hcap(C,.28,-.3,.025);for(const side of[-1,1]){chain([[side*.11,.08,-.05],[side*.15,.0,-.07],[side*.16,-.1,-.06],[side*.15,-.2,-.04]],.032,.014,C.hairM,C.head);ell(.03,.02,.03,mat('#c0392b'),side*.115,.08,-.05,C.head)}},
+  braids:C=>{hcap(C,.25,-.5,.028);for(const side of[-1,1])for(let i=0;i<7;i++)ell(.022,.03,.02,C.hairM,side*(.115+.004*i),-.03-i*.045,.05+.012*i,C.head)},
+  mohawk:C=>{hcap(C,.62,.55,.012);spikesAt(C,midline(9,.55,2.7),.1,.026)},
+  afro:C=>{ell(.2,.19,.17,C.hairM,0,.06,-.03,C.head)},
+  curly:C=>{hcap(C,.28,-.3,.022);for(const p of capPts(46,.2)){const q=C.H.def(p[0],p[1],p[2]);ell(.024,.024,.024,C.hairM,q[0]*1.07,q[1]*1.07,q[2]*1.07,C.head)}}
+};
+function hair(C){const k=HSEQ[C.g][C.s.hair];if(k)HS[k](C)}
+
+/* ═════ Lunettes (11 modèles) ═════ */
+function glasses(C){
+  const gI=C.s.glasses;if(!gI)return;const{head,H}=C,fr=metal('#2a2a2a',.4),gl=mat('#1a1a1a',{roughness:.1,metalness:.3,transparent:true,opacity:.85}),clear=mat('#cfe8ff',{roughness:.05,transparent:true,opacity:.28,depthWrite:false});
+  const ez=H.surf(.05,.015)+.014,lensM=[null,clear,clear,gl,gl,gl,clear,gl,null,mat('#4a7a8a',{roughness:.1,transparent:true,opacity:.6}),glowM('#ff3030',1.2),clear][gI];
+  const ring=(x,r,sx=1,sy=1,thk=.0035)=>{const t=mk(new THREE.TorusGeometry(r,thk,8,24),fr,x,.015,ez,head);t.scale.set(sx,sy,1);return t};
+  const lens=(x,r,sx=1,sy=1)=>{if(!lensM)return;const o=new THREE.Mesh(new THREE.CircleGeometry(r,24),lensM);o.position.set(x,.015,ez-.001);o.scale.set(sx,sy,1);head.add(o)};
+  const temples=()=>{for(const side of[-1,1]){const x=side*.075;limb([x,.015,ez-.004],[side*R*H.sx*.95,.01,-.01],.0025,.0025,fr,head)}};
+  switch(gI){
+    case 1:for(const s of[-1,1]){ring(s*.05,.026);lens(s*.05,.026)}box(.02,.004,.004,fr,0,.02,ez,head);temples();break;
+    case 2:for(const s of[-1,1]){const b=box(.052,.038,.004,fr,s*.05,.015,ez,head);lens(s*.05,.02,1.2,.9)}temples();break;
+    case 3:for(const s of[-1,1]){const t=ring(s*.05,.03,1.1,.95);lens(s*.05,.03,1.1,.95)}box(.025,.004,.004,fr,0,.025,ez,head);temples();break;
+    case 4:for(const s of[-1,1]){box(.056,.034,.006,gl,s*.05,.013,ez,head)}box(.03,.006,.006,fr,0,.02,ez,head);temples();break;
+    case 5:for(const s of[-1,1]){ring(s*.05,.025,1.15,.9,.005);lens(s*.05,.025,1.15,.9)}limb([-.075,.015,ez-.004],[-R*H.sx*.95,.01,-.01],.004,.004,mat('#2c3a2c'),head);limb([.075,.015,ez-.004],[R*H.sx*.95,.01,-.01],.004,.004,mat('#2c3a2c'),head);break;
+    case 6:ring(.05,.027);lens(.05,.027);limb([.05,-.012,ez],[.06,-.1,ez+.03],.0012,.0012,metal('#b0a070'),head);break;
+    case 7:{const v=mk(new THREE.CylinderGeometry(R*H.sx*1.02,R*H.sx*1.02,.05,24,1,true,-.9,1.8),mat('#2b3d52',{roughness:.1,transparent:true,opacity:.6,side:THREE.DoubleSide}),0,.015,0,head);v.scale.z=H.sz;break}
+    case 8:{const p=box(.06,.045,.006,mat('#111'),-.05,.015,ez,head);p.rotation.z=.1;limb([-.075,.015,ez-.004],[-R*H.sx*.95,.01,-.01],.003,.003,mat('#111'),head);limb([-.07,.03,ez-.002],[.07,.05,ez-.002],.002,.002,mat('#111'),head);ell(.012,.012,.004,fr,.05,.015,ez-.002,head);break}
+    case 9:for(const s of[-1,1]){ring(s*.05,.028,1,1,.007);lens(s*.05,.028);cyl(.033,.033,.01,mat('#7a6a4a',{metalness:.6,roughness:.4}),s*.05,.015,ez-.004,head,18).rotation.x=Math.PI/2}limb([-.075,.015,ez],[-R*H.sx*.95,.01,-.01],.005,.005,mat('#3a2a1a'),head);limb([.075,.015,ez],[R*H.sx*.95,.01,-.01],.005,.005,mat('#3a2a1a'),head);break;
+    case 10:{const v=box(.14,.034,.008,glowM('#ff3030',1.3),0,.015,ez,head);v.scale.z=1;box(.145,.04,.004,fr,0,.015,ez-.004,head);temples();break}
+    case 11:for(const s of[-1,1]){const t=mk(new THREE.TorusGeometry(.025,.003,8,16,Math.PI),fr,s*.05,.018,ez,head);t.rotation.z=Math.PI;lens(s*.05,.02,1,.5)}box(.02,.004,.004,fr,0,.025,ez,head);temples();break}}
+
+/* ════════════════════════════════════════════════════════════════
+   2b. VERSION « MILITAIRE RÉALISTE » : nouvelles catégories + textures (tissu, camouflage, cuir, peau)
+   ════════════════════════════════════════════════════════════════ */
+Object.assign(LEN,{camo:6,pants:9,pantsColor:10,boots:9,bootsColor:8,gloves:8,glovesColor:8,arms:9,gear:9,backpack:8});
+Object.assign(NAMES,{
+  camo:['Uni','Woodland','Désert','Urbain','Numérique','Neige'],
+  pants:['Jean droit','Pantalon cargo','Treillis camouflage','Pantalon tactique','Combinaison de travail','Short cargo','Jogging','Pantalon en cuir','Pantalon à genouillères'],
+  boots:['Baskets','Rangers','Bottes hautes en cuir','Bottes en caoutchouc','Chaussures de ville','Bottes du désert','Bottes de neige','Rangers à bout renforcé','Sandales'],
+  gloves:['Aucun','Gants en cuir','Gants tactiques','Mitaines','Gants de travail','Gants d’hiver','Gants médicaux','Gants de mécanicien'],
+  arms:['Aucun','Bandage','Brassard rouge','Montre','Manchette en cuir','Coudières','Bracelets métalliques','Tatouage manches','Protège-bras'],
+  gear:['Aucun','Ceinture tactique','Holster de cuisse','Bandoulière à cartouches','Sacoches de ceinture','Radio portative','Gourde et couteau','Harnais complet','Sangles de parachutiste'],
+  backpack:['Aucun','Sac tactique','Sac de randonnée','Sac d’assaut','Sac radio','Sac médical','Sac avec couchage','Gros sac militaire']});
+Object.assign(LABEL,{camo:'Motif de la tenue',pants:'Pantalon',pantsColor:'Couleur pantalon',boots:'Bottes',bootsColor:'Couleur bottes',gloves:'Gants',glovesColor:'Couleur gants',arms:'Bras (détails)',gear:'Équipement',backpack:'Sac à dos'});
+// look de départ « soldat » : treillis camouflage, rangers, gants tactiques, ceinture, cheveux courts
+Object.assign(DEF,{outfit:3,outfitColor:1,camo:1,pants:2,pantsColor:1,boots:1,bootsColor:0,gloves:2,glovesColor:0,arms:0,gear:1,backpack:0,hair:1,hairColor:2,headwear:0});
+['gloves','arms','gear','backpack'].forEach(k=>emptyChoices.add(k));
+STEPS.length=0;STEPS.push(
+  {t:'1. Base',keys:['species','skin','face','eyes','eyeColor','brows','nose','mouth','beard','hair','hairColor']},
+  {t:'2. Tenue',keys:['outfit','outfitColor','camo','pants','pantsColor','boots','bootsColor','gloves','glovesColor','arms']},
+  {t:'3. Équipement',keys:['headwear','accColor','glasses','extra','gear','backpack','specialBack','specialHead','specialFace']},
+  {t:'4. Arme à feu',keys:['weapon','wMuzzle','wOptic','wUnder','wStock','wMag','wFinish']},
+  {t:'5. Fond & nom',keys:['background','pattern','nameFont','nameColor','nameStyle','nameSize','namePos']});
+STEP_DETAILS.length=0;STEP_DETAILS.push(['La base','Choisissez les traits de votre survivant : visage, cheveux, barbe…'],['La tenue','Haut, camouflage, pantalon, bottes, gants et détails des bras.'],['L’équipement','Casque ou chapeau, lunettes, ceinture, holster, sac à dos et particularités.'],['Personnalisation de l’arme à feu','Choisissez parmi 6 armes puis changez l’embout, l’optique, la crosse, le chargeur et la finition : les caractéristiques se mettent à jour.'],['Fond & nom','Terminez votre portrait puis exportez-le en JSON, en .glb ou en image.']);
+const BOOTCOL=['#16110d','#4a3420','#8a6b43','#3c4a30','#555a5c','#e8e8e2','#8a1e18','#1a2540'];
+const GLOVECOL=['#14110e','#4a3420','#3c4a30','#5a5d5f','#8a6b43','#e8e8e2','#a02828','#d8b030'];
+
+/* ───────── textures procédurales ───────── */
+const CAMO=[null,['#4b5a32','#2f3a22','#6b5a3a','#1a1a14'],['#c2a878','#a88e5e','#8c7448','#d8c8a0'],['#6a6d70','#4a4d50','#2e3032','#8c8f92'],['#51603f','#2c3426','#7a7d5a','#16180f'],['#e8eef0','#c8d4d8','#9aa8ae','#f4f8fa']];
+const TEXC=new Map(),cvs=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
+function mkTex(c,rx=1,ry=1,srgb=true){const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);t.anisotropy=QUALITY.anisotropy;if(srgb)t.colorSpace=THREE.SRGBColorSpace;return t}
+function noiseTex(key,size,amp,rx,ry){
+  if(TEXC.has(key))return TEXC.get(key);
+  const c=cvs(size,size),x=c.getContext('2d'),id=x.createImageData(size,size);
+  for(let i=0;i<id.data.length;i+=4){const v=128+(Math.random()-.5)*amp;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=255}
+  x.putImageData(id,0,0);const t=mkTex(c,rx,ry,false);TEXC.set(key,t);return t}
+function weaveTex(){
+  if(TEXC.has('weave'))return TEXC.get('weave');
+  const c=cvs(32,32),x=c.getContext('2d');x.fillStyle='#808080';x.fillRect(0,0,32,32);
+  for(let i=0;i<32;i+=2){x.fillStyle='#9c9c9c';x.fillRect(i,0,1,32);x.fillStyle='#6c6c6c';x.fillRect(0,i,32,1)}
+  const t=mkTex(c,7,7,false);TEXC.set('weave',t);return t}
+function fabricTex(kind,hex){
+  const key='f'+kind+hex;if(TEXC.has(key))return TEXC.get(key);
+  const c=cvs(256,256),x=c.getContext('2d');x.fillStyle=kind?CAMO[kind][0]:hex;x.fillRect(0,0,256,256);
+  if(kind){const pal=CAMO[kind];
+    for(let i=0;i<120;i++){x.fillStyle=pal[1+(i%3)];const cx=Math.random()*256,cy=Math.random()*256;
+      if(kind===4){const s=(8+Math.random()*16)|0;x.fillRect(((cx/8)|0)*8,((cy/8)|0)*8,s,s)}
+      else{x.beginPath();for(let k=0;k<9;k++){const a=k/9*6.283,r=10+Math.random()*26;x.lineTo(cx+Math.cos(a)*r*1.4,cy+Math.sin(a)*r*.8)}x.closePath();x.fill()}}}
+  else{for(let i=0;i<40;i++){x.fillStyle=Math.random()<.5?'rgba(0,0,0,.05)':'rgba(255,255,255,.04)';x.fillRect(Math.random()*256,Math.random()*256,30+Math.random()*60,20+Math.random()*40)}}
+  x.globalAlpha=.08;x.fillStyle='#000';for(let i=0;i<256;i+=2)x.fillRect(i,0,1,256);x.fillStyle='#fff';for(let j=0;j<256;j+=2)x.fillRect(0,j,256,1);x.globalAlpha=1;
+  const t=mkTex(c,2,2);TEXC.set(key,t);return t}
+
+/* ───────── mains et gants (doigts articulés) ───────── */
+const GLV=[null,{cuff:.045},{cuff:.055,knuckle:1},{cuff:.03,fl:1},{cuff:.05,bulk:1.1,fab:1},{cuff:.11,bulk:1.35,fab:1},{cuff:.02,thin:1,white:1},{cuff:.03,fl:.5,fab:1}];
+function buildHand(C,eg,side){
+  const gl=GLV[C.s.gloves],col=GLOVECOL[C.s.glovesColor]||'#14110e',skin=C.skin;
+  const gm=gl?(gl.fab?fab(gl.white?'#e8e8e2':col,0):leather(gl.white?'#e8e8e2':col,.5)):null,pm=gm||skin;
+  const bulk=(gl&&gl.bulk)||(gl&&gl.thin?0.93:0)||1,fem=C.fem?.92:1,hg=grp(0,-.275,0,eg);hg.rotation.x=-.08;
+  ell(.021*bulk,.052*bulk*fem,.043*bulk*fem,pm,0,-.05,0,hg);                       // paume (épaisseur selon x, doigts alignés selon z)
+  for(let i=0;i<4;i++){
+    const z=(-.03+i*.02)*fem*bulk,L=[.034,.043,.045,.036][i]*fem,r=.0087*bulk,fs=gl&&gl.fl?skin:pm;
+    const f1=grp(0,-.095,z,hg);f1.rotation.z=-side*(.22+.05*i);
+    cyl(r,r*.93,L,pm,0,-L/2,0,f1,8);
+    const f2=grp(0,-L,0,f1);f2.rotation.z=-side*.55;const L2=L*.85;
+    cyl(r*.92,r*.78,L2,fs,0,-L2/2,0,f2,8);ell(r*.8,r*.8,r*.8,fs,0,-L2,0,f2)}
+  const th=grp(-side*.02*bulk,-.06,.042*fem*bulk,hg);th.rotation.x=-.8;th.rotation.z=-side*.35;
+  cyl(.0105*bulk,.0095*bulk,.036,pm,0,-.018,0,th,8);const t2=grp(0,-.036,0,th);t2.rotation.x=.25;cyl(.0095*bulk,.008*bulk,.03,pm,0,-.015,0,t2,8);
+  if(gl&&gl.knuckle){box(.012,.05,.075,metal('#2b2f2b',.5),side*.026,-.075,0,hg);for(let i=0;i<4;i++)box(.014,.012,.016,metal('#3a3f3a',.5),side*.028,-.108,(-.03+i*.02),hg)}
+  if(gl)cyl(.043*bulk,.045*bulk,gl.cuff,gm,0,gl.cuff*.3,0,hg,14,true)               // poignet du gant
+}
+
+/* ───────── détails des bras ───────── */
+function tattooMat(){
+  if(TEXC.has('tat'))return TEXC.get('tat');
+  const c=cvs(256,256),x=c.getContext('2d');x.strokeStyle='rgba(25,38,60,.85)';x.lineWidth=5;x.lineCap='round';
+  for(let i=0;i<14;i++){x.beginPath();const y=i*18+6;x.moveTo(0,y);for(let k=1;k<=8;k++)x.quadraticCurveTo(k*32-16,y+(k%2?14:-14),k*32,y);x.stroke()}
+  for(let i=0;i<8;i++){x.beginPath();x.arc(30+i*30,128+Math.sin(i)*50,10,0,6.3);x.stroke()}
+  const t=mkTex(c,1,1);const m=new THREE.MeshStandardMaterial({map:t,transparent:true,roughness:.7,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2});TEXC.set('tat',m);return m}
+function armWear(C,a){
+  const k=C.s.arms;if(!k)return;const{ag,eg,side}=a,P=C.P,white=mat('#e6e2d4',{roughness:.9}),blood=mat('#7a1010',{roughness:.6}),dk=mat('#1b1b1b',{roughness:.5,metalness:.3}),lea=leather('#3a2a1a',.6),rf=y=>P.arm*(.85-.23*clamp(-y/.27,0,1));
+  switch(k){
+    case 1:for(let i=0;i<6;i++){const y=-.05-i*.04;const o=cyl(rf(y)+.006,rf(y-.04)+.006,.045,white,0,y-.02,0,eg,12);o.rotation.z=(i%2?.08:-.08)}ell(.012,.02,.008,blood,side*(rf(-.1)+.006),-.1,.01,eg);break;
+    case 2:cyl(P.arm+.009,P.arm*.95,.075,mat('#b02020',{roughness:.8}),0,-.12,0,ag,14);box(.004,.045,.014,white,side*(P.arm+.011),-.12,0,ag);box(.004,.014,.045,white,side*(P.arm+.011),-.12,0,ag);break;
+    case 3:if(side<0){const t=mk(new THREE.TorusGeometry(P.arm*.68,.006,6,16),dk,0,-.22,0,eg);t.rotation.x=Math.PI/2;box(.03,.008,.03,metal('#9a9d98',.3),0,-.22,P.arm*.7,eg);box(.022,.003,.022,glowM('#6fffa0',.8),0,-.215,P.arm*.7+.005,eg)}break;
+    case 4:cyl(P.arm*.72,P.arm*.7,.07,lea,0,-.225,0,eg,14);for(let i=0;i<5;i++)ell(.004,.004,.004,metal('#c8c8c0',.3),Math.cos(i/5*6.28)*P.arm*.72,-.225,Math.sin(i/5*6.28)*P.arm*.72,eg);break;
+    case 5:ell(P.arm*1.2,.055,P.arm*1.2,dk,0,0,.005,eg);cyl(P.arm*.9,P.arm*.9,.025,mat('#2a2a28'),0,-.07,0,eg,12);break;
+    case 6:[-.215,-.245].forEach(y=>{const t=mk(new THREE.TorusGeometry(P.arm*.66,.006,6,16),metal('#b0b3ae',.25),0,y,0,eg);t.rotation.x=Math.PI/2});break;
+    case 7:cyl(P.arm*.86+.0015,P.arm*.64+.0015,.27,tattooMat(),0,-.135,0,eg,18,true);cyl(P.arm+.0015,P.arm*.87+.0015,.3,tattooMat(),0,-.15,0,ag,18,true);break;
+    case 8:cyl(P.arm*.9,P.arm*.68,.21,dk,0,-.13,0,eg,12,true);[-.05,-.15].forEach(y=>cyl(P.arm*.92-(y<-.1?.03:0),P.arm*.92-(y<-.1?.03:0),.02,mat('#3a3a36'),0,y,0,eg,12));box(.04,.12,.012,metal('#555',.4),0,-.1,P.arm*.9,eg);break}}
+
+/* ───────── pantalons (9) + bottes (9) ───────── */
+const PT=[{r:1},{r:1.07,pockets:1},{r:1.05,pockets:1,camo:1},{r:1.03,pockets:1,knee:1,camo:1},{r:1.06,pockets:1,work:1},{r:1.07,short:1,pockets:1},{r:1.02,cuff:1},{r:.98,shiny:1},{r:1.04,knee:1}];
+const BT=[{sh:0,low:1},{sh:.2,laces:7,lug:1},{sh:.38},{sh:.36,shiny:1},{sh:.02,shiny:1,thin:1},{sh:.2,laces:7,lug:1,desert:1},{sh:.28,fur:1,lug:1},{sh:.2,laces:7,lug:1,toe:1},{sh:0,open:1}];
+function buildLegs(C){
+  const{body,P,s}=C,pt=PT[s.pants]||PT[0],camoK=s.camo||1,pcol=D.OUTCOL[s.pantsColor]||'#3b3f45';
+  const pm=pt.camo?fab(pcol,camoK,{side:THREE.DoubleSide}):pt.shiny?mat(pcol,{roughness:.28,metalness:.1,side:THREE.DoubleSide}):fab(pcol,0,{side:THREE.DoubleSide}),dk=fab(sh(pcol,-.3),0),r=pt.r;
+  C.pantsM=pm;C.legs=[];
+  C.torso(.86,1.05,.012,pm);ell(P.hr*1.05,.12,P.hr*.7,pm,0,.93,0,body);
+  const b=mk(new THREE.TorusGeometry(1,.014,6,28),dk,0,1.04,0,body);b.rotation.x=Math.PI/2;const br=C.prof(1.04)+.014;b.scale.set(br,br*.64,1);
+  for(const side of[-1,1]){
+    const lg=grp(side*.085,.93,0,body),kn=grp(0,-.44,0,lg);
+    cyl(.07,.058,.44,C.skin,0,-.22,0,lg,14);cyl(.056,.044,.41,C.skin,0,-.205,0,kn,14);ell(.058,.06,.058,C.skin,0,0,0,kn);
+    const th=pt.short?.27:.44,rt=.079*r,rb=lerp(rt,.066*r,th/.44);
+    cyl(rt,rb,th,pm,0,-th/2,0,lg,16,true);
+    if(!pt.short)cyl(.066*r,.05*r,.41,pm,0,-.205,0,kn,16,true);
+    if(pt.pockets){box(.034,.12,.1,pm,side*(rt+.012),-.15,.015,lg);box(.036,.035,.104,dk,side*(rt+.013),-.1,.015,lg)}
+    if(pt.knee){ell(.052,.065,.03,dk,0,0,.052,kn);box(.09,.012,.02,dk,0,.06,.045,kn);box(.09,.012,.02,dk,0,-.06,.045,kn)}
+    if(pt.work){box(.1,.06,.012,dk,0,-.12,.075,lg)}
+    if(pt.cuff)cyl(.056,.056,.03,dk,0,-.385,0,kn,14);
+    C.legs.push({lg,kn,side});buildFoot(C,kn,side)}}
+function buildFoot(C,kn,side){
+  const bt=BT[C.s.boots]||BT[0],col=BOOTCOL[C.s.bootsColor]||'#16110d',fg=grp(0,-.41,0,kn);
+  const up=bt.shiny?mat(col,{roughness:.22,metalness:.1}):leather(bt.desert&&C.s.bootsColor===0?'#8a6b43':col,.6),sole=mat(bt.low?'#ececE6':'#0e0e0e',{roughness:.85}),lace=mat('#d9d4c4',{roughness:.9}),sh2=bt.sh;
+  box(.108,bt.thin?.02:.03,.285,sole,0,-.066,.045,fg);
+  if(bt.lug)for(let i=0;i<7;i++)box(.112,.008,.012,sole,0,-.086,-.07+i*.045,fg);
+  if(bt.open){ell(.046,.034,.115,C.skin,0,-.035,.05,fg);box(.1,.008,.02,up,0,-.012,.03,fg);box(.1,.008,.02,up,0,-.01,.1,fg);box(.07,.04,.012,up,0,-.03,-.075,fg);return}
+  ell(.052,.043,.135,up,0,-.03,.05,fg);ell(.05,.037,.06,bt.toe?metal('#8a8d88',.35):up,0,-.038,.145,fg);
+  if(sh2>.03){cyl(.062,.067,sh2,up,0,sh2/2-.01,0,fg,16);const t=mk(new THREE.TorusGeometry(.064,.008,6,16),mat(sh(col,-.2),{roughness:.7}),0,sh2-.01,0,fg);t.rotation.x=Math.PI/2}
+  if(bt.laces){for(let i=0;i<bt.laces;i++){const y=-.015+i*(sh2+.02)/bt.laces;box(.05,.005,.01,lace,0,y,.063+(y<.02?.045:0),fg)}box(.04,sh2*.9,.008,mat(sh(col,-.15),{roughness:.8}),0,sh2/2,.066,fg)}
+  if(bt.fur)cyl(.079,.079,.05,mat('#d8d4c8',{roughness:1}),0,sh2-.015,0,fg,16);
+  if(!bt.thin)ell(.05,.012,.05,mat(sh(col,-.3),{roughness:.8}),0,-.05,-.07,fg)}
+
+/* ───────── corps (torse, bras avec mains, jambes) ───────── */
+function buildBody(C){
+  const{fem,body}=C,P=C.P=fem?{sw:.155,tr:.148,wr:.108,hr:.15,arm:.04}:{sw:.2,tr:.172,wr:.14,hr:.155,arm:.047};
+  const pts=[[.86,P.hr*.98],[.98,P.wr],[1.12,P.wr*1.05],[1.24,P.tr],[1.33,P.sw*.9],[1.39,.07]];
+  C.prof=y=>{let r=pts[pts.length-1][1];if(y<=pts[0][0])r=pts[0][1];else for(let i=1;i<pts.length;i++)if(y<=pts[i][0]){const a=pts[i-1],b=pts[i];r=lerp(a[1],b[1],(y-a[0])/(b[0]-a[0]));break}
+    return r+(fem?.016*Math.exp(-Math.pow((y-1.2)/.06,2)):0)};
+  C.torso=(y0,y1,off,m,fl=0,n=12)=>{const v=[];for(let i=0;i<=n;i++){const y=lerp(y0,y1,i/n);v.push(new THREE.Vector2(C.prof(y)+off+fl*Math.max(0,1-y)*.35,y))}
+    const o=mk(new THREE.LatheGeometry(v,56),m,0,0,0,body);o.scale.z=.64;return o};
+  C.torso(.86,1.4,0,C.skin);
+  ell(P.sw*.55,.05,.085,C.skin,0,1.385,-.01,body);                               // trapèzes
+  cyl(.05,.058,.15,C.skin,0,1.42,0,body);ell(.056,.04,.056,C.skin,0,1.37,.0,body);   // cou
+  C.arms=[];
+  for(const side of[-1,1]){
+    const ag=grp(side*P.sw,1.31,0,body);ag.rotation.z=side*.12;
+    ell(P.arm*1.3,P.arm*1.25,P.arm*1.25,C.skin,0,0,0,ag);                          // deltoïde
+    ell(P.arm*1.06,.12,P.arm*1.06,C.skin,0,-.12,0,ag);                               // biceps
+    cyl(P.arm,P.arm*.86,.3,C.skin,0,-.15,0,ag,14);
+    const eg=grp(0,-.3,0,ag);eg.rotation.x=-.14;
+    ell(P.arm*.9,P.arm*.9,P.arm*.9,C.skin,0,0,0,eg);cyl(P.arm*.85,P.arm*.62,.27,C.skin,0,-.135,0,eg,14);
+    buildHand(C,eg,side);C.arms.push({ag,eg,side})}
+  buildLegs(C);C.chest=body}
+
+/* ───────── équipement (9) et sacs à dos (7) ───────── */
+function gearBuild(C){
+  const k=C.s.gear;if(!k)return;const{body}=C,zf=y=>(C.prof(y)+.035)*.64,nyl=fab(sh(C.mainHex,-.35),0),blk=mat('#1d1f1c',{roughness:.7}),mt=metal('#8a8d88',.4),dk=mat('#222420',{roughness:.5,metalness:.4});
+  const belt=y=>{const b=mk(new THREE.TorusGeometry(1,.02,6,28),nyl,0,y,0,body);b.rotation.x=Math.PI/2;const r=C.prof(y)+.032;b.scale.set(r,r*.64,1);box(.055,.045,.014,mt,0,y,zf(y)+.002,body)};
+  const pouch=(x,y,zz,w=.07,h=.09)=>{box(w,h,.05,nyl,x,y,zz,body);box(w+.004,.025,.054,blk,x,y+h/2-.01,zz,body)};
+  switch(k){
+    case 1:belt(1.03);pouch(-.1,1.0,zf(1.0)+.02);pouch(-.17,.99,zf(1.0)-.04,.06,.1);pouch(.1,1.0,zf(1.0)+.02);pouch(.18,.99,zf(1.0)-.05,.06,.1);pouch(0,1.0,-zf(1.0)-.02,.16,.1);break;
+    case 2:{belt(1.03);const L=C.legs[1].lg;cyl(.084,.084,.03,blk,0,-.2,0,L,14);box(.045,.2,.095,blk,.1,-.2,.015,L);box(.032,.08,.055,dk,.1,-.07,.0,L);box(.026,.05,.12,dk,.1,-.2,.07,L);pouch(-.1,1.0,zf(1.0)+.02)}break;
+    case 3:{const A=[-.13,1.37,zf(1.37)+.012],B=[.13,1.04,zf(1.04)+.012];limb(A,B,.021,.021,nyl,body);
+      for(let i=0;i<8;i++){const t=(i+.5)/8;cyl(.0075,.0075,.045,metal('#c9a64a',.3),lerp(A[0],B[0],t),lerp(A[1],B[1],t),lerp(A[2],B[2],t)+.02,body,8)}belt(1.03)}break;
+    case 4:belt(1.03);pouch(-.12,.98,-zf(.98)-.03,.12,.11);pouch(.12,.98,-zf(.98)-.03,.12,.11);break;
+    case 5:{pouch(-.11,1.27,zf(1.27)+.02,.09,.2);cyl(.004,.004,.34,mt,-.14,1.5,zf(1.27)+.02,body,6);box(.05,.012,.012,blk,-.11,1.3,zf(1.3)+.05,body);belt(1.03)}break;
+    case 6:{belt(1.03);const c=cyl(.042,.042,.17,mat('#4a5a3a',{roughness:.8}),.19,.97,.0,body,14);c.rotation.z=.1;cyl(.026,.026,.02,blk,.19,1.07,.0,body,10);box(.026,.14,.016,blk,-.18,.97,.04,body);box(.024,.06,.02,mat('#2a1a10'),-.18,1.06,.04,body)}break;
+    case 7:{belt(1.03);for(const s of[-1,1])box(.04,.34,.014,nyl,s*.085,1.2,zf(1.2)+.012,body);box(.22,.035,.014,nyl,0,1.28,zf(1.28)+.012,body);
+      for(const s of[-1,1]){const t=mk(new THREE.TorusGeometry(.015,.004,6,12),mt,s*.085,1.35,zf(1.35)+.02,body)}pouch(-.1,1.05,zf(1.05)+.02);pouch(.1,1.05,zf(1.05)+.02);pouch(0,1.18,zf(1.18)+.025,.12,.07)}break;
+    case 8:{for(const l of C.legs){cyl(.088,.085,.035,nyl,0,-.14,0,l.lg,14);cyl(.088,.085,.03,nyl,0,-.32,0,l.lg,14);box(.03,.03,.01,mt,0,-.14,.087,l.lg)}
+      for(const s of[-1,1])box(.045,.3,.014,nyl,s*.09,1.2,zf(1.2)+.012,body);box(.2,.035,.014,nyl,0,1.26,zf(1.26)+.012,body);belt(1.03)}break}}
+const BP=[null,{w:.34,h:.46,d:.2,y:1.2,pk:1,molle:1},{w:.36,h:.62,d:.26,y:1.14,roll:1,lid:1},{w:.28,h:.34,d:.14,y:1.22},{w:.32,h:.4,d:.2,y:1.2,ant:1},{w:.34,h:.38,d:.2,y:1.22,cross:1,white:1},{w:.34,h:.5,d:.22,y:1.16,roll:1,top:1},{w:.42,h:.64,d:.3,y:1.12,pk:2,molle:1,big:1}];
+function backpack(C){
+  const k=C.s.backpack;if(!k)return;const bp=BP[k],{body}=C,zb=-((C.prof(1.2)+.05)*.64+bp.d/2);
+  const bm=bp.white?mat('#dcd8cc',{roughness:.8}):fab(C.mainHex,(k===1||k===7)?(C.s.camo||0):0,{side:THREE.DoubleSide}),dk=fab(sh(C.mainHex,-.35),0),zfy=y=>(C.prof(y)+.03)*.64;
+  box(bp.w,bp.h,bp.d,bm,0,bp.y,zb,body);box(bp.w*.96,.05,bp.d*1.02,dk,0,bp.y+bp.h/2,zb,body);
+  if(bp.pk)for(const s of[-1,1])box(.06,bp.h*.5,bp.d*.8,dk,s*(bp.w/2+.03),bp.y-bp.h*.1,zb,body);
+  if(bp.pk===2)box(bp.w*.8,bp.h*.4,.08,dk,0,bp.y-bp.h*.12,zb-bp.d/2-.04,body);
+  if(bp.molle)for(let i=0;i<4;i++)box(bp.w*.9,.008,.012,dk,0,bp.y-bp.h*.3+i*.07,zb-bp.d/2-.006,body);
+  if(bp.roll||bp.top){const c=cyl(.07,.07,bp.w+.04,mat('#8a6b43',{roughness:.9}),0,bp.roll&&!bp.top?bp.y-bp.h/2-.05:bp.y+bp.h/2+.09,zb,body,16);c.rotation.z=Math.PI/2}
+  if(bp.lid)box(bp.w*1.02,.06,bp.d*1.04,dk,0,bp.y+bp.h/2+.03,zb,body);
+  if(bp.ant){cyl(.004,.004,.6,metal('#9a9d98',.3),.12,bp.y+bp.h/2+.3,zb-.05,body,6);box(.12,.1,.04,dk,0,bp.y,zb-bp.d/2-.02,body)}
+  if(bp.cross){const r=mat('#b02020',{roughness:.7});box(.14,.045,.01,r,0,bp.y,zb-bp.d/2-.006,body);box(.045,.14,.01,r,0,bp.y,zb-bp.d/2-.006,body)}
+  for(const s of[-1,1]){box(.05,.3,.014,dk,s*.1,1.2,zfy(1.2)+.012,body);box(.05,.014,.2,dk,s*.1,1.4,-.0,body);box(.05,.014,.07,dk,s*.1,1.395,.075,body)}}
+
+/* ════════════════════════════════════════════════════════════════
+   2c. PERSONNALISATION DE L’ARME À FEU : 6 armes, 6 emplacements, stats qui changent avec les pièces
+   ════════════════════════════════════════════════════════════════ */
+Object.assign(LEN,{weapon:13,wMuzzle:5,wOptic:5,wUnder:5,wStock:5,wMag:4,wFinish:8});
+const WCTX={w:0};                                         // arme courante (l’interface le met à jour pour adapter les noms de pièces)
+const GUN_MUZ=['Standard','Frein de bouche','Silencieux','Cache-flamme','Compensateur'];
+Object.assign(NAMES,{weapon:['Aucune arme','Couteau de combat','Pistolet 9 mm','Fusil à pompe','AK-47','Fusil de précision','Minigun','Revolver Magnum','Pistolet-mitrailleur','Carabine M4','Fusil à levier','Machette','Lance-roquettes'],wMuzzle:GUN_MUZ,
+  wOptic:['Organes de visée (fer)','Point rouge','Holographique','Lunette ACOG','Lunette longue portée'],wUnder:['Aucun','Poignée verticale','Lampe tactique','Laser','Bipied'],
+  wStock:['Standard','Crosse pliante','Crosse tactique','Crosse en bois','Sans crosse'],wMag:['Chargeur standard','Chargeur étendu','Chargeur tambour','Double chargeur'],
+  wFinish:['Noir mat','Acier brossé','Vert militaire','Sable désert','Bois et noir','Blanc arctique','Rouge sang','Bleu nuit']});
+Object.assign(LABEL,{weapon:'Arme',wMuzzle:'Embout (bouche du canon)',wOptic:'Optique de visée',wUnder:'Accessoire sous le canon',wStock:'Crosse',wMag:'Chargeur',wFinish:'Finition'});
+Object.assign(DEF,{weapon:0,wMuzzle:0,wOptic:0,wUnder:0,wStock:0,wMag:0,wFinish:4});
+emptyChoices.add('weapon');
+const WFIN=['#1b1b1d','#8a8d90','#4a5a3a','#b09a6a','#26272a','#d8d8d4','#8a1e18','#2a3140'];
+// emplacements disponibles selon l’arme
+const WSLOTS={1:['wMuzzle','wFinish'],2:['wMuzzle','wOptic','wUnder','wMag','wFinish'],3:['wMuzzle','wOptic','wUnder','wStock','wMag','wFinish'],4:['wMuzzle','wOptic','wUnder','wStock','wMag','wFinish'],5:['wMuzzle','wOptic','wUnder','wStock','wMag','wFinish'],6:['wMuzzle','wUnder','wMag','wFinish'],7:['wMuzzle','wOptic','wUnder','wFinish'],8:['wMuzzle','wOptic','wUnder','wStock','wMag','wFinish'],9:['wMuzzle','wOptic','wUnder','wStock','wMag','wFinish'],10:['wMuzzle','wOptic','wFinish'],11:['wMuzzle','wFinish'],12:['wOptic','wFinish']};
+// noms et étiquettes qui dépendent de l’arme (lame du couteau, munitions du minigun…)
+const WALT={wMuzzle:{11:['Lame droite','Lame courbe','Lame kukri','Lame dentelée','Pointe clip'],1:['Pointe classique','Pointe tanto','Lame dentelée','Pointe crochet','Double tranchant']},wMag:{6:['Boîte 200 coups','Boîte 400 coups','Tambour dorsal','Double boîte']},wUnder:{6:['Poignée standard','Poignée renforcée','Lampe','Laser','Trépied']}};
+const WLAB={wMuzzle:{1:'Forme de la lame (embout)',11:'Forme de la lame (embout)'},wMag:{6:'Munitions'},wUnder:{6:'Poignées'}};
+const labelOf=k=>(WLAB[k]&&WLAB[k][WCTX.w])||LABEL[k];
+// caractéristiques de base : dmg = dégâts, rate = coups/min, range = portée (m), acc = précision (0-100), wt = poids (kg), mag = capacité
+const WPN=[null,
+ {n:'Couteau de combat',dmg:35,rate:90,range:2,acc:100,wt:.4,mag:0,cat:'Mêlée silencieuse'},
+ {n:'Pistolet 9 mm',dmg:25,rate:60,range:35,acc:70,wt:1,mag:15,cat:'Arme de poing'},
+ {n:'Fusil à pompe',dmg:90,rate:25,range:20,acc:45,wt:3.3,mag:8,cat:'Courte portée, gros dégâts'},
+ {n:'AK-47',dmg:42,rate:600,range:90,acc:58,wt:4.3,mag:30,cat:'Fusil d’assaut'},
+ {n:'Fusil de précision',dmg:140,rate:40,range:400,acc:92,wt:6.5,mag:5,cat:'Longue portée'},
+ {n:'Minigun',dmg:30,rate:3000,range:120,acc:28,wt:20,mag:200,cat:'Arme lourde'},
+ {n:'Revolver Magnum',dmg:70,rate:45,range:40,acc:75,wt:1.2,mag:6,cat:'Arme de poing lourde'},
+ {n:'Pistolet-mitrailleur',dmg:22,rate:800,range:45,acc:62,wt:2.9,mag:30,cat:'Rafale rapprochée'},
+ {n:'Carabine M4',dmg:38,rate:750,range:110,acc:72,wt:3.4,mag:30,cat:'Fusil d’assaut polyvalent'},
+ {n:'Fusil à levier',dmg:85,rate:35,range:130,acc:80,wt:3.1,mag:8,cat:'Précis, cadence lente'},
+ {n:'Machette',dmg:55,rate:70,range:2,acc:95,wt:.8,mag:0,cat:'Mêlée tranchante'},
+ {n:'Lance-roquettes',dmg:400,rate:6,range:200,acc:50,wt:7,mag:1,cat:'Explosif'}];
+const WMOD={ // modificateurs : + / - ajoutés, x = multiplié
+ wMuzzle:[{},{acc:4,recoil:-12,noise:10},{acc:6,xr:.92,xd:.97,noise:-70},{acc:2,recoil:-5,noise:-10},{acc:6,recoil:-20}],
+ wOptic:[{},{acc:8},{acc:10},{acc:14,xr:1.1},{acc:22,xr:1.35,xrate:.95}],
+ wUnder:[{},{acc:6,recoil:-10},{acc:2,wt:.2},{acc:5},{acc:12,wt:.6,recoil:-18}],
+ wStock:[{},{wt:-.3,acc:-5},{acc:5,wt:.2},{wt:.4,xd:1.02},{wt:-.6,acc:-12,recoil:15}],
+ wMag:[{},{xm:1.5,wt:.2},{xm:2.5,wt:.8,xrate:.95},{xm:2,wt:.3}]};
+const KNIFE_MOD=[{},{xd:1.1},{xd:1.15,acc:-5},{xd:1.05,acc:5,xrate:.9},{xd:1.1,wt:.05}];
+function weaponStats(s){
+  const b=WPN[s.weapon];if(!b)return null;const r={dmg:b.dmg,rate:b.rate,range:b.range,acc:b.acc,wt:b.wt,mag:b.mag,noise:100,recoil:50,name:b.n,cat:b.cat};
+  const ap=(m)=>{if(!m)return;r.acc+=m.acc||0;r.wt+=m.wt||0;r.recoil+=m.recoil||0;r.noise+=m.noise||0;r.range*=m.xr||1;r.dmg*=m.xd||1;r.rate*=m.xrate||1;r.mag*=m.xm||1};
+  if(s.weapon===1||s.weapon===11){ap(KNIFE_MOD[s.wMuzzle]);r.noise=5;r.recoil=0}
+  else for(const k of WSLOTS[s.weapon]||[])if(k!=='wFinish')ap(WMOD[k][s[k]]);
+  r.acc=clamp(Math.round(r.acc),5,100);r.dmg=Math.round(r.dmg);r.rate=Math.round(r.rate);r.range=Math.round(r.range);r.mag=Math.round(r.mag);r.wt=Math.round(r.wt*10)/10;r.noise=clamp(Math.round(r.noise),0,140);r.recoil=clamp(Math.round(r.recoil),0,100);
+  return r}
+
+/* ───────── modèles 3D (profils extrudés = silhouettes réalistes) + prise en main par cinématique inverse ─────────
+   Repère de l’arme : z = vers l’avant (bouche du canon), y = vers le haut, x = côté.
+   gunModel() construit l’arme seule (utilisée aussi par l’armurerie) et renvoie les points de prise : gR (main arrière), gL (main avant). */
+function gunModel(s,k,wg,anim){
+  const fin=WFIN[s.wFinish]||WFIN[0],bm=gunPaint(fin),st=metal('#26282a',.4),steel=metal('#9a9d98',.28),poly=polyMat('#17181a'),wood=woodMat(),furn=s.wFinish===4?wood:poly,brass=mat('#c9a64a',{metalness:.7,roughness:.3});
+  const zc=(r0,r1,len,m,x,y,z)=>{const o=mk(new THREE.CylinderGeometry(r1,r0,len,24),m,x,y,z+len/2,wg);o.rotation.x=Math.PI/2;return o};
+  const bx=(w,h,d,m,x,y,z)=>box(w,h,d,m,x,y,z,wg);
+  const px=(pts,w,m,x=0,y=0,z=0)=>{const sp=new THREE.Shape();pts.forEach((q,i)=>i?sp.lineTo(q[0],q[1]):sp.moveTo(q[0],q[1]));sp.closePath();
+    const g=new THREE.ExtrudeGeometry(sp,{depth:w,bevelEnabled:true,bevelThickness:.0022,bevelSize:.0022,bevelSegments:1,curveSegments:4});g.translate(0,0,-w/2);g.rotateY(-Math.PI/2);return mk(g,m,x,y,z,wg)};
+  const rail=(z0,z1,y)=>{bx(.02,.005,z1-z0,st,0,y,(z0+z1)/2);for(let z=z0+.005;z<z1;z+=.012)bx(.026,.004,.005,st,0,y+.004,z)};
+  const screws=(zs,y,m=steel)=>zs.forEach(z=>{for(const q of[-1,1])zc(.004,.004,.003,m,q*.0215,y,z).rotation.z=Math.PI/2});
+  const muzzle=(zm,y,r)=>{switch(s.wMuzzle){
+    case 1:zc(r*1.8,r*1.8,.06,bm,0,y,zm);for(let i=0;i<3;i++)bx(r*4,.004,.008,st,0,y,zm+.012+i*.014);break;
+    case 2:zc(r*2.3,r*2.3,.2,st,0,y,zm);for(let i=0;i<5;i++)zc(r*2.4,r*2.4,.004,mat('#0c0c0c'),0,y,zm+.025+i*.036);zc(r*2.35,r*2.35,.012,st,0,y,zm+.2);break;
+    case 3:zc(r*1.4,r*2.1,.08,st,0,y,zm);for(let i=0;i<6;i++){const q=i/6*6.28;bx(.004,.016,.03,st,Math.cos(q)*r*2,y+Math.sin(q)*r*2,zm+.05)}break;
+    case 4:zc(r*1.9,r*1.9,.05,bm,0,y,zm);bx(r*4,.014,.02,st,0,y+r*1.9,zm+.025);bx(r*4,.014,.02,st,0,y-r*1.9,zm+.025);break}
+    if(!s.wMuzzle)zc(r*1.25,r*1.25,.012,st,0,y,zm)};
+  const optic=(z,y)=>{const o=s.wOptic;if(!o)return;const g=glowM('#ff3030',1.4),gl=mat('#aaddff',{transparent:true,opacity:.38,roughness:.05});
+    rail(z-.07,z+.07,y);
+    if(o===1){bx(.03,.03,.05,st,0,y+.024,z);bx(.016,.02,.002,gl,0,y+.036,z+.026);ell(.0025,.0025,.0025,g,0,y+.036,z+.022,wg)}
+    if(o===2){bx(.038,.014,.07,st,0,y+.014,z);for(const q of[-1,1])bx(.004,.034,.07,st,q*.017,y+.036,z);bx(.034,.004,.07,st,0,y+.056,z);bx(.03,.03,.002,gl,0,y+.036,z+.034)}
+    if(o===3){zc(.02,.02,.14,st,0,y+.036,z-.07);zc(.027,.027,.03,st,0,y+.036,z+.06);zc(.026,.026,.026,st,0,y+.036,z-.08);zc(.0165,.0165,.004,mat('#4488ff',{emissive:'#102040',roughness:.08}),0,y+.036,z+.092);bx(.014,.014,.022,st,0,y+.012,z);ell(.0025,.0025,.0025,glowM('#ff8a20',1.6),0,y+.062,z-.01,wg)}
+    if(o===4){zc(.0155,.0155,.4,st,0,y+.046,z-.19);zc(.032,.032,.07,st,0,y+.046,z+.2);zc(.028,.028,.05,st,0,y+.046,z-.23);zc(.0295,.0295,.012,steel,0,y+.046,z+.0);
+      zc(.0165,.0165,.004,mat('#6a5aff',{emissive:'#101040',roughness:.08}),0,y+.046,z+.27);for(const zz of[-.05,.08])bx(.022,.026,.012,st,0,y+.02,z+zz);
+      zc(.007,.007,.03,steel,.036,y+.048,z-.02).rotation.z=Math.PI/2;zc(.007,.007,.03,steel,0,y+.084,z-.02)}};
+  const under=(z,y)=>{const u=s.wUnder;if(!u)return;
+    if(u===1){cyl(.0165,.0155,.11,poly,0,y-.055,z,wg,12);bx(.022,.01,.04,st,0,y,z)}
+    if(u===2){zc(.021,.021,.085,st,0,y-.022,z);zc(.0175,.0175,.004,glowM('#ffffee',2.6),0,y-.022,z+.085);bx(.03,.012,.04,st,0,y,z-.01)}
+    if(u===3){bx(.022,.03,.055,st,0,y-.02,z);zc(.005,.005,.01,glowM('#ff2020',2.6),0,y-.02,z+.055);bx(.026,.01,.04,st,0,y,z)}
+    if(u===4)for(const q of[-1,1]){limb([q*.012,y,z],[q*.07,y-.15,z+.15],.006,.005,st,wg);zc(.007,.007,.02,steel,q*.07,y-.15,z+.15)}};
+  // crosse : profils selon le type (0 standard, 1 pliante, 2 tactique, 3 bois, 4 aucune)
+  const stockP=(zb,y,len,h,drop=.05)=>{const t=s.wStock;
+    if(t===4){bx(.03,.07,.02,st,0,y,zb);return}
+    if(t===1){for(const q of[-1,1])zc(.006,.006,len*.95,st,q*.016,y+h*.25,zb-len*.95);px([[zb-len*.95-.01,y+h*.5],[zb-len*.95+.012,y+h*.5],[zb-len*.95+.012,y-h*.5],[zb-len*.95-.01,y-h*.5]],.03,poly);return}
+    if(t===2){px([[zb,y+h*.4],[zb-len*.6,y+h*.42],[zb-len,y+h*.3],[zb-len,y-h*.7],[zb-len*.55,y-h*.4],[zb,y-h*.4]],.036,poly);px([[zb-len*.3,y+h*.42],[zb-len*.85,y+h*.34],[zb-len*.85,y+h*.52],[zb-len*.3,y+h*.55]],.032,furn);bx(.042,h*1.15,.022,mat('#0f0f0f',{roughness:.9}),0,y-.1*h,zb-len);return}
+    const m=t===3?wood:furn;px([[zb,y+h*.45],[zb-len*.55,y+h*.38],[zb-len,y+h*.28],[zb-len*1.01,y-h*.85],[zb-len*.7,y-h*.52-drop*.4],[zb-len*.3,y-h*.45],[zb,y-h*.4]],.036,m);bx(.038,h*1.05,.016,mat('#0f0f0f',{roughness:.9}),0,y-h*.28,zb-len*1.0)};
+  const pgrip=(z,y,len,rake,m)=>{px([[z-.02,y],[z+.022,y],[z+.022-rake,y-len],[z-.03-rake,y-len],[z-.034-rake*.4,y-len*.45]],.032,m);
+    for(let i=0;i<5;i++)bx(.034,.003,.026,mat('#0b0b0b'),0,y-.02-i*len*.17,z-rake*(.05+i*.2));};
+  const guard=(z,y,l)=>{px([[z,y],[z+l,y],[z+l,y-.04],[z+l*.5,y-.052],[z+l*.15,y-.04],[z,y-.03]],.006,st);bx(.006,.03,.004,st,0,y-.04,z+l*.3).rotation.x=.3};
+  // gravures : marquage du fabricant sur les deux côtés du boîtier (texture transparente, léger relief métallique)
+  const engr=(text,z,y,w,h,xs)=>{const c=document.createElement('canvas');c.width=512;c.height=Math.max(16,Math.round(512*h/w));const cx=c.getContext('2d');cx.font=`bold ${Math.round(c.height*.62)}px "Courier New",monospace`;cx.textAlign='center';cx.textBaseline='middle';cx.fillStyle='rgba(205,208,200,.6)';cx.fillText(text,256,c.height/2);
+    const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;const m=new THREE.MeshStandardMaterial({map:t,transparent:true,roughness:.35,metalness:.8,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});
+    for(const q of[-1,1]){const p=new THREE.Mesh(new THREE.PlaneGeometry(w,h),m);p.position.set(q*xs,y,z);p.rotation.y=q*Math.PI/2;wg.add(p)}};
+  const ENG={2:['MODEL 9 · 9x19 · N°7731',.01,.038,.13,.0155,.0178],3:['PUMP 12 GA · N°3320',.02,.0,.19,.02,.0235],4:['AK-47 · 7,62x39 · N°48213',.0,.0,.3,.02,.0225],5:['PRECISION .308 · N°0417',.0,.0,.26,.02,.0225],7:['MAGNUM .357',-.02,.01,.1,.016,.0175],8:['SMG 9 · N°20817',-.05,.0,.22,.02,.0225],9:['M4 · 5.56 NATO · N°9902',-.04,.0,.24,.02,.0205],10:['MODEL 94 · .30-30',.0,.0,.2,.02,.0195]};
+  const R={},put=(n,v)=>R[n]=v;
+  switch(k){
+    case 1:{                                               // COUTEAU DE COMBAT (lame extrudée, poignée cordée, garde, pommeau)
+      const hm=leather(fin==='#1b1b1d'?'#1a1512':fin,.6);zc(.0155,.0135,.13,hm,0,0,-.135);zc(.0175,.0175,.014,steel,0,0,-.005);ell(.0185,.0185,.014,steel,0,0,-.14,wg);bx(.054,.014,.012,steel,0,0,.012);
+      for(let i=0;i<6;i++)zc(.0165,.0165,.004,mat('#0a0a0a'),0,0,-.125+i*.019);
+      const t=s.wMuzzle,P=[[[0,.016],[.13,.016],[.2,-.014],[.14,-.019],[0,-.019]],[[0,.017],[.17,.017],[.205,-.006],[.19,-.019],[0,-.019]],null,[[0,.016],[.12,.018],[.2,.011],[.225,-.014],[.205,-.016],[.17,-.005],[0,-.019]],[[0,.018],[.12,.02],[.215,0],[.12,-.02],[0,-.018]]];
+      let pts=P[t];if(!pts){pts=[[0,.016],[.13,.016],[.2,-.012]];for(let i=0;i<8;i++)pts.push([.19-i*.0225,i%2?-.012:-.018]);pts.push([0,-.019])}
+      const sh2=new THREE.Shape();sh2.moveTo(pts[0][0],pts[0][1]);pts.slice(1).forEach(p=>sh2.lineTo(p[0],p[1]));
+      const g=new THREE.ExtrudeGeometry(sh2,{depth:.0045,bevelEnabled:true,bevelThickness:.0012,bevelSize:.0012,bevelSegments:1});g.translate(0,0,-.00225);g.rotateY(-Math.PI/2);
+      mk(g,metal('#c9ccc8',.16),0,0,.018,wg);bx(.0016,.003,.17,metal('#e8ebe7',.1),0,.0,.1);   // lame + fil poli
+      put('gR',V(0,0,-.07));put('wR',V(0,0,-.075))}break;
+    case 2:{                                               // PISTOLET (culasse, carcasse, rail, gâchette, chargeur)
+      bx(.026,.026,.17,bm,0,-.004,.0);px([[-.075,.058],[.095,.058],[.098,.03],[.095,.016],[-.075,.016]],.03,bm);for(let i=0;i<6;i++)bx(.032,.036,.003,st,0,.037,-.07+i*.007);   // culasse + cannelures
+      px([[-.075,.016],[.07,.016],[.07,-.012],[.01,-.014],[-.03,-.03],[-.075,-.012]],.028,furn);rail(.01,.07,-.016);
+      pgrip(-.02,-.012,.105,.03,furn);guard(.0,-.016,.07);bx(.006,.02,.005,st,0,-.03,.03).rotation.x=.25;bx(.004,.012,.012,st,0,.062,-.07);bx(.004,.01,.01,st,0,.062,.09);
+      const mh=[.02,.05,.02,.036][s.wMag]||.02;
+      if(s.wMag===2){const d=mk(new THREE.CylinderGeometry(.04,.04,.03,18),st,0,-.14,-.04,wg);d.rotation.z=Math.PI/2}else{bx(.026,mh+.02,.04,st,0,-.115-mh/2,-.044);bx(.03,.01,.044,poly,0,-.125-mh,-.044)}
+      if(s.wMag===3)bx(.024,.04,.036,st,0,-.15,-.01);
+      zc(.0075,.0075,.04,steel,0,.036,.096);muzzle(.135,.036,.0078);optic(-.01,.06);under(.06,-.022);
+      put('gR',V(0,-.05,-.03));put('wR',V(0,.045,-.08));put('gL',V(-.012,-.06,.012));put('wL',V(-.045,.04,-.06))}break;
+    case 3:{                                               // FUSIL À POMPE (carcasse, tube-magasin, garde-main coulissante, crosse)
+      px([[-.12,.045],[.14,.04],[.15,.0],[.12,-.04],[-.04,-.045],[-.12,-.02]],.042,bm);bx(.044,.016,.1,st,0,.0,.02);bx(.008,.04,.06,st,.022,.012,.0);
+      zc(.0145,.0145,.6,steel,0,.026,.14);zc(.012,.012,.5+(s.wMag===1?.1:0),st,0,-.014,.14);bx(.004,.01,.005,brass,0,.044,.74);
+      px([[.17,.012],[.4,.012],[.4,-.03],[.17,-.03]],.052,furn);for(let i=0;i<9;i++)bx(.056,.003,.012,mat('#0b0b0b'),0,-.009,.19+i*.024);
+      pgrip(-.07,-.04,.1,.045,furn);guard(-.055,-.047,.1);
+      if(s.wMag===2){const d=mk(new THREE.CylinderGeometry(.05,.05,.04,18),st,0,-.08,.04,wg);d.rotation.z=Math.PI/2}
+      if(s.wMag===3)for(const q of[-1,1])bx(.012,.064,.12,st,q*.034,.0,-.02);
+      stockP(-.12,.0,.32,.1);muzzle(.74,.026,.0145);optic(.0,.052);under(.38,-.03);
+      put('gR',V(0,-.085,-.06));put('wR',V(0,.05,-.075));put('gL',V(0,-.01,.2));put('wL',V(0,.02,-.07))}break;
+    case 4:{                                               // AK-47 (boîtier embouti, couvre-culasse, tube à gaz, garde-main bois, chargeur courbe)
+      px([[-.2,.034],[.2,.034],[.2,-.034],[-.2,-.034]],.04,bm);px([[-.2,.034],[.1,.034],[.1,.05],[-.02,.054],[-.2,.046]],.038,st);screws([-.15,-.05,.12,.18],.0);
+      for(let i=0;i<3;i++)bx(.042,.002,.12,mat('#0e0e0e'),0,.0,-.14+i*.0);                                   // fente d’éjection
+      px([[.16,.03],[.4,.034],[.4,-.026],[.16,-.036]],.05,wood);px([[.2,.05],[.4,.046],[.4,.034],[.2,.034]],.04,wood);for(let i=0;i<8;i++)bx(.052,.003,.01,mat('#2a1a0c'),0,-.0,.2+i*.025);
+      zc(.0085,.0085,.26,steel,0,.012,.38);zc(.0105,.0105,.34,steel,0,.056,.18);bx(.016,.034,.02,st,0,.036,.5);bx(.006,.03,.006,st,0,.066,.5);ell(.007,.007,.007,st,0,.07,.5,wg);
+      zc(.012,.012,.04,st,0,.012,.64);zc(.0095,.0095,.03,steel,0,.012,.62);bx(.012,.02,.02,st,0,.034,-.18);bx(.006,.018,.006,st,0,.056,-.14);
+      pgrip(-.03,-.034,.115,.05,furn);guard(-.005,-.042,.1);
+      const cap=[.15,.22,0,.15][s.wMag];
+      if(s.wMag===2){const d=mk(new THREE.CylinderGeometry(.075,.075,.062,20),st,0,-.14,.06,wg);d.rotation.z=Math.PI/2;zc(.02,.02,.07,st,0,-.075,.0)}
+      else{const pts=[],pb=[];const n=8;for(let i=0;i<=n;i++){const t=i/n,z0=.04+Math.pow(t,1.7)*.1*(cap/.15),y0=-.034-t*cap;pts.push([z0,y0]);pb.push([z0-.04-t*.012,y0+(i?0:0)])}
+        px(pts.concat(pb.reverse()),.032,st);for(let i=1;i<n;i+=2)bx(.034,.003,.004,mat('#0e0e0e'),0,-.034-i/n*cap,.04+Math.pow(i/n,1.7)*.1*(cap/.15)-.02);
+        if(s.wMag===3){const q=bx(.03,.14,.036,st,.034,-.1,.02);q.rotation.x=-.2}}
+      stockP(-.2,-.002,.3,.1);muzzle(.65,.012,.0095);optic(-.02,.054);under(.28,-.036);
+      put('gR',V(0,-.09,-.055));put('wR',V(0,.05,-.075));put('gL',V(0,-.015,.15));put('wL',V(0,.02,-.07))}break;
+    case 5:{                                               // FUSIL DE PRÉCISION (culasse, verrou, canon lourd cannelé, crosse trou de pouce, bipied)
+      px([[-.2,.034],[.22,.034],[.22,-.034],[-.2,-.034]],.04,bm);bx(.012,.016,.07,st,.032,.024,-.04);ell(.011,.011,.011,st,.052,.024,-.06,wg);zc(.005,.005,.05,st,.04,.024,-.06).rotation.z=Math.PI/2;
+      rail(-.18,.2,.037);zc(.0125,.0105,.74,steel,0,.012,.2);for(let i=0;i<6;i++)zc(.0145,.0145,.004,st,0,.012,.3+i*.1);
+      px([[.12,.0],[.5,.002],[.5,-.036],[.12,-.04]],.05,furn);px([[-.2,.0],[-.06,-.034],[-.06,-.06],[-.2,-.06]],.046,furn);
+      pgrip(-.06,-.034,.115,.06,furn);guard(-.04,-.045,.1);
+      if(s.wMag===2){const d=mk(new THREE.CylinderGeometry(.06,.06,.05,18),st,0,-.1,.04,wg);d.rotation.z=Math.PI/2}else bx(.032,.05+[0,.04,0,.02][s.wMag],.07,st,0,-.075,.04);
+      px([[-.2,.02],[-.38,.0],[-.6,.0],[-.6,-.13],[-.4,-.15],[-.3,-.1],[-.2,-.07]],.04,furn);bx(.042,.12,.02,mat('#0f0f0f',{roughness:.9}),0,-.068,-.6);
+      if(s.wStock)stockP(-.2,.0,.3,.1);
+      muzzle(.94,.012,.011);if(!s.wOptic){bx(.006,.03,.006,st,0,.05,.82);bx(.014,.02,.012,st,0,.044,-.03);bx(.004,.02,.004,st,0,.06,-.03)}else optic(.02,.037);
+      if(!s.wUnder)for(const q of[-1,1]){limb([q*.012,-.03,.5],[q*.07,-.17,.62],.005,.004,st,wg);zc(.007,.007,.02,steel,q*.07,-.17,.62)}else under(.5,-.04);
+      put('gR',V(0,-.09,-.06));put('wR',V(0,.05,-.075));put('gL',V(0,-.025,.05));put('wL',V(0,.03,-.07))}break;
+    case 6:{                                               // MINIGUN (6 canons rotatifs, carter, moteur, bande de munitions, poignées)
+      zc(.075,.075,.34,bm,0,.0,-.04);zc(.058,.058,.07,st,0,0,.3);zc(.08,.08,.04,st,0,0,-.08);zc(.06,.06,.12,st,0,0,-.2);
+      const rot=grp(0,0,.37,wg);for(let i=0;i<6;i++){const a=i/6*Math.PI*2;cyl(.011,.011,.66,steel,Math.cos(a)*.038,Math.sin(a)*.038,.33,rot,12).rotation.x=Math.PI/2}
+      for(const z of[.0,.2,.42,.62]){const r=mk(new THREE.TorusGeometry(.05,.008,8,20),st,0,0,z,rot)}
+      anim&&anim.push(t=>{rot.rotation.z=t*9});
+      bx(.05,.05,.18,st,0,.095,.04);bx(.04,.02,.22,st,0,.125,.04);rail(-.04,.14,.137);
+      pgrip(-.06,-.07,.1,.0,furn);bx(.07,.014,.02,st,0,-.075,-.06);px([[.08,-.07],[.26,-.07],[.26,-.095],[.08,-.095]],.012,st);cyl(.014,.014,.1,poly,0,-.12,.17,wg,12);
+      const boxM=[[.16,.12,.2],[.2,.16,.26],[.14,.14,.14],[.14,.12,.18]][s.wMag];bx(boxM[0],boxM[1],boxM[2],mat(sh(fin,-.1),{roughness:.5,metalness:.5}),-.18,-.1,-.04);bx(boxM[0]+.01,.01,boxM[2]+.01,st,-.18,-.1+boxM[1]/2,-.04);
+      if(s.wMag===3){bx(boxM[0],boxM[1],boxM[2],mat(sh(fin,-.1),{roughness:.5,metalness:.5}),.18,-.1,-.04)}
+      chain([[-.12,-.04,.04],[-.1,-.0,.07],[-.06,.04,.07],[-.03,.06,.06]],.011,.011,brass,wg);
+      if(s.wMuzzle)zc(.052,.052,.04+s.wMuzzle*.02,bm,0,0,1.0);under(.18,-.05);
+      put('gR',V(0,-.1,-.06));put('wR',V(0,.05,-.07));put('gL',V(0,-.125,.17));put('wL',V(0,.05,-.07))}break;
+    case 7:{                                               // REVOLVER MAGNUM (tambour cannelé, canon à nervure, crosse bois)
+      px([[-.1,.045],[.07,.045],[.07,.0],[-.0,-.03],[-.1,-.02]],.03,bm);zc(.031,.031,.06,steel,0,.014,-.025);for(let i=0;i<6;i++){const q=i/6*6.283;bx(.006,.012,.058,st,Math.cos(q)*.031,.014+Math.sin(q)*.031,-.025+.03)}
+      zc(.0125,.0115,.17,steel,0,.024,.045);zc(.0095,.0095,.12,bm,0,-.0,.05);bx(.008,.008,.17,st,0,.04,.1);bx(.004,.014,.006,st,0,.039,.2);
+      bx(.008,.028,.014,st,0,.052,-.1).rotation.x=.4;pgrip(-.1,-.02,.115,.05,wood);guard(-.04,-.03,.075);bx(.006,.018,.004,st,0,-.034,-.015).rotation.x=.25;
+      muzzle(.215,.024,.0115);optic(-.01,.048);under(.1,-.014);
+      put('gR',V(0,-.07,-.11));put('wR',V(0,.05,-.075));put('gL',V(-.012,-.08,-.09));put('wL',V(-.045,.04,-.06))}break;
+    case 8:{                                               // PISTOLET-MITRAILLEUR (carter tubulaire, chargeur droit, crosse télescopique)
+      px([[-.2,.036],[.1,.036],[.1,-.03],[-.2,-.03]],.04,bm);px([[-.2,.036],[.1,.04],[.1,.03],[-.2,.03]],.044,st);screws([-.15,-.02,.06],.0);bx(.008,.02,.03,st,.024,.012,-.04);
+      zc(.019,.019,.22,bm,0,.0,.1);for(let i=0;i<8;i++)bx(.04,.004,.006,mat('#0b0b0b'),0,.0,.14+i*.02);zc(.009,.009,.12,steel,0,.0,.32);bx(.014,.03,.02,st,0,.03,.4);bx(.012,.022,.012,st,0,.04,-.18);
+      px([[.1,.026],[.32,.022],[.32,-.026],[.1,-.03]],.046,furn);pgrip(-.03,-.03,.115,.05,furn);guard(-.005,-.04,.1);
+      const mc=[.17,.24,.0,.17][s.wMag];
+      if(s.wMag===2){const d=mk(new THREE.CylinderGeometry(.07,.07,.05,20),st,0,-.12,.05,wg);d.rotation.z=Math.PI/2}
+      else{px([[.03,-.03],[.075,-.03],[.085,-.03-mc],[.04,-.03-mc]],.028,st);for(let i=1;i<5;i++)bx(.03,.003,.004,mat('#0e0e0e'),0,-.03-i*mc/5,.055);if(s.wMag===3)bx(.028,mc,.04,st,.032,-.03-mc/2,.06)}
+      stockP(-.2,.0,.26,.09);muzzle(.44,.0,.009);optic(-.02,.04);under(.28,-.032);
+      put('gR',V(0,-.09,-.05));put('wR',V(0,.05,-.075));put('gL',V(0,-.015,.15));put('wL',V(0,.02,-.07))}break;
+    case 9:{                                               // CARABINE M4 (rail supérieur, garde-main rond, poignée A2, crosse rétractable)
+      px([[-.2,.026],[.12,.026],[.12,-.03],[-.2,-.03]],.036,bm);px([[-.16,-.03],[.12,-.03],[.1,-.06],[-.05,-.06],[-.12,-.045]],.034,bm);rail(-.2,.2,.032);
+      bx(.005,.02,.006,st,0,.056,.18);bx(.005,.02,.006,st,0,.056,-.16);screws([-.12,-.02,.08],.0);
+      zc(.0275,.0275,.28,bm,0,.0,.1);for(let i=0;i<7;i++)zc(.029,.029,.004,st,0,.0,.12+i*.035);rail(.12,.36,.0275+.0);
+      zc(.0085,.0085,.2,steel,0,.0,.36);bx(.016,.028,.02,st,0,.016,.4);pgrip(-.045,-.06,.1,.05,furn);guard(-.015,-.06,.1);
+      const mc=[.13,.19,0,.13][s.wMag];
+      if(s.wMag===2){const d=mk(new THREE.CylinderGeometry(.065,.065,.06,20),st,0,-.14,.04,wg);d.rotation.z=Math.PI/2}
+      else{px([[.01,-.06],[.045,-.06],[.06,-.06-mc],[.025,-.06-mc]],.03,st);for(let i=1;i<5;i++)bx(.032,.003,.004,mat('#0e0e0e'),0,-.06-i*mc/5,.03);if(s.wMag===3)bx(.03,mc,.036,st,.034,-.06-mc/2,.02)}
+      stockP(-.2,-.01,.28,.09);muzzle(.56,.0,.0095);optic(-.03,.032);under(.22,-.03);
+      put('gR',V(0,-.1,-.05));put('wR',V(0,.05,-.075));put('gL',V(0,-.02,.17));put('wL',V(0,.02,-.07))}break;
+    case 10:{                                              // FUSIL À LEVIER (carcasse acier, crosse et fût bois, levier de sous-garde, tube-magasin)
+      px([[-.1,.04],[.12,.04],[.12,-.03],[-.1,-.04]],.034,bm);bx(.012,.02,.03,steel,.02,.02,-.04);bx(.01,.02,.03,steel,0,.044,-.1);
+      px([[-.03,-.04],[.06,-.04],[.065,-.1],[-.04,-.115],[-.05,-.07]],.008,steel);
+      zc(.0105,.0095,.62,steel,0,.02,.12);zc(.0085,.0085,.5,st,0,-.015,.12);bx(.004,.014,.005,st,0,.036,.72);bx(.01,.016,.02,st,0,.036,-.02);
+      px([[.12,.0],[.42,.0],[.42,-.044],[.12,-.044]],.044,wood);px([[-.1,.035],[-.32,.02],[-.6,.0],[-.6,-.12],[-.38,-.1],[-.2,-.07],[-.1,-.04]],.04,wood);bx(.042,.12,.014,mat('#0f0f0f',{roughness:.9}),0,-.06,-.6);
+      muzzle(.74,.02,.0105);optic(-.02,.046);
+      put('gR',V(0,-.085,-.09));put('wR',V(0,.05,-.075));put('gL',V(0,-.025,.08));put('wL',V(0,.03,-.07))}break;
+    case 11:{                                              // MACHETTE (lame longue extrudée, poignée cordée, garde)
+      zc(.0165,.015,.14,leather('#1a1512',.6),0,0,-.14);for(let i=0;i<6;i++)zc(.0175,.0175,.004,mat('#0a0a0a'),0,0,-.13+i*.02);ell(.019,.019,.014,steel,0,0,-.145,wg);bx(.05,.016,.012,steel,0,0,.0);
+      const t=s.wMuzzle,P=[[[0,.03],[.46,.03],[.5,.0],[.46,-.012],[0,-.012]],[[0,.03],[.3,.04],[.46,.034],[.52,-.01],[.46,-.012],[0,-.012]],[[0,.025],[.2,.05],[.38,.048],[.5,0],[.38,-.014],[0,-.012]],null,[[0,.03],[.4,.03],[.52,.0],[.44,-.01],[0,-.012]]];
+      let pts=P[t];if(!pts){pts=[[0,.03],[.46,.03],[.5,.0],[.46,-.012]];for(let i=0;i<8;i++)pts.push([.44-i*.055,i%2?-.006:-.016]);pts.push([0,-.012])}
+      const sh2=new THREE.Shape();sh2.moveTo(pts[0][0],pts[0][1]);pts.slice(1).forEach(p=>sh2.lineTo(p[0],p[1]));
+      const g=new THREE.ExtrudeGeometry(sh2,{depth:.005,bevelEnabled:true,bevelThickness:.0013,bevelSize:.0013,bevelSegments:1});g.translate(0,0,-.0025);g.rotateY(-Math.PI/2);
+      mk(g,gunPaint(fin==='#1b1b1d'?'#2a2c2e':fin),0,0,.008,wg);bx(.0018,.003,.4,metal('#d8dbd7',.15),0,-.011,.2);
+      put('gR',V(0,0,-.08));put('wR',V(0,0,-.075))}break;
+    case 12:{                                              // LANCE-ROQUETTES (tube, venturi évasé, protection thermique bois, ogive, poignées)
+      zc(.03,.03,.95,bm,0,0,-.5);zc(.062,.032,.14,st,0,0,-.66);zc(.066,.066,.012,steel,0,0,-.67);for(let i=0;i<6;i++){const q=i/6*6.283;bx(.004,.01,.1,st,Math.cos(q)*.045,Math.sin(q)*.045,-.62)}
+      zc(.0395,.0395,.3,woodMat(),0,0,-.08);zc(.042,.042,.01,steel,0,0,-.08);zc(.042,.042,.01,steel,0,0,.22);
+      zc(.034,.034,.1,st,0,0,.45);const og=mk(new THREE.CylinderGeometry(.012,.055,.3,24),st,0,0,.65,wg);og.rotation.x=Math.PI/2;zc(.055,.055,.18,mat('#4a5a3a',{roughness:.6,metalness:.4}),0,0,.45);zc(.014,.014,.02,steel,0,0,.8);
+      pgrip(-.1,-.03,.11,.05,furn);guard(-.08,-.04,.09);pgrip(.05,-.036,.1,.0,furn);bx(.004,.03,.004,st,0,.04,.3);optic(.0,.034);
+      put('gR',V(0,-.085,-.12));put('wR',V(0,.05,-.075));put('gL',V(0,-.085,.05));put('wL',V(0,.05,-.07))}break;}
+  if(ENG[k])engr(...ENG[k]);
+  return R}
+// poses de tenue : a = point de l’arme (repère arme) posé en B (repère corps) ; ry/rx = orientation ; tir = bras tendus
+const WHOLD={
+ 1:{a:V(0,0,-.07),B:V(.2,1.04,.3),rx:-.6,ry:-.1,two:0},
+ 2:{a:V(0,-.05,-.03),B:V(.09,1.3,.46),rx:.0,ry:-.02,two:1},
+ 3:{a:V(0,0,-.44),B:V(.12,1.27,-.08),rx:.05,ry:-.25,two:1},
+ 4:{a:V(0,-.02,-.5),B:V(.16,1.27,-.08),rx:.05,ry:-.25,two:1},
+ 5:{a:V(0,0,-.6),B:V(.16,1.27,-.08),rx:.05,ry:-.25,two:1},
+ 6:{a:V(0,-.1,-.06),B:V(.17,1.02,.14),rx:.04,ry:-.1,two:1},
+ 7:{a:V(0,-.07,-.11),B:V(.09,1.3,.42),rx:0,ry:-.02,two:1},
+ 8:{a:V(0,0,-.46),B:V(.16,1.27,-.08),rx:.05,ry:-.25,two:1},
+ 9:{a:V(0,-.01,-.48),B:V(.16,1.27,-.08),rx:.05,ry:-.25,two:1},
+ 10:{a:V(0,-.04,-.6),B:V(.16,1.27,-.08),rx:.05,ry:-.25,two:1},
+ 11:{a:V(0,0,-.08),B:V(.2,1.04,.3),rx:-.6,ry:-.1,two:0},
+ 12:{a:V(0,0,-.4),B:V(.17,1.38,.0),rx:.02,ry:-.12,two:1}};
+function aimArm(a,T,pole){
+  const S=a.ag.position.clone(),L1=.3,L2=.27,d=T.clone().sub(S),dir=d.clone().normalize();let Dd=clamp(d.length(),.12,L1+L2-.005);
+  const A=Math.acos(clamp((L1*L1+Dd*Dd-L2*L2)/(2*L1*Dd),-1,1)),p=pole.clone().sub(dir.clone().multiplyScalar(pole.dot(dir))).normalize();
+  const E=S.clone().addScaledVector(dir,Math.cos(A)*L1).addScaledVector(p,Math.sin(A)*L1),down=V(0,-1,0);
+  a.ag.quaternion.setFromUnitVectors(down,E.clone().sub(S).normalize());
+  const w=T.clone().sub(E).normalize().applyQuaternion(a.ag.quaternion.clone().invert());
+  a.eg.quaternion.setFromUnitVectors(down,w);a.posed=true}
+function buildWeapon(C){
+  const s=C.s,k=s.weapon;if(!k)return;const{body}=C,H=WHOLD[k],wg=grp(0,0,0,body);C.weapon=wg;
+  const G=gunModel(s,k,wg,C.anim);
+  const Rr=C.arms.find(a=>a.side>0),Ll=C.arms.find(a=>a.side<0);
+  wg.rotation.set(H.rx,H.ry,0,'YXZ');wg.position.set(0,0,0);wg.updateMatrix();
+  wg.position.copy(H.B).sub(H.a.clone().applyMatrix4(wg.matrix));
+  const fwd=V(0,0,1).applyQuaternion(wg.quaternion),wr=()=>G.gR.clone().add(G.wR).applyMatrix4(wg.matrix),wl=()=>G.gL.clone().add(G.wL).applyMatrix4(wg.matrix);
+  for(let i=0;i<45;i++){wg.updateMatrix();const ok=wr().distanceTo(Rr.ag.position)<=.55&&(!H.two||wl().distanceTo(Ll.ag.position)<=.555);if(ok)break;wg.position.addScaledVector(fwd,-.01)}   // on rapproche l’arme du corps jusqu’à ce que les deux mains l’atteignent
+  wg.updateMatrix();
+  aimArm(Rr,wr(),V(.6,-1,-.25));
+  if(H.two)aimArm(Ll,wl(),V(-.6,-1,-.25));else aimArm(Ll,V(-.12,1.1,.3),V(-.6,-1,.1))}
+
+/* ═════ Couvre-chefs (17 modèles) ═════ */
+function headwear(C){
+  const k=C.s.headwear;if(!k)return;const{head,H}=C,col=D.ACCCOL[C.s.accColor],m=mat(col,{roughness:.75,side:THREE.DoubleSide}),dk=mat(sh(col,-.35),{roughness:.8,side:THREE.DoubleSide}),lt=mat(sh(col,.3),{roughness:.7}),mt=metal('#7a7d78',.45);
+  const dome=(f,b,off,mm=m)=>head.add(shell(H,(x,y,z)=>y>(z>0?f:b),off,mm));
+  const brim=(r,y,w,mm=m,sy=1)=>{const o=mk(new THREE.RingGeometry(r,r+w,28),mm,0,y,0,head);o.rotation.x=-Math.PI/2;o.scale.set(1,sy,1);return o};
+  switch(k){
+    case 1:dome(.1,-.25,.022);box(.01,.01,.01,m,0,.17,0,head);ell(.03,.03,.03,lt,0,.172,0,head);break;                            // bonnet
+    case 2:dome(.25,-.1,.02);{const b=mk(new THREE.CylinderGeometry(.11,.11,.006,20,1,false,-.2,Math.PI+.4),dk,0,.1,.12,head);b.rotation.x=.1;b.scale.set(1,1,.9);b.position.set(0,.09,.15)}break;   // casquette
+    case 3:dome(.04,-.35,.03,mat('#4c5a3c',{roughness:.6}));brim(R*H.sx*1.0,.075,.012,mat('#4c5a3c'));break;                     // casque militaire
+    case 4:dome(.35,.0,.014);{const t=ell(.05,.03,.04,m,0,.0,-.15,head);t.position.set(0,.08,-.15)}break;                           // bandana
+    case 5:head.add(shell(H,(x,y,z)=>y>.38&&y<.55,.012,m));break;                                                              // bandeau
+    case 6:dome(.35,.0,.025);brim(R*H.sx*.99,.065,.12,m);break;                                                                  // large bord
+    case 7:dome(.05,-.3,.03,mat('#e0b020',{roughness:.5}));brim(R*H.sx,.07,.04,mat('#e0b020'));box(.012,.1,.05,mat('#c09010'),0,.16,0,head);break;   // chantier
+    case 8:dome(.1,-.4,.035,mat('#6a5640',{roughness:.95}));for(const s of[-1,1])ell(.025,.07,.04,mat('#6a5640',{roughness:.95}),s*.14,.0,.0,head);break; // chapka
+    case 9:head.add(shell(H,(x,y,z)=>y>-.1&&!(y<.35&&y>-.05&&Math.abs(x)<.7&&z>.1),.014,dk));break;                              // cagoule
+    case 10:{const b=ell(.19,.05,.19,dk,.03,.11,-.01,head);b.rotation.z=-.15}break;                                                 // béret
+    case 11:head.add(shell(H,(x,y,z)=>y>.0||z<-.25,.04,m));ell(.12,.05,.11,m,0,.0,-.15,head);break;                                // capuche
+    case 12:dome(.35,.0,.025,mat('#6a4a2a',{roughness:.8}));brim(R*H.sx*.99,.065,.14,mat('#6a4a2a'),.9);break;                    // cowboy
+    case 13:{const bandM=metal('#2a2a2a',.4);tube([[-.16,-.01,0],[-.16,.12,0],[0,.19,0],[.16,.12,0],[.16,-.01,0]],.007,bandM,head,16,6);for(const s of[-1,1])cyl(.045,.045,.04,mat('#1a1a1a'),s*.168,-.02,0,head,16).rotation.z=Math.PI/2}break;   // casque audio
+    case 14:{head.add(shell(H,(x,y,z)=>y>-.35&&z>-.4,.018,mat('#2a2f28',{roughness:.5})));const mk2=cyl(.045,.055,.07,mat('#1b1d1b'),0,-.065,.17,head,14);mk2.rotation.x=Math.PI/2;for(const s of[-1,1])ell(.032,.032,.01,glowM('#6fbf7a',.5),s*.05,.02,H.surf(s*.05,.02)+.03,head)}break;   // masque à gaz
+    case 15:dome(.08,-.2,.028,mat('#2c3328',{roughness:.5}));box(.06,.012,.05,metal('#1a1a1a'),0,.14,.14,head);break;               // casque tactique
+    case 16:cyl(.095,.095,.19,mat('#16161a'),0,.2,0,head,22);brim(.0,.1,.17,mat('#16161a'));box(.2,.02,.2,mat('#7a1018'),0,.12,0,head);break;   // haut-de-forme
+    case 17:{const g=metal('#d8b030',.25),r=R*H.sx;for(let i=0;i<7;i++){const a=i/7*Math.PI*2;spike([Math.cos(a)*r*.95,.115,Math.sin(a)*r*.95*H.sz],[0,1,0],.018,.07,g,head)}const rg=mk(new THREE.TorusGeometry(r*.96,.01,8,28),g,0,.115,0,head);rg.rotation.x=Math.PI/2;rg.scale.set(1,H.sz,1)}break;   // couronne
+  }}
+
+/* ═════ Détails du visage (17 modèles, certains peints en décalque) ═════ */
+function extras(C){
+  const k=C.s.extra;if(!k)return;const{head,H}=C,ctx=dctx(C);
+  switch(k){
+    case 1:for(const[x,y]of[[-.04,-.01],[-.055,-.025],[-.03,-.03],[-.065,-.01],[.04,-.01],[.055,-.025],[.03,-.03],[.065,-.01],[0,-.012],[-.02,-.015],[.02,-.015]])dDot(C,ctx,x,y,.0035,'rgba(150,80,40,.7)');break;
+    case 2:dStroke(C,ctx,[[.06,.07],[.075,.03],[.09,-.02]],'rgba(130,40,40,.9)',.006);for(let i=0;i<3;i++)dStroke(C,ctx,[[.06+i*.012,.045-i*.02],[.085+i*.012,.04-i*.02]],'rgba(150,60,60,.85)',.003);break;
+    case 3:dPoly(C,ctx,[[.07,-.01],[.115,-.01],[.115,-.04],[.07,-.04]],'rgba(240,200,170,.95)','rgba(130,90,70,.9)');dStroke(C,ctx,[[.075,-.025],[.11,-.025]],'rgba(150,100,80,.8)',.002);break;
+    case 4:for(const s of[-1,1]){const x=s*R*H.sx*.96;ell(.006,.006,.006,metal('#d8b030',.2),x,-.045,-.005,head)}break;
+    case 5:ell(.0045,.0045,.0045,metal('#d8d8d8',.2),.03,-.027,H.surf(.03,-.027)+.012,head);break;
+    case 6:for(let i=0;i<5;i++)dStroke(C,ctx,[[-.11,.0+i*.012],[-.085,.02+i*.01],[-.06,.0+i*.012]],'rgba(30,60,110,.75)',.003);break;
+    case 7:dStroke(C,ctx,[[-.09,.015],[-.04,.025],[.04,.025],[.09,.015]],'rgba(200,40,30,.85)',.014);dStroke(C,ctx,[[-.09,-.02],[.09,-.02]],'rgba(240,240,230,.85)',.01);break;
+    case 8:head.add(shell(H,(x,y,z)=>y<-.12&&y>-.7&&z>.1,.008,mat('#d8e6ee',{roughness:.8})));break;
+    case 9:{const sc=mat('#a02828',{roughness:.9});tube([[-.14,-.2,.05],[-.1,-.23,.12],[0,-.25,.14],[.1,-.23,.12],[.14,-.2,.05]],.025,sc,head,18,8);ell(.03,.06,.025,sc,.07,-.3,.1,head)}break;
+    case 10:for(const s of[-.04,.04])ell(.0035,.0035,.0035,metal('#d8d8d8',.3),s,-.2,.14,C.body);{const chn=[[-.07,0,0],[-.06,-.03,.03],[0,-.06,.05],[.06,-.03,.03],[.07,0,0]];tube(chn.map(p=>[p[0],1.38+p[1],.1+p[2]]),.003,metal('#d8d8d8',.3),C.body,12,5);box(.04,.06,.004,metal('#d8d8d8',.3),0,1.3,.115,C.body)}break;
+    case 11:dDot(C,ctx,-.05,-.005,.02,'rgba(60,40,80,.35)',.5);dDot(C,ctx,.05,-.005,.02,'rgba(60,40,80,.35)',.5);break;
+    case 12:dStroke(C,ctx,[[-.05,-.015],[-.052,-.035]],'rgba(30,70,140,.85)',.004);dDot(C,ctx,-.052,-.04,.005,'rgba(30,70,140,.85)');break;
+    case 13:dStroke(C,ctx,[[-.12,.1],[-.09,.12],[-.05,.1]],'rgba(240,240,230,.9)',.016);dStroke(C,ctx,[[-.1,.03],[-.12,.0]],'rgba(240,240,230,.9)',.014);break;
+    case 14:for(let i=0;i<3;i++)dStroke(C,ctx,[[.03+i*.014,.01],[.05+i*.014,-.05]],'rgba(160,30,30,.85)',.0035);break;
+    case 15:ell(.005,.005,.005,metal('#d8d8d8',.3),.07,.085,H.surf(.07,.085)+.004,head);ell(.005,.005,.005,metal('#d8d8d8',.3),.07,.07,H.surf(.07,.07)+.004,head);break;
+    case 16:{const sc=mat('#7a4a8a',{roughness:.9});tube([[-.13,-.18,.05],[-.1,-.22,.12],[0,-.23,.14],[.1,-.22,.12],[.13,-.18,.05]],.03,sc,head,18,8)}break;
+  }}
+
+/* ═════ Particularités des personnages « Autres » : ailes, cornes, antennes, marques ═════ */
+function specials(C){
+  const{head,body,sp}=C;
+  const dk=mat('#2a2230',{roughness:.7,side:THREE.DoubleSide}),mem=mat('#3a2a46',{roughness:.65,side:THREE.DoubleSide});
+  // ailes / appendices du dos (specialBack 1..3) — l’espèce peut aussi en imposer
+  const sb=C.s.specialBack,wing=sb||(sp.wings==='bat'?1:sp.wings==='thin'?2:0);
+  const wg=(kind,side)=>{
+    const g=grp(side*.06,1.28,-.1,body);g.rotation.y=side*.5;
+    if(kind===1||kind===2){                                                    // chauve-souris / fines
+      const rib=[[0,0,0],[side*.3,.22,-.05],[side*.7,.34,-.12],[side*1.05,.28,-.2]];chain(rib.map(p=>[p[0],p[1],p[2]]),.02,.008,dk,g);
+      const sh2=new THREE.Shape();sh2.moveTo(0,0);sh2.lineTo(side*.3,.22);sh2.lineTo(side*.7,.34);sh2.lineTo(side*1.05,.28);sh2.lineTo(side*.8,-.1);sh2.lineTo(side*.5,.0);sh2.lineTo(side*.3,-.25);sh2.lineTo(0,-.3);
+      const wm=mk(new THREE.ShapeGeometry(sh2),kind===2?mat('#cfd8e8',{roughness:.4,transparent:true,opacity:.6,side:THREE.DoubleSide}):mem,0,0,-.05,g);wm.castShadow=false}
+    else if(kind===3){                                                          // plumes
+      for(let i=0;i<9;i++){const t=i/8,a=.2+t*.9,len=.5-.18*Math.abs(t-.35);limb([side*.02,.05-t*.1,-.02],[side*Math.cos(a)*len,Math.sin(a)*len*.7+.1-t*.3,-.04-t*.01],.025,.003,mat('#e9e4d8',{roughness:.8}),g)}}
+    return g};
+  if(wing===1||wing===2||wing===3)for(const s of[-1,1])wg(wing,s);
+  if(sb===3){for(let i=0;i<4;i++){const a=(i-1.5)*.35;tube([[0,1.2,-.1],[Math.sin(a)*.2,1.3,-.28],[Math.sin(a)*.4,1.15,-.4],[Math.sin(a)*.5,.95,-.36]],.02,mat('#5a3a5a',{roughness:.6}),body,16,6)}}   // appendices mutants
+  // queue
+  if(sp.tail){const m=sp.tail==='cat'?C.hairM:mat(sh(D.HUMAN[C.s.skin]||'#6a8a5a',-.1),{roughness:.7});tube([[0,.95,-.12],[0,.85,-.3],[.12,.7,-.42],[.3,.78,-.5],[.38,.98,-.45]],.035,m,body,24,8)}
+  // cornes / antennes / crête (specialHead 1..3 ou imposées)
+  const shd=C.s.specialHead||(sp.horns?1:sp.antenna?2:sp.crest?3:0),hm=mat('#d8cfb4',{roughness:.5});
+  if(shd===1)for(const s of[-1,1]){chain([[s*.07,.1,0],[s*.11,.18,.0],[s*.13,.26,.02],[s*.1,.33,.04]],.026,.006,hm,head)}
+  if(shd===2)for(const s of[-1,1]){tube([[s*.05,.13,.03],[s*.07,.22,.05],[s*.1,.3,.02]],.005,mat('#222'),head,10,5);ell(.014,.014,.014,glowM('#6fffa0',1.8),s*.1,.31,.02,head)}
+  if(shd===3)for(let i=0;i<7;i++){const t=i/6,a=.4+t*2.0;spike([0,Math.sin(a)*R*.95,Math.cos(a)*R*.95],[0,Math.sin(a),Math.cos(a)],.017-.004*t,.07-.02*Math.abs(t-.5),mat('#4a7a4a',{roughness:.5}),head)}
+  // défense du « Mutant massif »
+  if(sp.tusks)for(const s of[-1,1])spike([s*.03,-.085,C.H.surf(s*.03,-.085)],[s*.2,1,.3],.012,.05,hm,head);
+  if(sp.fangs)for(const s of[-1,1])spike([s*.012,-.07,C.H.surf(s*.012,-.07)],[0,-1,.1],.004,.015,mat('#f4f1e6'),head);
+  // détails spéciaux (visage) specialFace 1..3
+  const sf=C.s.specialFace,ctx=dctx(C,sf===2?'glow':'base');
+  if(sf===1){dStroke(C,ctx,[[-.09,.06],[-.05,.0],[-.02,-.05]],'rgba(120,30,30,.9)',.006);dStroke(C,ctx,[[.08,.1],[.06,.03],[.09,-.03]],'rgba(120,30,30,.9)',.006)}
+  if(sf===2){dStroke(C,ctx,[[.09,.08],[.12,.02],[.1,-.05],[.06,-.09]],'rgba(120,255,200,1)',.007);dDot(C,ctx,.12,.02,.008,'rgba(255,255,255,1)')}
+  if(sf===3){for(const[x,y]of[[-.07,.0],[.08,.04],[.0,-.1],[-.09,.08],[.05,-.07]])dDot(C,ctx,x,y,.011,'rgba(60,220,120,.55)')}
+  // zombie : peau terne, cicatrices
+  if(sp.zombie){const z=dctx(C);dStroke(C,z,[[-.1,.08],[-.04,.04],[-.06,-.02]],'rgba(60,40,40,.85)',.006);dDot(C,z,.06,-.03,.03,'rgba(70,90,60,.5)',.7)}
+  if(sp.cyber){const z=dctx(C,'glow');dStroke(C,z,[[.06,.1],[.12,.07],[.12,-.03]],'rgba(255,60,60,1)',.005);dStroke(C,z,[[.12,.03],[.15,.03]],'rgba(255,60,60,1)',.004)}
+  if(sp.scales){const z=dctx(C);for(let i=0;i<14;i++){const x=(rnd()-.5)*.2,y=(rnd()-.5)*.2;dDot(C,z,x,y,.008,'rgba(30,70,30,.25)')}}
+}
+
+/* ════════════════════════════════════════════════════════════════
+   6. ASSEMBLAGE D’UN PERSONNAGE COMPLET (tête aux pieds) à partir de l’état JSON
+   ════════════════════════════════════════════════════════════════ */
+function buildCharacter(raw,opt={}){
+  const s=sanitize(raw),g=s.gender,fem=g==='female',root=new THREE.Group(),sp=g==='other'?(SPX[s.species]||{}):{};
+  seed=7+s.hair*13+s.beard*5+s.skin;                                  // aléatoire stable
+  const C={s,g,fem,sp,root,opt,anim:[],tex:[],dc:{},eyes:[],mats:new Set()};
+  const skinHex=D.HUMAN[s.skin]||D.HUMAN[0],spSkin=g==='other'?(D.FANT[s.skin]||skinHex):skinHex;
+  const base=g==='other'?spSkin:skinHex;
+  C.skinHex=sp.zombie?'#8da07a':base;C.hairHex=D.HAIRCOL[s.hairColor]||'#3a2a1a';C.mainHex=D.OUTCOL[s.outfitColor]||'#556b4a';
+  C.skin=skinMat(C.skinHex),C.skinD=skinMat(sh(C.skinHex,-.25));
+  C.hairM=new THREE.MeshPhysicalMaterial({color:C.hairHex,roughness:.5,sheen:1,sheenColor:new THREE.Color(C.hairHex).lerp(new THREE.Color('#ffffff'),.35),sheenRoughness:.4,clearcoat:.25,clearcoatRoughness:.35});C.hairD=mat(sh(C.hairHex,-.12),{roughness:.6,side:THREE.DoubleSide});
+  const sc=sp.scale||1,body=C.body=grp(0,0,0,root),H=C.H=makeHead(s.face,fem);
+  if(sp.scale)root.scale.setScalar(sc);
+  C.opt={...opt};
+  safe(()=>buildBody(C),'corps');
+  // tête
+  const head=C.head=grp(0,1.58,0,body),face=mk(H.geo,C.skin,0,0,0,head);C.faceMesh=face;
+  head.scale.setScalar(1);
+  safe(()=>ears(C),'oreilles');safe(()=>eyes(C),'yeux');safe(()=>brows(C),'sourcils');
+  if(!sp.cyclops||true)safe(()=>nose(C),'nez');safe(()=>mouth(C),'bouche');
+  safe(()=>beard(C),'barbe');safe(()=>hair(C),'cheveux');safe(()=>glasses(C),'lunettes');safe(()=>headwear(C),'couvre-chef');
+  safe(()=>extras(C),'détail');safe(()=>buildOutfit(C),'tenue');safe(()=>gearBuild(C),'équipement');safe(()=>backpack(C),'sac à dos');safe(()=>C.arms.forEach(a=>armWear(C,a)),'bras');safe(()=>buildWeapon(C),'arme');
+  if(g==='other')safe(()=>specials(C),'particularités');
+  safe(()=>flushDecals(C),'décalques');
+  // respiration + léger balancement de la tête
+  C.walk={phase:0,amt:0};C.pitch=0;
+  C.anim.push(t=>{const w=C.walk,sw=Math.sin(w.phase);
+    body.position.y=Math.sin(t*1.6)*.003+Math.abs(Math.cos(w.phase))*.015*w.amt;head.rotation.y=Math.sin(t*.5)*.08*(1-w.amt);head.rotation.x=Math.sin(t*.7)*.02+C.pitch;
+    C.arms.forEach(a=>{if(a.posed)return;a.ag.rotation.x=Math.sin(t*1.2+a.side)*.03*(1-w.amt)-a.side*sw*.55*w.amt;a.eg.rotation.x=-.14-w.amt*Math.max(0,a.side*sw)*.5});
+    (C.legs||[]).forEach(l=>{l.lg.rotation.x=l.side*sw*.6*w.amt;l.kn.rotation.x=Math.max(0,l.side*Math.cos(w.phase))*.8*w.amt})});
+  root.userData.setWalk=(p,a)=>{C.walk.phase=p;C.walk.amt=a};root.userData.setPitch=p=>{C.pitch=p};
+  // clignement des yeux
+  let nextB=2;C.anim.push(t=>{if(t>nextB){nextB=t+2+Math.random()*4}const b=t>nextB-.14&&t<nextB?.1:1;C.eyes.forEach(e=>e.scale.y=b)});
+  // ombre douce au sol
+  root.userData.update=t=>C.anim.forEach(f=>f(t));
+  root.userData.dispose=()=>{root.traverse(o=>{if(o.geometry&&o!==face)o.geometry.dispose()});C.tex.forEach(t=>t.dispose());H.geo.dispose()};
+  return root}
+
+
+return{D,LEN,NAMES,LABEL,DEF,STEPS,STEP_DETAILS,GENDERS,REGS,sanitize,choiceName,labelOf,emptyChoices,buildCharacter,gunModel,weaponStats,WSLOTS,WPN,WCTX,BOOTCOL,GLOVECOL,WFIN,SPX,CAMO,aimArm}
+})();
+const {D,NAMES,LABEL,STEPS,STEP_DETAILS,GENDERS,REGS,sanitize,choiceName,labelOf,emptyChoices,buildCharacter,weaponStats,WSLOTS,WCTX,BOOTCOL,GLOVECOL,WFIN,SPX}=CL;
+/* ════════════════════════════════════════════════════════════════
+   7. SCÈNE : rendu, studio (lumières), décor du fond, caméra, nom
+   ════════════════════════════════════════════════════════════════ */
+const stage=$('stage');
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true,alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;renderer.outputColorSpace=THREE.SRGBColorSpace;
+stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,1,.05,60);
+const pmrem=new THREE.PMREMGenerator(renderer);scene.environment=pmrem.fromScene(new RoomEnvironment(),.04).texture;   // reflets réalistes sur cuir, métal et tissu
+scene.add(new THREE.HemisphereLight(0xdfe8ff,0x3a3028,.35));
+const key=new THREE.DirectionalLight(0xfff0dd,2.4);key.position.set(2.2,3.2,3);key.castShadow=true;key.shadow.mapSize.set(4096,4096);
+Object.assign(key.shadow.camera,{left:-1.6,right:1.6,top:2.4,bottom:-.4,near:.5,far:10});key.shadow.bias=-.0003;key.shadow.normalBias=.02;scene.add(key);
+const rim=new THREE.DirectionalLight(0x9fc4ff,1.4);rim.position.set(-3,2.4,-2.5);scene.add(rim);const kick=new THREE.DirectionalLight(0xffc98a,.9);kick.position.set(3,1.6,-2);scene.add(kick);const topS=new THREE.SpotLight(0xffffff,22,9,.55,.75,2);topS.position.set(0,4.2,.6);topS.target.position.set(0,1,0);scene.add(topS,topS.target);
+const fillL=new THREE.PointLight(0xffd9c0,.8,8,2);fillL.position.set(-1.6,1.4,2.4);scene.add(fillL);
+// sol-socle
+const floor=new THREE.Mesh(new THREE.CircleGeometry(1.5,48),new THREE.MeshStandardMaterial({color:0x20262a,roughness:.42,metalness:.25}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+const ring=new THREE.Mesh(new THREE.RingGeometry(.62,.64,64),new THREE.MeshBasicMaterial({color:0xffb347,transparent:true,opacity:.6,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.002;scene.add(ring);
+
+/* Fond : dôme dégradé + motif (7 motifs) dessiné sur canvas à partir des palettes BGP de la version 2D */
+const dome=new THREE.Mesh(new THREE.SphereGeometry(20,32,16),new THREE.MeshBasicMaterial({side:THREE.BackSide,fog:false}));dome.position.y=2;scene.add(dome);
+function paintBackdrop(bi,pi){
+  const [c0,c1]=D.BGP[bi]||D.BGP[0],cv=document.createElement('canvas');cv.width=1024;cv.height=512;const x=cv.getContext('2d');
+  const gr=x.createLinearGradient(0,0,0,512);gr.addColorStop(0,c0);gr.addColorStop(1,c1);x.fillStyle=gr;x.fillRect(0,0,1024,512);
+  x.globalAlpha=.16;x.strokeStyle=x.fillStyle='#ffffff';x.lineWidth=3;
+  const pat=[()=>{},                                                                   // 0 uni
+    ()=>{for(let i=-512;i<1024;i+=44){x.beginPath();x.moveTo(i,0);x.lineTo(i+512,512);x.stroke()}},                      // 1 diagonales
+    ()=>{for(let i=0;i<1024;i+=56){x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke()}},                            // 2 verticales
+    ()=>{for(let i=0;i<1024;i+=48)for(let j=0;j<512;j+=48){x.beginPath();x.arc(i+24,j+24,5,0,6.3);x.fill()}},           // 3 points
+    ()=>{for(let i=0;i<1024;i+=64)for(let j=0;j<512;j+=64){x.strokeRect(i+8,j+8,48,48)}},                               // 4 carreaux
+    ()=>{for(let i=0;i<12;i++){x.beginPath();x.arc(512,512,40+i*46,Math.PI,0);x.stroke()}},                              // 5 arcs
+    ()=>{for(let i=0;i<260;i++){x.beginPath();x.arc(Math.random()*1024,Math.random()*512,Math.random()*3+1,0,6.3);x.fill()}}];  // 6 poussière
+  (pat[pi]||pat[0])();x.globalAlpha=1;
+  const vg=x.createRadialGradient(512,300,60,512,300,520);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');x.fillStyle=vg;x.fillRect(0,0,1024,512);
+  const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;if(dome.material.map)dome.material.map.dispose();dome.material.map=t;dome.material.needsUpdate=true;scene.background=null;
+  const c=new THREE.Color(c1).lerp(new THREE.Color(0x000000),.35);floor.material.color.copy(c)}
+
+/* Nom du personnage : sprite canvas qui flotte au-dessus de la tête (polices, couleurs, styles, tailles et positions de la version 2D) */
+const nameSprite=new THREE.Sprite(new THREE.SpriteMaterial({transparent:true,depthTest:false}));nameSprite.renderOrder=10;scene.add(nameSprite);
+function paintName(st){
+  const txt=st.name||'';nameSprite.visible=!!txt;if(!txt)return;
+  const cv=document.createElement('canvas'),x=cv.getContext('2d');cv.width=1024;cv.height=256;
+  const fnt=(D.NFONTS[st.nameFont]||D.NFONTS[0])[1],col=D.NCOL[st.nameColor]||'#ffffff',size=[70,92,118,146][st.nameSize]||92,style=st.nameStyle;
+  x.font=`bold ${size}px ${fnt}`;x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
+  const cx=512,cy=128;
+  if(style===0){x.lineWidth=size*.14;x.strokeStyle='#000';x.strokeText(txt,cx,cy)}
+  if(style===1){x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=14;x.shadowOffsetY=6}
+  if(style===2){x.lineWidth=size*.22;x.strokeStyle='#000';x.strokeText(txt,cx,cy)}
+  if(style===3){x.fillStyle='rgba(8,10,8,.78)';const w=x.measureText(txt).width+70;x.fillRect(cx-w/2,cy-size*.62,w,size*1.24);x.fillStyle=col;x.fillRect(cx-w/2,cy+size*.52,w,6)}
+  if(style===4){x.shadowColor=col;x.shadowBlur=34;x.fillStyle=col;x.fillText(txt,cx,cy);x.fillText(txt,cx,cy)}
+  x.fillStyle=col;x.fillText(txt,cx,cy);
+  const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;if(nameSprite.material.map)nameSprite.material.map.dispose();nameSprite.material.map=t;nameSprite.material.needsUpdate=true;
+  nameSprite.scale.set(1.8,.45,1);st.namePos?nameSprite.position.set(0,2.1,0):nameSprite.position.set(0,.14,.75)}
+const LAST=STEPS.length-1;
+
+/* ════════════════════════════════════════════════════════════════
+   8. CAMÉRA : OrbitControls + cadrages (corps entier / buste / visage) avec transition douce
+   ════════════════════════════════════════════════════════════════ */
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=.08;controls.minDistance=.55;controls.maxDistance=8;controls.maxPolarAngle=Math.PI*.52;controls.enablePan=false;
+const SHOTS={full:{p:[0,1.15,4.7],t:[0,.92,0]},bust:{p:[0,1.4,2.3],t:[0,1.28,0]},face:{p:[0,1.6,1.05],t:[0,1.58,0]},back:{p:[0,1.15,-4.7],t:[0,.92,0]},legs:{p:[0,.55,2.7],t:[0,.5,0]},feet:{p:[.5,.3,1.5],t:[0,.1,.05]},arm:{p:[1.1,1.1,1.6],t:[.25,1.0,.1]},weapon:{p:[.9,1.3,2.0],t:[0,1.15,.35]}};
+let goal=null;
+function shot(k){const a=SHOTS[k];goal={p:new THREE.Vector3(...a.p),t:new THREE.Vector3(...a.t)};document.querySelectorAll('[data-shot]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.shot===k))}
+controls.addEventListener('start',()=>{goal=null});
+camera.position.set(...SHOTS.full.p);controls.target.set(...SHOTS.full.t);
+function resize(){const r=stage.getBoundingClientRect(),w=Math.max(200,r.width),h=Math.max(200,r.height);renderer.setSize(w,h,false);renderer.domElement.style.width=w+'px';renderer.domElement.style.height=h+'px';camera.aspect=w/h;camera.fov=w/h<.8?44:32;camera.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(stage);
+
+/* ════════════════════════════════════════════════════════════════
+   9. ÉTAT DU PERSONNAGE + interface (étapes, onglets de type, galerie de choix, nom, JSON, sauvegardes)
+   ════════════════════════════════════════════════════════════════ */
+let state=sanitize({}),step=0,character=null,lastBg=-1,lastPat=-1;
+const KEY='lastrefuge-3d-character',GKEY='lastrefuge-3d-gallery';
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const COLORS={skin:()=>state.gender==='other'?D.FANT:D.HUMAN,eyeColor:()=>D.EYECOL,hairColor:()=>D.HAIRCOL,outfitColor:()=>D.OUTCOL,accColor:()=>D.ACCCOL,nameColor:()=>D.NCOL,pantsColor:()=>D.OUTCOL,bootsColor:()=>BOOTCOL,glovesColor:()=>GLOVECOL,wFinish:()=>WFIN};
+function refresh(){
+  state=sanitize(state);
+  if(character){scene.remove(character);character.userData.dispose&&character.userData.dispose()}
+  character=buildCharacter(state);scene.add(character);
+  if(state.background!==lastBg||state.pattern!==lastPat){paintBackdrop(state.background,state.pattern);lastBg=state.background;lastPat=state.pattern}
+  paintName(state);lsSet(KEY,JSON.stringify(state));
+  $('json').value=JSON.stringify(state,null,1);renderControls()}
+function setVal(k,v){
+  state[k]=v;
+  if(k==='species'&&D.PRESETS[v]){const reg=REGS(state.gender);for(const[pk,pv]of Object.entries(D.PRESETS[v]))if(pk in reg&&pv<reg[pk])state[pk]=pv}   // chaque espèce applique un look de départ
+  refresh()}
+function setGender(g){state.gender=g;state=sanitize(state);refresh()}
+
+/* ── colonne de droite ── */
+function renderSteps(){
+  $('steps').innerHTML=STEPS.map((s,i)=>`<button type="button" data-step="${i}" aria-current="${i===step}">${s.t}</button>`).join('');
+  $('steps').querySelectorAll('button').forEach(b=>b.onclick=()=>{step=+b.dataset.step;renderSteps();renderControls()});
+  $('step-title').textContent=STEP_DETAILS[step][0];$('step-description').textContent=STEP_DETAILS[step][1];$('step-label').textContent=`ÉTAPE 0${step+1} / 0${STEPS.length}`;
+  $('tabs').hidden=$('type-label').hidden=step!==0;$('nameBox').hidden=$('jsonbox').hidden=step!==LAST;$('back').hidden=step===0;$('next').hidden=step===LAST;$('finish').hidden=step!==LAST}
+function swatchOf(k,i){
+  {const u=optThumb(k,i);if(u)return`<img class='thumb' alt='' src='${u}'>`}
+  if(COLORS[k])return`<i class="sw" style="background:${COLORS[k]()[i]}"></i>`;
+  if(k==='background'){const p=D.BGP[i];return`<i class="sw" style="background:linear-gradient(${p[0]},${p[1]})"></i>`}return''}
+function renderControls(){
+  WCTX.w=state.weapon;const reg=REGS(state.gender),keys=STEPS[step].keys.filter(k=>k in reg&&(k[0]!=='w'||k==='weapon'||(WSLOTS[state.weapon]||[]).includes(k))),box=$('controls');
+  $('tabs').innerHTML=Object.entries(GENDERS).map(([g,l])=>`<button type="button" data-g="${g}" aria-pressed="${state.gender===g}">${l}</button>`).join('');
+  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>setGender(b.dataset.g));
+  box.innerHTML=keys.map(k=>`<div class="row"><span class="lab">${labelOf(k)}</span>
+    <button type="button" class="arr" data-k="${k}" data-d="-1" aria-label="Précédent">‹</button>
+    <button type="button" class="val" data-open="${k}">${swatchOf(k,state[k])}<span>${choiceName(k,state[k],state.gender)}</span><small>${state[k]+1}/${reg[k]}</small></button>
+    <button type="button" class="arr" data-k="${k}" data-d="1" aria-label="Suivant">›</button></div>`).join('');
+  box.querySelectorAll('.arr').forEach(b=>b.onclick=()=>{const k=b.dataset.k,n=reg[k];setVal(k,(state[k]+ +b.dataset.d+n)%n)});
+  box.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openGallery(b.dataset.open));
+  renderStats();$('name').value=state.name;armDirty=true}
+function renderStats(){
+  const e=$('wstats'),st=weaponStats(state),show=STEPS[step].keys.includes('weapon')&&st;e.hidden=!show;if(!show)return;
+  const row=(l,v,p,u='')=>`<div class="st"><span>${l}</span><div><i style="width:${clamp(p,0,1)*100}%"></i></div><b>${v}${u}</b></div>`;
+  e.innerHTML=`<h3>${st.name} — ${st.cat}</h3>`+row('Dégâts',st.dmg,st.dmg/150)+row('Cadence',st.rate,Math.sqrt(st.rate/3000),' c/min')+row('Portée',st.range,Math.sqrt(st.range/400),' m')+row('Précision',st.acc,st.acc/100)+row('Recul',st.recoil,st.recoil/100)+row('Bruit',st.noise,st.noise/140)+row('Poids',st.wt,st.wt/20,' kg')+(st.mag?row('Capacité',st.mag,Math.sqrt(st.mag/200),' coups'):'')}
+/* ── fenêtre de choix : grille d’options, l’aperçu 3D se met à jour en direct ── */
+let galKey=null;
+function openGallery(k){
+  galKey=k;WCTX.w=state.weapon;const reg=REGS(state.gender),dlg=$('gallery-dialog');$('gallery-title').textContent=labelOf(k);
+  $('gallery-options').innerHTML=[...Array(reg[k]).keys()].map(i=>`<button type="button" class="opt" data-i="${i}" aria-pressed="${state[k]===i}">${swatchOf(k,i)}<span>${choiceName(k,i,state.gender)}</span></button>`).join('');
+  $('gallery-options').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{setVal(k,+b.dataset.i);$('gallery-options').querySelectorAll('.opt').forEach(o=>o.setAttribute('aria-pressed',+o.dataset.i===state[k]))});
+  shot(({eyes:'face',hair:'face',beard:'face',mouth:'face',nose:'face',glasses:'face',brows:'face',headwear:'face',extra:'face',specialHead:'face',specialFace:'face',outfit:'bust',outfitColor:'bust',camo:'bust',gear:'bust',specialBack:'back',backpack:'back',pants:'legs',pantsColor:'legs',boots:'feet',bootsColor:'feet',gloves:'arm',glovesColor:'arm',arms:'arm'})[k]||(k[0]==='w'?'weapon':'full'));
+  dlg.showModal();if(embedded)window.parent.postMessage({type:'afterlock-creator-modal',open:true},'*')}
+$('gallery-close').onclick=()=>$('gallery-dialog').close();
+$('gallery-dialog').addEventListener('close',()=>{if(embedded)window.parent.postMessage({type:'afterlock-creator-modal',open:false},'*');galKey=null;shot('full')});
+
+$('back').onclick=()=>{step=Math.max(0,step-1);renderSteps();renderControls()};
+$('next').onclick=()=>{step=Math.min(LAST,step+1);renderSteps();renderControls()};
+$('name').addEventListener('input',e=>{state.name=e.target.value.slice(0,20);paintName(state);lsSet(KEY,JSON.stringify(state));$('json').value=JSON.stringify(state,null,1)});
+$('rand').onclick=()=>{const g=['male','female','other'][(Math.random()*3)|0],reg=REGS(g),n={gender:g,name:state.name};for(const k in reg)n[k]=emptyChoices.has(k)&&Math.random()<.45?0:(Math.random()*reg[k])|0;if(g==='other'&&D.PRESETS[n.species])Object.assign(n,D.PRESETS[n.species],{species:n.species});state=n;refresh()};
+$('reset').onclick=()=>{state=sanitize({gender:state.gender,name:state.name});refresh()};
+/* ── JSON : même format que la version 2D ── */
+const msg=t=>{$('msg').textContent=t};
+$('load').onclick=()=>{try{const raw=JSON.parse($('json').value);state=sanitize(raw);refresh();msg('Personnage chargé.')}catch(e){msg('JSON invalide : '+e.message)}};
+const dl=(blob,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+const fname=()=>(state.name||'personnage').replace(/[^\p{L}\p{N}_-]+/gu,'_');
+$('dl').onclick=()=>{dl(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),fname()+'.json')};
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('json').value);msg('JSON copié.')}catch(e){$('json').select();msg('Sélectionné : faites Ctrl+C.')}};
+$('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{state=sanitize(JSON.parse(await f.text()));refresh();msg('Fichier chargé.')}catch(err){msg('Fichier invalide.')}e.target.value=''};
+/* ── exports 3D / image ── */
+$('glb').onclick=()=>{
+  msg('Export .glb en cours…');
+  try{new GLTFExporter().parse(character,res=>{dl(new Blob([res],{type:'model/gltf-binary'}),fname()+'.glb');msg('Fichier .glb téléchargé (modèle 3D complet).')},err=>msg('Export impossible : '+err.message),{binary:true,onlyVisible:true})}
+  catch(e){msg('Export impossible : '+e.message)}};
+$('png').onclick=()=>{renderer.render(scene,camera);renderer.domElement.toBlob(b=>dl(b,fname()+'.png'))};
+$('spin').onclick=e=>{controls.autoRotate=!controls.autoRotate;e.currentTarget.setAttribute('aria-pressed',controls.autoRotate)};
+document.querySelectorAll('[data-shot]').forEach(b=>b.onclick=()=>shot(b.dataset.shot));
+/* ── « Mes personnages » (stockés dans ce navigateur) ── */
+const getGal=()=>{try{return JSON.parse(lsGet(GKEY)||'[]')}catch(e){return[]}};
+function thumb(){renderer.render(scene,camera);const c=document.createElement('canvas');c.width=150;c.height=190;const x=c.getContext('2d'),s=renderer.domElement,r=150/190,h=s.height,w=Math.min(s.width,h*r);x.drawImage(s,(s.width-w)/2,0,w,h,0,0,150,190);return c.toDataURL('image/jpeg',.7)}
+function renderSaved(){
+  const g=getGal();$('saved').innerHTML=g.length?g.map((c,i)=>`<div class="card2"><img alt="" src="${c.img}"><b>${(c.s.name||'Sans nom').replace(/</g,'&lt;')}</b><div><button type="button" data-l="${i}">Charger</button><button type="button" data-x="${i}" class="no">✕</button></div></div>`).join(''):'<p class="help">Aucun personnage enregistré.</p>';
+  $('saved').querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{state=sanitize(getGal()[+b.dataset.l].s);refresh()});
+  $('saved').querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{const g2=getGal();g2.splice(+b.dataset.x,1);lsSet(GKEY,JSON.stringify(g2));renderSaved()})}
+$('save').onclick=()=>{const g=getGal();g.unshift({s:state,img:thumb()});lsSet(GKEY,JSON.stringify(g.slice(0,12)));renderSaved();msg('Personnage enregistré dans « Mes personnages ».')};
+/* ── intégration dans une page parente (même messages que la version 2D) ── */
+const embedded=window.parent!==window;if(embedded)document.documentElement.dataset.embedded='1';
+$('finish').addEventListener('click',e=>{if(embedded){e.preventDefault();window.parent.postMessage({type:'afterlock-creator-close'},'*')}});
+
+/* ════════════════════════════════════════════════════════════════
+   10. DÉMARRAGE + BOUCLE
+   ════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════
+   8b. VUES PAR ÉTAPE
+   • Étape « Arme à feu » : vue 3D dédiée à l’arme seule (glisser = tourner, molette = zoom), mise à jour en direct.
+   • Dernière étape : récapitulatif, le personnage complet (avec son arme) tourne sur lui-même.
+   • Ailleurs : vue normale (Corps entier / Buste / Visage / Dos + Rotation).
+   ════════════════════════════════════════════════════════════════ */
+var armDirty=true;                                           // « var » : lu aussi par refresh() défini plus haut
+const W_AUTOSPIN=false;   // true = l’arme tourne toute seule dans la vue des armes
+let viewMode='normal',wDrag=null,wYaw=.6,wZoom=1,wAuto=W_AUTOSPIN;
+const armScene=new THREE.Scene();armScene.environment=scene.environment;
+armScene.add(new THREE.HemisphereLight(0xdfe8ff,0x2a2a28,.7));const aKey=new THREE.DirectionalLight(0xfff0dc,2.2);aKey.position.set(2,3,3);armScene.add(aKey);
+aKey.castShadow=true;aKey.shadow.mapSize.set(1024,1024);Object.assign(aKey.shadow.camera,{left:-1.4,right:1.4,top:1.4,bottom:-1.4,near:.5,far:9});aKey.shadow.bias=-.0004;
+const aRim=new THREE.DirectionalLight(0x8fb4ff,1.3);aRim.position.set(-3,1.5,-2.5);armScene.add(aRim);
+armScene.background=(()=>{const c=document.createElement('canvas');c.width=4;c.height=256;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#2a3238');g.addColorStop(1,'#0b0d0f');x.fillStyle=g;x.fillRect(0,0,4,256);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t})();
+const qCam=new THREE.PerspectiveCamera(30,1,.02,40),sz=new THREE.Vector2();
+let wItem=null;
+const WK=['weapon','wMuzzle','wOptic','wUnder','wStock','wMag','wFinish'];
+const WPARTS=[['all','Arme entière'],['wMuzzle','Embout'],['wOptic','Optique'],['wUnder','Sous le canon'],['wStock','Crosse'],['wMag','Chargeur']];
+let wFocus='all',wCur={t:new THREE.Vector3(),z:1};
+function makeGun(s){                                          // construit une arme (centrée) à partir d’un état ; null si « aucune arme »
+  const k=s.weapon;if(!k)return null;s={...s};for(const sl of['wMuzzle','wOptic','wUnder','wStock','wMag'])if(!(WSLOTS[k]||[]).includes(sl))s[sl]=0;
+  const inner=new THREE.Group(),anim=[];try{CL.gunModel(s,k,inner,anim)}catch(e){console.warn('arme',k,e)}
+  const box=new THREE.Box3().setFromObject(inner),c=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
+  inner.position.sub(c);const pivot=new THREE.Group();pivot.add(inner);
+  const grp=new THREE.Group(),r=Math.max(size.x,size.y,size.z)*.5+.1;grp.add(pivot);
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(r*.9,r*.95,.035,64),new THREE.MeshStandardMaterial({color:0x1b1f23,metalness:.7,roughness:.3}));base.position.y=-size.y/2-.12;base.receiveShadow=true;grp.add(base);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(r*.91,.004,6,96),new THREE.MeshBasicMaterial({color:0xffb347}));ring.rotation.x=Math.PI/2;ring.position.y=base.position.y+.019;grp.add(ring);
+  return{k,grp,pivot,anim,r,size,st:weaponStats(s)}}
+// cadrage d’une pièce : l’arme est dirigée vers +z (bouche) ; crosse vers -z, optique en haut, chargeur en bas
+function focusParams(key,it){const L=it.size.z,H=it.size.y,r=it.r;
+  switch(key){
+    case'wMuzzle':return{t:[0,0,L*.5-L*.07],z:3.2};
+    case'wOptic':return{t:[0,H*.22,L*.05],z:2.6};
+    case'wUnder':return{t:[0,-H*.2,L*.28],z:2.8};
+    case'wStock':return{t:[0,0,-L*.5+L*.12],z:2.6};
+    case'wMag':return{t:[0,-H*.28,-L*.02],z:2.6};
+    default:return{t:[0,0,0],z:1}}}
+function camFor(it,fp,aspect,yaw){const d=it.r/Math.tan(qCam.fov*Math.PI/360)*1.15/fp.z/Math.min(1,aspect*.9+.1);
+  const t=new THREE.Vector3(...(fp.t.toArray?fp.t.toArray():fp.t)).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
+  return{pos:new THREE.Vector3(t.x,t.y+it.r*.28/fp.z,d),tg:t}}
+function buildWeaponView(){
+  if(wItem){armScene.remove(wItem.grp);wItem=null}armDirty=false;
+  const it=makeGun(state);if(it){armScene.add(it.grp);wItem=it}
+  document.querySelectorAll('#wshots button').forEach(b=>{const k=b.dataset.p;b.hidden=!(k==='all'||(it&&(WSLOTS[it.k]||[]).includes(k)))})}
+function weaponFocus(k){wFocus=WK.includes(k)&&k!=='weapon'&&k!=='wFinish'?k:'all';wAuto=W_AUTOSPIN&&wFocus==='all';
+  document.querySelectorAll('#wshots button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===wFocus))}
+const wShots=document.createElement('div');wShots.id='wshots';wShots.className='hud';wShots.style.cssText='left:12px;top:12px;display:none';
+wShots.innerHTML=WPARTS.map(([k,l])=>`<button data-p="${k}" aria-pressed="${k==='all'}">${l}</button>`).join('');stage.appendChild(wShots);
+wShots.querySelectorAll('button').forEach(b=>b.onclick=()=>weaponFocus(b.dataset.p));
+{const _sv=setVal;setVal=function(k,v){_sv(k,v);if(WK.includes(k)&&STEPS[step].keys.includes('weapon'))weaponFocus(k)}}      // changer une pièce zoome dessus
+{const _og=openGallery;openGallery=function(k){_og(k);if(WK.includes(k))weaponFocus(k)}}
+// ── miniatures des options (rendues une fois, mises en cache) ──
+const thumbCache=new Map();
+function optThumb(k,i){
+  if(!WK.includes(k))return null;
+  const s={...state};if(k==='weapon')s.weapon=i;else s[k]=i;if(!s.weapon)return null;
+  if(k!=='weapon'&&k!=='wFinish'&&!(WSLOTS[s.weapon]||[]).includes(k))return null;
+  const key=[k,i,s.weapon,s.wMuzzle,s.wOptic,s.wUnder,s.wStock,s.wMag,s.wFinish].join('|');if(thumbCache.has(key))return thumbCache.get(key);
+  let url=null;
+  try{
+    const it=makeGun(s);if(!it)return null;const W=240,Hh=150,pr=renderer.getPixelRatio(),prev=wItem&&wItem.grp.visible;
+    if(wItem)wItem.grp.visible=false;armScene.add(it.grp);it.pivot.rotation.y=Math.PI/2-.35;
+    const asp=W/Hh;qCam.aspect=asp;const fp=focusParams(k==='weapon'?'all':k,it),c=camFor(it,{t:fp.t,z:fp.z},asp,it.pivot.rotation.y);
+    qCam.position.copy(c.pos);qCam.lookAt(c.tg);qCam.updateProjectionMatrix();
+    renderer.setScissorTest(true);renderer.setViewport(0,0,W/pr,Hh/pr);renderer.setScissor(0,0,W/pr,Hh/pr);renderer.render(armScene,qCam);
+    const cv=document.createElement('canvas');cv.width=W;cv.height=Hh;cv.getContext('2d').drawImage(renderer.domElement,0,renderer.domElement.height-Hh,W,Hh,0,0,W,Hh);url=cv.toDataURL('image/jpeg',.88);
+    armScene.remove(it.grp);it.grp.traverse(o=>{if(o.geometry)o.geometry.dispose()});if(wItem)wItem.grp.visible=prev;
+    renderer.setScissorTest(false);renderer.getSize(sz);renderer.setViewport(0,0,sz.x,sz.y)}
+  catch(e){console.warn('miniature',e)}
+  thumbCache.set(key,url);return url}
+const wLab=document.createElement('div');wLab.style.cssText='position:absolute;left:0;right:0;bottom:56px;text-align:center;pointer-events:none;font:600 13px/1.5 system-ui,sans-serif;letter-spacing:.12em;color:#d6d2bd;text-shadow:0 1px 4px #000;display:none';stage.appendChild(wLab);
+function setWeaponLabel(){const st=wItem&&wItem.st;wLab.style.display=viewMode==='weapon'?'block':'none';
+  wLab.innerHTML=st?`<div style="font-size:18px;color:#ffb347">${st.name.toUpperCase()}</div><div>${st.cat} · dég ${st.dmg} · ${st.rate} c/min · ${st.range} m · ${st.wt} kg</div><div style="opacity:.6;font-size:11px">Glisser pour tourner · molette pour zoomer</div>`:'<div style="font-size:16px">AUCUNE ARME SÉLECTIONNÉE</div>'}
+function applyStepView(){
+  const isW=STEPS[step].keys.includes('weapon'),isLast=step===STEPS.length-1;
+  viewMode=isW?'weapon':'normal';
+  $('shots').style.display=isW?'none':'';wShots.style.display=isW?'':'none';controls.enabled=!isW;
+  if(isW){armDirty=true;wZoom=1;weaponFocus('all')}
+  else{vLab_hide();if(isLast){shot('full');controls.autoRotate=true;$('spin').setAttribute('aria-pressed','true')}}
+  setWeaponLabel()}
+function vLab_hide(){wLab.style.display='none'}
+{const _rs=renderSteps;renderSteps=function(){_rs();applyStepView()}}
+renderer.domElement.addEventListener('pointerdown',e=>{if(viewMode==='weapon'){wDrag={x:e.clientX};wAuto=false;renderer.domElement.setPointerCapture(e.pointerId)}});
+renderer.domElement.addEventListener('pointermove',e=>{if(wDrag){wYaw+=(e.clientX-wDrag.x)*.012;wDrag.x=e.clientX}});
+['pointerup','pointercancel'].forEach(n=>renderer.domElement.addEventListener(n,()=>{if(wDrag){wDrag=null;setTimeout(()=>{if(!wDrag)wAuto=W_AUTOSPIN&&wFocus==='all'},2500)}}));
+renderer.domElement.addEventListener('wheel',e=>{if(viewMode==='weapon'){e.preventDefault();wZoom=Math.min(2.2,Math.max(.5,wZoom*(e.deltaY>0?1.08:.92)))}},{passive:false});
+function drawView(t){
+  if(viewMode!=='weapon'){renderer.setScissorTest(false);renderer.render(scene,camera);return}
+  if(armDirty){buildWeaponView();setWeaponLabel()}
+  renderer.getSize(sz);qCam.aspect=sz.x/sz.y;
+  if(wItem){
+    const fp=focusParams(wFocus,wItem),tg=new THREE.Vector3(...fp.t),k=.12;
+    if(wAuto)wYaw+=.008;else if(wFocus!=='all'&&!wDrag){let dy=(Math.PI/2-.35)-wYaw;dy=Math.atan2(Math.sin(dy),Math.cos(dy));wYaw+=dy*.1}
+    wCur.t.lerp(tg,k);wCur.z+=(fp.z*wZoom-wCur.z)*k;
+    wItem.pivot.rotation.y=wYaw;wItem.anim.forEach(f=>f(t));
+    const c=camFor(wItem,{t:wCur.t,z:wCur.z},qCam.aspect,wYaw);qCam.position.copy(c.pos);qCam.lookAt(c.tg)}
+  else{qCam.position.set(0,0,3);qCam.lookAt(0,0,0)}
+  qCam.updateProjectionMatrix();renderer.render(armScene,qCam)}
+
+try{const sv=JSON.parse(lsGet(KEY)||'null');if(sv)state=sanitize(sv)}catch(e){}
+renderSteps();renderSaved();shot('full');resize();refresh();
+const clk=new THREE.Clock();
+(function loop(){requestAnimationFrame(loop);const dt=Math.min(clk.getDelta(),.05),t=clk.elapsedTime;
+  if(goal){const k=1-Math.exp(-dt*6);camera.position.lerp(goal.p,k);controls.target.lerp(goal.t,k);if(camera.position.distanceTo(goal.p)<.01)goal=null}
+  controls.update();character&&character.userData.update(t);drawView(t)})();
+window.Creator={get state(){return state},setState(s){state=sanitize(s);refresh()},THREE,scene,camera,buildCharacter,D,NAMES,SPX};   // pour la console / vos propres scripts
+
+</script>
+</body>
+</html>
