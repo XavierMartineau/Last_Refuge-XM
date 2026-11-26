@@ -85,6 +85,11 @@ Les modèles du détenu sont **générés par le code**, ce qui permet toutes le
 - [Living Flesh Blob - Free Organic Horror Asset](https://skfb.ly/pGOHv), par Yury Misiyuk — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
 - [Animated Zombie Cop Running Loop](https://skfb.ly/o9xXZ), par LasquetiSpice — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
 
+### Crédits des cartes
+
+- "Zombie Town" (https://skfb.ly/ozw8L) by Atlas125 is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+- [Post-Apocalyptic City](https://sketchfab.com/3d-models/post-apocalyptic-city-2b9c7e8688ab454485bdab5d1432fec4), par golukumar — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
+
 Les fichiers du Sas 07 partagent la même portée : `escape-room.js` les lit dans l’ordre de sa liste `FICHIERS` et les exécute comme un seul script. Pour ajouter du code au jeu, créez un fichier dans `docs/js/escape-room/Sas-07/` et ajoutez-le à cette liste.
 
 L’interface vise les ordinateurs, tablettes et consoles dès 768 px de largeur ; les animations respectent le réglage « Animations » et la préférence système de réduction du mouvement.
