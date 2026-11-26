@@ -34,31 +34,97 @@
     </header>
     <main class="mode section-shell" id="mode-content">
       <div class="mode-intro">
-        <p class="mode-kicker"><span></span> POSTE DE SURVIE / XM</p>
-        <h1><span data-content="heading">Comment souhaitez-vous</span><br><em data-content="headingEmphasis">survivre ?</em></h1>
-        <p data-content="intro">Avant de franchir le périmètre, choisissez comment affronter la zone.</p>
+        <div class="mode-intro__copy">
+          <p class="mode-kicker"><span aria-hidden="true"></span> POSTE DE COMMANDEMENT <b>/</b> SECTEUR 07</p>
+          <h1><span data-content="heading">Comment souhaitez-vous</span><br><em data-content="headingEmphasis">survivre ?</em></h1>
+          <p class="mode-intro__description" data-content="intro">Avant de franchir le périmètre, choisissez comment affronter la zone.</p>
+        </div>
+        <div class="mode-intro__stamp" aria-hidden="true">
+          <svg viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-dasharray="2 5"/>
+            <circle cx="50" cy="50" r="35" stroke="currentColor"/>
+            <path d="M50 24 72 33v15c0 15-9 24-22 30C37 72 28 63 28 48V33zM50 37v20M40 47h20" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span>REFUGE XM<br><b>ORDRE DE MISSION</b></span>
+        </div>
       </div>
+      <div class="mode-section-label"><span><b>01</b> / CHOIX DE L’EXPÉDITION</span><span>ARCHIVES DU PÉRIMÈTRE <b>—</b> XM</span></div>
       <div class="mode-grid">
         <section class="mode-card mode-card--solo" aria-labelledby="solo-title">
-          <div class="mode-card__top"><span>EXPÉDITION / 01</span><span class="mode-status"><i></i> DISPONIBLE</span></div>
-          <div class="mode-card__art" aria-hidden="true"><svg viewBox="0 0 200 160" fill="none"><circle class="mode-art__radar" cx="100" cy="80" r="70" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="2 7"/><circle cx="100" cy="80" r="55" stroke="currentColor" stroke-opacity=".45"/><g class="mode-art__survivor"><circle cx="100" cy="64" r="21" stroke="currentColor" stroke-width="2"/><path d="M61 127c2-25 16-38 39-38s37 13 39 38M100 8v14m0 116v14M28 80h14m116 0h14" stroke="currentColor" stroke-width="2"/></g></svg></div>
-          <p class="mode-card__eyebrow">UNE AVENTURE À VOTRE RYTHME</p>
-          <h2 id="solo-title" data-content="soloTitle">En solo<span>.</span></h2>
-          <p data-content="soloText">Créez votre survivant et préparez-vous à explorer la zone en solitaire.</p>
-          <a class="mode-action" href="../info/info.html"><span data-content="soloAction">Préparer ma mission</span><span aria-hidden="true">→</span></a>
-          <small>PERSONNAGE · SALLES · PRÉPARATION</small>
+          <div class="mode-card__top"><span>DOSSIER <b>01</b> / EXPÉDITION</span><span class="mode-status"><i aria-hidden="true"></i> DISPONIBLE</span></div>
+          <div class="mode-card__art" aria-hidden="true">
+            <svg viewBox="0 0 560 250" preserveAspectRatio="xMidYMid slice" fill="none">
+              <defs>
+                <linearGradient id="solo-sky" x1="0" y1="0" x2="0" y2="250" gradientUnits="userSpaceOnUse"><stop stop-color="#6b4c37"/><stop offset="1" stop-color="#171c17"/></linearGradient>
+                <radialGradient id="solo-light"><stop stop-color="#d9a16d" stop-opacity=".3"/><stop offset="1" stop-color="#d9a16d" stop-opacity="0"/></radialGradient>
+              </defs>
+              <rect width="560" height="250" fill="url(#solo-sky)"/>
+              <circle cx="377" cy="89" r="138" fill="url(#solo-light)"/>
+              <path d="M0 166h55v-31h35V93h28v73h31v-45h43V80h30v86h53V110h37v56h30v-37h32V89h22v77h29v-38h54v38h81v84H0z" fill="#222820"/>
+              <path d="M0 190 96 167l75 10 69-17 73 16 70-12 177 24v62H0z" fill="#171d18"/>
+              <path d="M0 211 93 192l100 11 89-20 99 17 74-11 105 13M0 228l115-13 107 7 110-16 121 18 107-7" stroke="#a3a383" stroke-opacity=".18"/>
+              <path d="M48 174v-53m-7 11 7-11 7 11m-20 32h26m-21-19h16M452 169V84m-11 23 11-23 11 23m-24 30h26m-21-17h16" stroke="#afb39a" stroke-opacity=".35" stroke-width="2"/>
+              <path d="M418 180v-32h33v32m-28 0v-25h23v25m-12-25v25" stroke="#c6ba98" stroke-opacity=".35" stroke-width="2"/>
+              <circle class="mode-art__radar" cx="377" cy="98" r="67" stroke="#dfb587" stroke-opacity=".5" stroke-dasharray="3 7"/>
+              <circle cx="377" cy="98" r="54" stroke="#dfb587" stroke-opacity=".22"/>
+              <path d="M377 18v17m0 126v17m-80-80h17m126 0h17" stroke="#e2bb8d" stroke-opacity=".6"/>
+              <g class="mode-art__survivor" fill="#0c120f">
+                <path d="M278 135c-7-1-13-7-13-15v-7c0-10 6-16 14-16s14 6 14 16v7c0 8-6 14-13 15z"/>
+                <path d="M260 151c2-10 10-15 19-15s18 5 20 15l8 32-9 4-6-15 2 28h-29l1-28-6 15-9-4z"/>
+                <path d="m266 197-3 32h12l5-25 5 25h12l-4-32z"/>
+                <path d="M266 109h27l-3-7h-20z" fill="#242b20"/>
+              </g>
+              <path d="M0 235h560" stroke="#d4ae83" stroke-opacity=".3"/>
+            </svg>
+            <span class="mode-card__art-label">ZONE 07 <b>/</b> RECONNAISSANCE</span>
+            <span class="mode-card__art-index">01</span>
+          </div>
+          <div class="mode-card__body">
+            <div class="mode-card__heading">
+              <div><p class="mode-card__eyebrow">UNE AVENTURE À VOTRE RYTHME</p><h2 id="solo-title" data-content="soloTitle">En solo</h2></div>
+              <span class="mode-card__symbol" aria-hidden="true">↗</span>
+            </div>
+            <p class="mode-card__description" data-content="soloText">Créez votre survivant et préparez-vous à explorer la zone en solitaire.</p>
+            <div class="mode-card__tags" aria-label="Préparation de l’expédition"><span>PERSONNAGE</span><span>SALLES</span><span>PRÉPARATION</span></div>
+            <a class="mode-action" href="../info/info.html"><span data-content="soloAction">Préparer ma mission</span><span class="mode-action__arrow" aria-hidden="true">↗</span></a>
+          </div>
         </section>
         <section class="mode-card mode-card--multi" aria-labelledby="multi-title">
-          <div class="mode-card__top"><span>EXPÉDITION / 02</span><span class="mode-status mode-status--future">À VENIR</span></div>
-          <div class="mode-card__art" aria-hidden="true"><svg viewBox="0 0 200 160" fill="none"><circle class="mode-art__radar" cx="100" cy="80" r="70" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="2 7"/><circle cx="100" cy="80" r="55" stroke="currentColor" stroke-opacity=".45"/><g class="mode-art__survivor"><circle cx="82" cy="65" r="17" stroke="currentColor" stroke-width="2"/><circle cx="121" cy="65" r="17" stroke="currentColor" stroke-width="2"/><path d="M50 119c2-21 13-32 32-32 8 0 14 2 19 6M99 93c5-4 12-6 22-6 19 0 30 11 32 32M100 8v14m0 116v14M28 80h14m116 0h14" stroke="currentColor" stroke-width="2"/></g></svg></div>
-          <p class="mode-card__eyebrow">UNE EXPÉDITION ENSEMBLE</p>
-          <h2 id="multi-title" data-content="multiTitle">Multijoueur<span>.</span></h2>
-          <p data-content="multiText">Une aventure à partager se prépare. Le mode multijoueur n’est pas encore disponible.</p>
-          <button class="mode-action mode-action--disabled" type="button" disabled><span data-content="multiAction">En construction</span><span aria-hidden="true">◇</span></button>
-          <small>MODE INDISPONIBLE POUR LE MOMENT</small>
+          <div class="mode-card__top"><span>DOSSIER <b>02</b> / EXPÉDITION</span><span class="mode-status mode-status--future">À VENIR</span></div>
+          <div class="mode-card__art" aria-hidden="true">
+            <svg viewBox="0 0 560 250" preserveAspectRatio="xMidYMid slice" fill="none">
+              <defs><linearGradient id="multi-sky" x1="0" y1="0" x2="0" y2="250" gradientUnits="userSpaceOnUse"><stop stop-color="#475247"/><stop offset="1" stop-color="#1b211c"/></linearGradient></defs>
+              <rect width="560" height="250" fill="url(#multi-sky)"/>
+              <path d="M0 172h64v-34h47V96h34v76h43v-49h53v49h38V90h27v82h29v-54h50v54h42v-38h39v38h94v78H0z" fill="#252e26"/>
+              <path d="M0 195 94 174l92 15 79-19 82 20 81-18 132 22v56H0z" fill="#19201b"/>
+              <path d="M0 215l95-19 87 12 86-17 83 16 85-16 124 17M0 232l119-13 95 8 100-17 109 18 137-9" stroke="#b3bf9e" stroke-opacity=".17"/>
+              <path d="M71 179V96m-11 23 11-23 11 23m-25 31h28m-21-17h15M451 178V93m-10 22 10-22 10 22m-23 31h26" stroke="#b4c2a9" stroke-opacity=".3" stroke-width="2"/>
+              <circle class="mode-art__radar" cx="289" cy="100" r="71" stroke="#b4c2a9" stroke-opacity=".38" stroke-dasharray="3 8"/>
+              <circle cx="289" cy="100" r="56" stroke="#b4c2a9" stroke-opacity=".2"/>
+              <path d="M289 18v19m0 126v19m-82-82h19m126 0h19" stroke="#c8d0b6" stroke-opacity=".45"/>
+              <g class="mode-art__survivor" fill="#111915">
+                <circle cx="263" cy="134" r="11"/><path d="M251 147c2-4 6-6 12-6s10 2 12 6l5 23-5 3-4-9 1 17h-18l1-17-4 9-5-3zM254 178l-2 23h8l3-17 4 17h8l-3-23z"/>
+                <circle cx="307" cy="130" r="12"/><path d="M294 144c2-5 7-7 13-7s11 2 13 7l6 25-6 3-4-10 1 18h-20l1-18-4 10-6-3zM297 177l-3 25h9l4-19 4 19h9l-3-25z"/>
+              </g>
+              <path d="M0 235h560" stroke="#b4c2a9" stroke-opacity=".3"/>
+            </svg>
+            <span class="mode-card__art-label">SIGNAL <b>/</b> EN ATTENTE</span>
+            <span class="mode-card__art-index">02</span>
+          </div>
+          <div class="mode-card__body">
+            <div class="mode-card__heading">
+              <div><p class="mode-card__eyebrow">UNE EXPÉDITION ENSEMBLE</p><h2 id="multi-title" data-content="multiTitle">Multijoueur</h2></div>
+              <span class="mode-card__symbol mode-card__symbol--locked" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v10H5zM12 14v3" stroke="currentColor" stroke-width="1.5"/></svg>
+              </span>
+            </div>
+            <p class="mode-card__description" data-content="multiText">Une aventure à partager se prépare. Le mode multijoueur n’est pas encore disponible.</p>
+            <div class="mode-card__tags"><span>COMMUNICATION</span><span>COOPÉRATION</span></div>
+            <button class="mode-action mode-action--disabled" type="button" disabled><span data-content="multiAction">En construction</span><span class="mode-action__arrow" aria-hidden="true">◇</span></button>
+          </div>
         </section>
       </div>
-      <footer class="mode-footer"><span>LAST REFUGE · XM</span><span>RESTEZ EN ALERTE</span><a href="../../../index.html">← RETOUR À L’ACCUEIL</a></footer>
+      <footer class="mode-footer"><span>LAST REFUGE <b>·</b> XM</span><span>TRANSMISSION TERMINÉE <b>///</b> RESTEZ EN ALERTE</span><a href="../../../index.html">← RETOUR À L’ACCUEIL</a></footer>
     </main>
   </body>
 </html>
