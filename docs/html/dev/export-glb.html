@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Export .glb des assets | LAST REFUGE</title>
+<link rel="icon" href="../../assets/svg/identite/favicon.svg" type="image/svg+xml">
+<style>
+  body { margin: 0; padding: 32px; color: #e8e3d3; background: #0e0e0d; font: 14px/1.6 Consolas, monospace; }
+  h1 { color: #f2b705; font: 400 28px Impact, sans-serif; letter-spacing: .06em; }
+  button { padding: 10px 16px; border: 2px solid #111; color: #111; background: #f2b705; font: 700 14px Consolas, monospace; cursor: pointer; }
+  pre { max-height: 60vh; overflow: auto; padding: 12px; border: 1px solid #333; background: #000; color: #9cc23a; }
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<h1>Export .glb des assets du détenu</h1>
+<p>Outil de développement : construit chaque asset avec le code de <code>docs/assets/creation-personnage/</code> et le télécharge en <code>.glb</code>.
+Cette page permet de les régénérer à la main, sous forme de fichiers distincts.</p>
+<button id="go" type="button">Tout exporter (fichiers .glb séparés)</button>
+<pre id="log">Prêt.</pre>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+import * as CL from '../../assets/creation-personnage/personnage_armes.js';
+
+const slug = (t) => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const pad = (n) => String(n).padStart(2, '0');
+const exporter = new GLTFExporter();
+// fichiers légers : on garde couleurs et motifs (camouflage, gravures…), sans cartes de relief ni de rugosité
+function allege(obj) {
+  obj.traverse((o) => [].concat(o.material || []).forEach((m) => {
+    ['normalMap', 'roughnessMap', 'metalnessMap', 'bumpMap', 'aoMap'].forEach((k) => { if (m[k]) m[k] = null; });
+    m.needsUpdate = true;
+  }));
+  return obj;
+}
+const toGlb = (obj) => new Promise((ok, ko) => exporter.parse(allege(obj), ok, ko, { binary: true, onlyVisible: true, maxTextureSize: 128 }));
+const b64 = (buf) => { let s = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+
+// tête seule (pour les assets du visage et de la coiffure)
+function headOf(root) {
+  let head = null;
+  root.traverse((o) => { if (!head && o.isGroup && Math.abs(o.position.y - 1.58) < 1e-6) head = o; });
+  return head || root;
+}
+const base = (g = 'male') => ({ ...CL.sanitize({ gender: g }), hair: 0, beard: 0, headwear: 0, glasses: 0, extra: 0, weapon: 0, backpack: 0, gear: 0 });
+
+/* liste des assets : [dossier, nom de fichier, () => objet 3D] */
+function catalogue() {
+  const list = [];
+  const N = CL.NAMES;
+  const head = (state) => () => headOf(CL.buildCharacter(state));
+  const body = (state) => () => CL.buildCharacter(state);
+  // armes (pièces par défaut, finition « bois et noir »)
+  for (let k = 1; k < CL.WPN.length; k++) list.push(['armes/modeles', `${pad(k)}-${slug(N.weapon[k])}`, () => {
+    const g = new THREE.Group(); CL.gunModel({ ...base(), weapon: k, wMuzzle: 0, wOptic: 0, wUnder: 0, wStock: 0, wMag: 0, wFinish: 4 }, k, g, []); return g; }]);
+  // visage et tête
+  const headCats = [['couvre-chefs', 'headwear'], ['lunettes', 'glasses'], ['details-visage', 'extra'], ['barbes', 'beard'],
+    ['visage/yeux', 'eyes'], ['visage/nez', 'nose'], ['visage/bouche', 'mouth'], ['visage/sourcils', 'brows']];
+  for (const [dir, key] of headCats) {
+    const names = N[key], start = ['eyes', 'nose', 'mouth', 'brows'].includes(key) ? 0 : 1;
+    for (let i = start; i < names.length; i++) list.push([dir + '/modeles', `${pad(i)}-${slug(names[i])}`, head({ ...base(), [key]: i })]);
+  }
+  for (const g of ['male', 'female', 'other']) {
+    const names = N.hair[g];
+    for (let i = 1; i < names.length; i++) list.push(['cheveux/modeles', `${g === 'male' ? 'homme' : g === 'female' ? 'femme' : 'autres'}-${pad(i)}-${slug(names[i])}`, head({ ...base(g), hair: i, ...(g === 'other' ? { species: 0 } : {}) })]);
+  }
+  // corps complet
+  const bodyCats = [['tenues', 'outfit', 0], ['pantalons', 'pants', 0], ['bottes', 'boots', 0], ['gants', 'gloves', 1], ['bras', 'arms', 1], ['equipement', 'gear', 1], ['sacs-a-dos', 'backpack', 1]];
+  for (const [dir, key, start] of bodyCats) {
+    const names = N[key];
+    for (let i = start; i < names.length; i++) list.push([dir + '/modeles', `${pad(i)}-${slug(names[i])}`, body({ ...base(), hair: 1, [key]: i })]);
+  }
+  // espèces (type « Autres ») avec leur préréglage
+  CL.D.SPNAMES.forEach((name, i) => list.push(['especes/modeles', `${pad(i)}-${slug(name)}`, body({ ...CL.sanitize({ gender: 'other', ...CL.D.PRESETS[i], species: i }) })]));
+  // détenu par défaut, complet
+  list.push(['assemblage/modeles', 'detenu-par-defaut', body(CL.sanitize({}))]);
+  return list;
+}
+
+window.exportCharacterAssets = async (from = 0, to = Infinity) => {
+  const out = [], list = catalogue();
+  for (let i = from; i < Math.min(to, list.length); i++) {
+    const [dir, name, build] = list[i];
+    try { out.push({ path: `${dir}/${name}.glb`, data: b64(await toGlb(build())) }); }
+    catch (e) { out.push({ path: `${dir}/${name}.glb`, error: String(e) }); }
+  }
+  return { total: list.length, files: out };
+};
+
+document.getElementById('go').onclick = async () => {
+  const log = document.getElementById('log');
+  const { files } = await window.exportCharacterAssets();
+  for (const f of files) {
+    if (f.error) { log.textContent += `\n✗ ${f.path} : ${f.error}`; continue; }
+    const a = document.createElement('a');
+    a.href = 'data:model/gltf-binary;base64,' + f.data;
+    a.download = f.path.replace(/\//g, '__');
+    a.click();
+    log.textContent += `\n✓ ${f.path}`;
+    await new Promise((r) => setTimeout(r, 120));
+  }
+};
+</script>
+</body>
+</html>

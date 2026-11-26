@@ -8,6 +8,15 @@ const ray = new THREE.Raycaster(),
   mv = new THREE.Vector2(),
   tip = document.getElementById('tip');
 let hovered = null;
+function interactionLabel(pickup = false) {
+  const pad = window.LastRefugeManette, settings = window.LastRefugeReglages;
+  if (pad && pad.active) {
+    const binding = settings ? settings.load().pb_interact : 'A';
+    return pad.label(binding || 'A');
+  }
+  if (pickup) return settings ? settings.actionKey('take') : 'E';
+  return TOUCH ? 'Toucher' : 'Clic gauche';
+}
 function pick(e) {
   const r = el.getBoundingClientRect();
   mv.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
@@ -31,10 +40,7 @@ function hover(e) {
   const o = pick(e);
   setHover(o);
   if (o) {
-    tip.textContent =
-      (o.userData.actionType === 'pickup'
-        ? '[' + (window.LastRefugeReglages ? LastRefugeReglages.actionKey('take') : 'E') + '] '
-        : TEXTS.ui.hintPrefix) + o.userData.hint;
+    tip.textContent = '[' + interactionLabel(o.userData.actionType === 'pickup') + '] ' + o.userData.hint;
     tip.style.transform = `translate(${e.clientX + 16}px,${e.clientY + 14}px)`;
   }
 }
@@ -77,7 +83,7 @@ function click(e) {
   }
   if (o.userData.actionType === 'pickup') {
     SND.play('click');
-    return say(M.pressE, 2200);
+    return say('Appuyez sur ' + interactionLabel(true) + ' pour le prendre.', 2200);
   } // les objets se prennent avec la touche E
   actObj = o;
   const fn =

@@ -92,6 +92,36 @@ const midline = (n, a0, a1) => {
   }
   return a;
 };
+function flowingHair(C, build) {
+  const head = C.head, pivot = new THREE.Group(), content = new THREE.Group();
+  pivot.name = 'cheveux-dynamiques';
+  pivot.position.y = 0.06;
+  content.position.y = -0.06;
+  head.add(pivot);
+  pivot.add(content);
+  C.head = content;
+  try {
+    build();
+  } finally {
+    C.head = head;
+  }
+  const motionQuery = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  let lastTime = null, lastYaw = 0;
+  C.anim.push((t) => {
+    const dt = lastTime === null ? 0 : Math.min(Math.max(t - lastTime, 0), 0.05);
+    const turn = dt > 0 ? THREE.MathUtils.clamp((head.rotation.y - lastYaw) / dt, -2, 2) : 0;
+    lastTime = t;
+    lastYaw = head.rotation.y;
+    const motion = document.documentElement.dataset.motion;
+    const reduced = (motion && motion !== 'full') || (motionQuery && motionQuery.matches);
+    const walk = C.walk || { phase: 0, amt: 0 };
+    const sway = reduced ? 0 : Math.sin(walk.phase) * walk.amt * 0.08 - turn * 0.06;
+    const back = reduced ? 0 : walk.amt * (0.08 + Math.cos(walk.phase * 2) * 0.025);
+    const blend = 1 - Math.exp(-dt * 8);
+    pivot.rotation.z += (sway - pivot.rotation.z) * blend;
+    pivot.rotation.x += (back - pivot.rotation.x) * blend;
+  });
+}
 const HS = {
   buzz: (C) => hcap(C, 0.35, -0.1, 0.008),
   short: (C) => hcap(C, 0.3, -0.2, 0.02),
@@ -115,34 +145,38 @@ const HS = {
   },
   mid: (C) => {
     hcap(C, 0.25, -0.45, 0.03);
-    hback(C, 0.12);
+    flowingHair(C, () => hback(C, 0.12));
   },
   long: (C) => {
     hcap(C, 0.22, -0.6, 0.03);
-    hback(C, C.fem ? 0.46 : 0.34);
-    if (C.fem) for (const side of [-1, 1]) ell(0.026, 0.17, 0.02, C.hairM, side * 0.125, -0.1, 0.04, C.head);
+    flowingHair(C, () => {
+      hback(C, C.fem ? 0.46 : 0.34);
+      if (C.fem) for (const side of [-1, 1]) ell(0.026, 0.17, 0.02, C.hairM, side * 0.125, -0.1, 0.04, C.head);
+    });
   },
   curlyLong: (C) => {
     HS.curly(C);
-    hback(C, 0.34);
-    for (const side of [-1, 1]) ell(0.03, 0.16, 0.03, C.hairM, side * 0.125, -0.08, 0.03, C.head);
+    flowingHair(C, () => {
+      hback(C, 0.34);
+      for (const side of [-1, 1]) ell(0.03, 0.16, 0.03, C.hairM, side * 0.125, -0.08, 0.03, C.head);
+    });
   },
   bangsLong: (C) => {
     hcap(C, 0.08, -0.6, 0.03);
-    hback(C, 0.4);
+    flowingHair(C, () => hback(C, 0.4));
   },
   bob: (C) => {
     hcap(C, 0.25, -0.4, 0.03);
-    hring(C, 0.12);
+    flowingHair(C, () => hring(C, 0.12));
   },
   bobLong: (C) => {
     hcap(C, 0.25, -0.4, 0.03);
-    hring(C, 0.22);
+    flowingHair(C, () => hring(C, 0.22));
   },
   pony: (C) => {
     hcap(C, 0.28, -0.3, 0.025);
     const m = C.hairM;
-    chain(
+    flowingHair(C, () => chain(
       [
         [0, 0.08, -0.13],
         [0, 0.03, -0.2],
@@ -154,7 +188,7 @@ const HS = {
       0.012,
       m,
       C.head
-    );
+    ));
     ell(0.04, 0.02, 0.04, mat(sh(C.hairHex, -0.4)), 0, 0.075, -0.13, C.head);
   },
   bun: (C) => {
@@ -164,7 +198,7 @@ const HS = {
   pigtails: (C) => {
     hcap(C, 0.28, -0.3, 0.025);
     for (const side of [-1, 1]) {
-      chain(
+      flowingHair(C, () => chain(
         [
           [side * 0.11, 0.08, -0.05],
           [side * 0.15, 0.0, -0.07],
@@ -175,24 +209,26 @@ const HS = {
         0.014,
         C.hairM,
         C.head
-      );
+      ));
       ell(0.03, 0.02, 0.03, mat('#c0392b'), side * 0.115, 0.08, -0.05, C.head);
     }
   },
   braids: (C) => {
     hcap(C, 0.25, -0.5, 0.028);
-    for (const side of [-1, 1])
-      for (let i = 0; i < 7; i++)
-        ell(
-          0.022,
-          0.03,
-          0.02,
-          C.hairM,
-          side * (0.115 + 0.004 * i),
-          -0.03 - i * 0.045,
-          0.05 + 0.012 * i,
-          C.head
-        );
+    flowingHair(C, () => {
+      for (const side of [-1, 1])
+        for (let i = 0; i < 7; i++)
+          ell(
+            0.022,
+            0.03,
+            0.02,
+            C.hairM,
+            side * (0.115 + 0.004 * i),
+            -0.03 - i * 0.045,
+            0.05 + 0.012 * i,
+            C.head
+          );
+    });
   },
   mohawk: (C) => {
     hcap(C, 0.62, 0.55, 0.012);

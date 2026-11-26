@@ -164,6 +164,7 @@ const DEV = (function () {
     heal: () => {
       State.hp = 100;
       State.ammo = Math.max(State.ammo || 0, 60);
+      hud();
       sync();
     }
   };

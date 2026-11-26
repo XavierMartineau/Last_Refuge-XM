@@ -76,6 +76,7 @@ const State = {
   zDone: false,
   kills: 0,
   spawned: 0,
+  wave: 0,
   hp: 100,
   ammo: 0,
   reloading: false,

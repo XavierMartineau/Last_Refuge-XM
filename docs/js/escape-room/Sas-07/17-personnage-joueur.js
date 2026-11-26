@@ -17,9 +17,55 @@ function charEnv() {
   } catch (e) {}
   return _env;
 } // reflets doux uniquement sur le personnage (la salle reste sombre)
+function updatePortrait(avatar, state) {
+  const canvas = document.getElementById('player-portrait');
+  const name = state.name;
+  const label = document.getElementById('player-name');
+  label.textContent = name.trim() || 'DÉTENU';
+  label.style.fontFamily = CL.D.NFONTS[state.nameFont][1];
+  label.style.color = CL.D.NCOL[state.nameColor];
+  label.style.fontSize = [12, 14, 16, 18][state.nameSize] + 'px';
+  label.dataset.style = String(state.nameStyle);
+  canvas.setAttribute('aria-label', 'Portrait de ' + (name.trim() || 'votre détenu'));
+  const portraitScene = new THREE.Scene();
+  portraitScene.background = new THREE.Color(0x252a22);
+  portraitScene.add(new THREE.HemisphereLight(0xe4e9dc, 0x464039, 1.8));
+  const light = new THREE.DirectionalLight(0xffe6c6, 2);
+  light.position.set(1, 3, 4);
+  portraitScene.add(light);
+  const model = avatar.clone();
+  model.position.set(0, 0, 0);
+  model.rotation.set(0, 0, 0);
+  model.visible = true;
+  portraitScene.add(model);
+  const scale = model.scale.y;
+  const portraitCamera = new THREE.PerspectiveCamera(32, 1, 0.01, 10 * scale);
+  portraitCamera.position.set(0, 1.62 * scale, 0.9 * scale);
+  portraitCamera.lookAt(0, 1.58 * scale, 0);
+  const target = new THREE.WebGLRenderTarget(canvas.width, canvas.height);
+  target.texture.colorSpace = THREE.SRGBColorSpace;
+  const previous = renderer.getRenderTarget();
+  try {
+    renderer.setRenderTarget(target);
+    renderer.render(portraitScene, portraitCamera);
+    const pixels = new Uint8Array(canvas.width * canvas.height * 4);
+    renderer.readRenderTargetPixels(target, 0, 0, canvas.width, canvas.height, pixels);
+    const ctx = canvas.getContext('2d');
+    const image = ctx.createImageData(canvas.width, canvas.height);
+    for (let y = 0; y < canvas.height; y++) {
+      const source = (canvas.height - 1 - y) * canvas.width * 4;
+      image.data.set(pixels.subarray(source, source + canvas.width * 4), y * canvas.width * 4);
+    }
+    ctx.putImageData(image, 0, 0);
+  } finally {
+    renderer.setRenderTarget(previous);
+    target.dispose();
+  }
+}
 function loadAvatar(json) {
   try {
-    const st = CL.sanitize(json || {});
+    let st = CL.sanitize(json || {});
+    if (State.armed && !st.weapon) st = CL.sanitize({ ...st, weapon: 2 });
     if (AV.obj) {
       scene.remove(AV.obj);
       try {
@@ -43,6 +89,17 @@ function loadAvatar(json) {
     scene.add(o);
     AV.obj = o;
     AV.state = st;
+    if (State.armed) {
+      AV.stats = CL.weaponStats(st);
+      State.ammo = Math.min(State.ammo, AV.stats.mag);
+      rebalanceZombies();
+    }
+    try {
+      updatePortrait(o, st);
+    } catch (error) {
+      console.error('Portrait du personnage impossible à afficher :', error);
+    }
+    hud();
     return true;
   } catch (e) {
     console.warn('Personnage :', e);

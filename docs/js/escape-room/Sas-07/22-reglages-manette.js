@@ -66,11 +66,11 @@
     if (!R) return;
     const K = (a) => R.keyLabel([].concat(CONTROLS.keys[a] || [])[0]);
     const move = K('forward') + K('left') + K('back') + K('right');
-    TEXTS.intro = `Vous reprenez conscience dans un sas plongé dans le noir. Votre lampe torche marche : ${K('flashlight')} pour l’allumer ou l’éteindre. Glissez pour regarder, ${move} pour marcher (ou les joysticks de la manette).`;
+    TEXTS.intro = `Vous reprenez conscience dans un sas plongé dans le noir. Votre lampe torche marche : ${K('flashlight')} pour l’allumer ou l’éteindre. Bougez la souris pour regarder, ${move} pour marcher (ou les joysticks de la manette).`;
     TEXTS.ui.flashOn = `🔦 Lampe : ON (${K('flashlight')})`;
     TEXTS.ui.flashOff = `🔦 Lampe : OFF (${K('flashlight')})`;
     TEXTS.msg.pressE = `Appuyez sur ${K('take')} (ou A à la manette) pour le prendre.`;
-    TEXTS.ui.help = `Clic-glisser : regarder · ${move} : marcher · ${K('turnLeft')} ${K('turnRight')} : tourner · ${K('sprint')} : courir · ${K('crouch')} : s’accroupir · ${K('inventory')} : inventaire · ${K('objectives')} : objectifs · ${K('flashlight')} : lampe torche · ${K('view')} : vue 1re/3e personne · ${K('fire')} : tirer · ${K('reload')} : recharger · Clic : interagir · Échap : menu`;
+    TEXTS.ui.help = `Souris : regarder · ${move} : marcher · ${K('turnLeft')} ${K('turnRight')} : tourner · ${K('sprint')} : courir · ${K('crouch')} : s’accroupir · ${K('inventory')} : inventaire · ${K('objectives')} : objectifs · ${K('flashlight')} : lampe torche · ${K('view')} : vue 1re/3e personne · ${K('fire')} : tirer · ${K('reload')} : recharger · Clic : interagir · Échap : menu`;
   }
   try {
     keyTexts();
@@ -171,20 +171,16 @@
     let sprint = false,
       lastHp = State.hp,
       toastT;
-    const vk = {
-      f: CONTROLS.keys.forward[0],
-      b: CONTROLS.keys.back[0],
-      l: CONTROLS.keys.left[0],
-      r: CONTROLS.keys.right[0],
-      s: CONTROLS.keys.sprint[0]
-    };
+    const padKeys = new Set();
     const free = () => !rig.locked && !State.focus && !modalOpen && !State.doorExit;
     const dz = (v, d) => (Math.abs(v) < d ? 0 : (v - Math.sign(v) * d) / (1 - d));
-    const setKey = (code, on) => {
-      if (on) keysDown.add(code);
-      else keysDown.delete(code);
+    const setKey = (action, on) => {
+      const code = CONTROLS.keys[action][0];
+      if (!code) return;
+      if (on) { keysDown.add(code); padKeys.add(code); }
+      else { keysDown.delete(code); padKeys.delete(code); }
     };
-    const releaseKeys = () => Object.values(vk).forEach((c) => keysDown.delete(c));
+    const releaseKeys = () => { padKeys.forEach((c) => keysDown.delete(c)); padKeys.clear(); };
     const showToast = (t) => {
       toast.textContent = t;
       toast.classList.add('on');
@@ -206,7 +202,11 @@
         .pop() || null;
 
     PAD.attach({
-      menuActive: () => modalOpen || menuOn(),
+      menuActive: () => {
+        const active = modalOpen || menuOn();
+        if (active) releaseKeys();
+        return active;
+      },
       spatial: () => !menuOn(),
       scope: topModal,
       onMenu: () => {
@@ -215,10 +215,11 @@
       onPad: (on) => {
         document.body.classList.toggle('pad', on);
         if (ui) ui.setPad(on);
-        if (on) releaseKeys();
+        releaseKeys();
       },
       onConnect: () => showToast('🎮 Manette connectée — appuyez sur Menu pour les réglages'),
       onFrame: (pad, { pressed, btn, dt }) => {
+        if (!PAD.active) return;
         S = R ? R.load() : S;
         // boutons réaffectables (pb_*) : nom Xbox → index du bouton
         const P = (action, def) => {
@@ -255,11 +256,11 @@
           const mag = Math.hypot(lx, ly);
           if (hit('sprint', 'L3')) sprint = !sprint;
           if (mag < 0.2) sprint = false;
-          setKey(vk.f, ly < -0.35);
-          setKey(vk.b, ly > 0.35);
-          setKey(vk.l, lx < -0.35);
-          setKey(vk.r, lx > 0.35);
-          setKey(vk.s, sprint);
+          setKey('forward', ly < -0.35);
+          setKey('back', ly > 0.35);
+          setKey('left', lx < -0.35);
+          setKey('right', lx > 0.35);
+          setKey('sprint', sprint);
           // regard (stick droit)
           if (free() && (rx || ry)) {
             const sx = (S.padLookX ?? 5) * 0.55,
@@ -341,10 +342,16 @@
     if (auto() && freeLook() && !locked() && canvas.requestPointerLock) {
       try {
         const p = canvas.requestPointerLock();
-        if (p && p.catch) p.catch(() => {});
-      } catch (e) {}
+        if (p && p.catch) p.catch((error) => console.warn('Verrouillage du pointeur refusé :', error));
+      } catch (error) {
+        console.warn('Verrouillage du pointeur impossible :', error);
+        say('Le navigateur refuse le regard automatique. Choisissez « Cliquer-glisser » dans les réglages.', 6000);
+      }
     }
   };
+  document.addEventListener('pointerlockerror', () => {
+    say('Le navigateur refuse le regard automatique. Choisissez « Cliquer-glisser » dans les réglages.', 6000);
+  });
 
   // clic : verrouille d’abord, puis vise le centre de l’écran
   canvas.addEventListener(
@@ -421,7 +428,7 @@
     }
     cross.classList.toggle('on', on && freeLook());
     hint.classList.toggle('on', auto() && !on && freeLook() && !document.body.classList.contains('pad'));
-    if (on && freeLook() && t - hoverT > 90) {
+    if ((on || (window.LastRefugeManette && window.LastRefugeManette.active)) && freeLook() && t - hoverT > 90) {
       hoverT = t;
       hover(center());
     }

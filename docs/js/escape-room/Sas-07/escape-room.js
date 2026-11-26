@@ -8,6 +8,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import * as CL from '../../../assets/creation-personnage/personnage_armes.js';
@@ -19,6 +20,7 @@ Object.assign(window, {
   UnrealBloomPass,
   OutlinePass,
   OutputPass,
+  ShaderPass,
   RoomEnvironment,
   RoundedBoxGeometry,
   CL

@@ -119,7 +119,7 @@
     { id: "manette", label: "Manette", sections: [
       { title: "Manette détectée", rows: [
         { id: "padModel", label: "Modèle de manette", type: "choice", def: "auto",
-          options: [["auto", "Automatique"], ["xbox", "Xbox"], ["ps", "PlayStation"], ["flydigi", "Flydigi"], ["nintendo", "Nintendo"], ["generique", "Générique"]],
+          options: [["auto", "Automatique"], ["xboxseries", "Xbox Series X|S"], ["xboxone", "Xbox One"], ["xbox360", "Xbox 360"], ["ps5", "PS5 DualSense"], ["ps4", "PS4 DualShock 4"], ["flydigi", "Flydigi"], ["switch", "Switch Pro"], ["8bitdo", "8BitDo"], ["generique", "Générique"]],
           desc: "Choisit les symboles et le schéma affichés. En mode XInput, Windows présente beaucoup de manettes (Flydigi, 8BitDo…) comme une manette Xbox : choisissez ici votre vrai modèle si la détection automatique se trompe." }
       ]},
       { title: "Sensibilité", rows: [
@@ -157,6 +157,17 @@
       ]}
     ]},
     { id: "accessibilite", label: "Accessibilité", sections: [
+      { title: "Daltonisme", rows: [
+        { id: "colorblind", label: "Mode daltonien", type: "choice", def: "non", visual: "daltonien",
+          options: [["non", "Non"], ["deuteranopie", "Deutéranopie"], ["protanopie", "Protanopie"], ["tritanopie", "Tritanopie"]],
+          desc: "À l’aide des planches ci-dessous, testez les différents filtres pour trouver la correction des couleurs qui vous convient le mieux. Vous devez voir un cadenas au milieu de chaque cercle. La correction s’applique à tout le site et à l’escape room." },
+        { id: "cbMode", label: "Type de filtre", type: "choice", def: "correction", visual: "daltonien",
+          options: [["correction", "Correction"], ["simulation", "Simulation"]],
+          desc: "Correction : les couleurs difficiles à distinguer sont décalées vers des teintes que vous percevez mieux. Simulation : affiche le jeu tel qu’une personne daltonienne le voit (utile pour vérifier la lisibilité d’un écran)." },
+        { id: "cbStrength", label: "Force de la correction", type: "choice", def: 10, visual: "daltonien",
+          options: [[0, "0"], [1, "1"], [2, "2"], [3, "3"], [4, "4"], [5, "5"], [6, "6"], [7, "7"], [8, "8"], [9, "9"], [10, "10"]],
+          desc: "À l’aide des planches ci-dessous, ajustez la puissance du filtre pour trouver la correction qui vous convient le mieux. Vous devez voir un cadenas au milieu de chaque cercle." }
+      ]},
       { title: "Lisibilité", rows: [
         { id: "uiScale", label: "Taille du texte du jeu", type: "choice", def: 100, options: [[100, "Normale"], [115, "Grande"], [130, "Très grande"]], scope: "jeu",
           desc: "Agrandit les messages, l’objectif et les menus de l’escape room." },
@@ -186,6 +197,62 @@
   function save(values) {
     try { localStorage.setItem(KEY, JSON.stringify(values)); } catch (e) { /* stockage indisponible */ }
     if (window.afterlockPreferences) window.afterlockPreferences.save({ motion: values.motion, sound: values.sound, contrast: values.contrast });
+    dispatchEvent(new Event("lastrefuge-reglages"));
+  }
+
+  /* ---------- planches de test du mode daltonien (générées, mises en cache) ---------- */
+  let platesUrl = null;
+  function plates() {
+    if (platesUrl) return platesUrl;
+    const W = 600, H = 400, c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    const x = c.getContext("2d");
+    x.fillStyle = "#f4f1ea"; x.fillRect(0, 0, W, H);
+    const SETS = [
+      [["#f2b06b", "#e9a35a", "#f5c27e", "#eaa868"], ["#a9a9a9", "#9a9a9a", "#b5b5b5"]],
+      [["#f6d3a3", "#f2c891", "#f7dcb5"], ["#c9d39a", "#bcc98a", "#d3dba7"]],
+      [["#8fae5a", "#7fa04c", "#9cba66", "#86a654"], ["#e7a35c", "#dd9550", "#efb06c"]],
+      [["#c8c25a", "#d6cf6a", "#b9b64e", "#e0c64f"], ["#e09a3a", "#d88a34", "#e6a84a"]],
+      [["#e8a3b7", "#df93aa", "#f0b3c4", "#d887a0"], ["#4f5a4a", "#5d6858", "#46503f"]],
+      [["#f2b3a3", "#eea594", "#f6c2b4"], ["#6f6b4e", "#7a7656", "#625f44"]]
+    ];
+    // silhouette de cadenas (anse + corps + trou de serrure)
+    const lock = (cx, cy, r) => {
+      const p = new Path2D();
+      p.rect(cx - r * .48, cy - r * .08, r * .96, r * .7);
+      const a = new Path2D();
+      a.arc(cx, cy - r * .1, r * .32, Math.PI, 0);
+      return { body: p, shackle: a, w: r * .13 };
+    };
+    let seed = 7;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    SETS.forEach(([bg, fg], k) => {
+      const cx = 100 + (k % 3) * 200, cy = 100 + Math.floor(k / 3) * 200, R = 88, L = lock(cx, cy, R);
+      x.lineWidth = L.w;
+      for (let gy = -R; gy <= R; gy += 8) for (let gx = -R; gx <= R; gx += 8) {
+        const px = cx + gx + (rnd() - .5) * 5, py = cy + gy + (rnd() - .5) * 5;
+        if (Math.hypot(px - cx, py - cy) > R) continue;
+        const inside = x.isPointInPath(L.body, px, py) || x.isPointInStroke(L.shackle, px, py);
+        const pal = inside ? fg : bg;
+        x.fillStyle = pal[Math.floor(rnd() * pal.length)];
+        x.beginPath(); x.arc(px, py, 2.6 + rnd() * 1.8, 0, Math.PI * 2); x.fill();
+      }
+    });
+    platesUrl = c.toDataURL("image/png");
+    return platesUrl;
+  }
+
+  // cartes d’accès du pénitencier : référence des couleurs de niveau (bas → élevé)
+  function keycards() {
+    const C = [["#9a9d98", 1], ["#3fae49", 2], ["#2f6fd6", 3], ["#9b4fd0", 4], ["#e0952a", 5]];
+    return `<div class="rg-cards">${C.map(([col, n]) => `
+      <svg viewBox="0 0 60 60" aria-hidden="true"><rect x="2" y="2" width="56" height="56" rx="3" fill="${col}"/>
+        <rect x="2" y="2" width="56" height="56" rx="3" fill="url(#rg-card-shade)"/>
+        <rect x="10" y="14" width="40" height="27" rx="3" fill="#1c1c1a"/><rect x="14" y="19" width="10" height="8" rx="1" fill="#d9b44a"/>
+        <path d="M14 33h28M14 37h18" stroke="#6f6b61" stroke-width="2"/><circle cx="42" cy="23" r="4" fill="${col}"/>
+        <text x="54" y="54" text-anchor="end" font-size="8" fill="#fff">${"★".repeat(n)}</text></svg>`).join("")}
+      <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="rg-card-shade" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient></defs></svg>
+    </div><div class="rg-cards__legend"><span>Accès bas</span><span>Accès élevé</span></div>`;
   }
 
   const consoles = new Set();
@@ -253,11 +320,11 @@
     const PAD_ALIAS = { L3: "LS", R3: "RS", "✛": "DPAD" };
     function padSvg(keys) {
       const PAD = window.LastRefugeManette;
-      const m = PAD ? PAD.model() : { type: "xbox", buttons: 17, label: "Manette Xbox" };
+      const m = PAD ? PAD.model() : { type: "xbox", base: "xbox", buttons: 17, label: "Manette Xbox" };
       const L = (n) => (PAD ? PAD.label(n, m.type) : n);
       const on = new Set((keys || []).map((k) => PAD_ALIAS[k] || k));
       const c = (id) => (on.has(id) ? "hl" : "");
-      const ps = m.type === "ps";
+      const ps = m.base === "ps";
       // sticks : décalés (Xbox, Flydigi, Nintendo) ou symétriques (PlayStation)
       const ls = ps ? [86, 104] : [66, 66], rs = ps ? [154, 104] : [150, 100], dp = ps ? [64, 66] : [94, 97];
       const face = ps
@@ -268,7 +335,7 @@
            <circle class="rg-pad__abxy rg-pad__a ${c("A")}" cx="186" cy="80" r="8"/><text x="186" y="83" class="rg-pad__l">${L("A")}</text>`;
       // boutons supplémentaires : palettes arrière et C / Z (Flydigi) ou boutons génériques
       let extra = "";
-      if (m.type === "flydigi") {
+      if (m.base === "flydigi") {
         extra = `<g class="rg-pad__extra">
           <rect class="rg-pad__btn ${c("B17")}" x="160" y="30" width="12" height="8" rx="2"/><text x="166" y="27" class="${c("B17")}">C</text>
           <rect class="rg-pad__btn ${c("B18")}" x="176" y="30" width="12" height="8" rx="2"/><text x="182" y="27" class="${c("B18")}">Z</text>
@@ -281,7 +348,7 @@
         extra = `<text x="120" y="156" class="rg-pad__more">+ ${n} bouton${n > 1 ? "s" : ""} supplémentaire${n > 1 ? "s" : ""}</text>`;
       }
       const touch = ps ? `<rect class="rg-pad__btn ${c("B17")}" x="98" y="40" width="44" height="22" rx="4"/>` : "";
-      return `<svg class="rg-pad rg-pad--${m.type}" viewBox="0 0 240 160" aria-hidden="true">
+      return `<svg class="rg-pad rg-pad--${m.base}" viewBox="0 0 240 160" aria-hidden="true">
         <path class="rg-pad__sh ${c("LT")}" d="M40 22h38l4-12H50z"/><path class="rg-pad__sh ${c("RT")}" d="M200 22h-38l-4-12h32z"/>
         <text x="58" y="8" class="${c("LT")}">${L("LT")}</text><text x="182" y="8" class="${c("RT")}">${L("RT")}</text>
         <path class="rg-pad__sh ${c("LB")}" d="M34 34c8-8 28-12 50-10l-2 8c-20-1-36 2-44 8z"/><path class="rg-pad__sh ${c("RB")}" d="M206 34c-8-8-28-12-50-10l2 8c20-1 36 2 44 8z"/>
@@ -357,7 +424,9 @@
       const scope = row.scope === "jeu" ? `<p class="rg-scope">● S’applique dans l’escape room.</p>` : "";
       const tab = tabs[tabIndex];
       const code = `RGL-${tab.id.slice(0, 3).toUpperCase()}-${String(rowIndex + 1).padStart(2, "0")}`;
-      const visual = tab.id === "manette"
+      const visual = row.visual === "daltonien"
+        ? `<img class="rg-plates" src="${plates()}" alt="Six planches de test à pastilles : un cadenas apparaît au centre de chaque cercle."> ${keycards()}`
+        : tab.id === "manette"
         ? padSvg(row.type === "keys" ? row.keys : row.type === "bind" ? [values[row.id]] : ({ padLookX: ["RS"], padLookY: ["RS"], padInvertY: ["RS"], padDeadL: ["LS"], padDeadR: ["RS"], padTrigger: ["LT", "RT"], padVibration: [], padModel: [] })[row.id])
         : `<div class="rg-emblem">${ICONS[tab.icon || tab.id] || ICONS.partie}</div>`;
       const state = row.id ? (same(values[row.id], row.def) ? "<span class='rg-tag'>PAR DÉFAUT</span>" : "<span class='rg-tag rg-tag--mod'>MODIFIÉ</span>") : "";
@@ -552,7 +621,7 @@
     }
     // nouveau modèle de manette détecté : symboles et schéma mis à jour
     addEventListener("lastrefuge-manette", (e) => {
-      root.dataset.pad = e.detail.type;
+      root.dataset.pad = e.detail.base || e.detail.type;
       setPadLabels();
       renderList();
     });

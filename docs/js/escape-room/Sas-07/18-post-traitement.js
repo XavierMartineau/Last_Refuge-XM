@@ -22,6 +22,24 @@ const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.
 composer.addPass(bloom);
 bloom.enabled = !TOUCH || CONFIG.device.bloomMobile;
 composer.addPass(new OutputPass());
+const daltonien = new ShaderPass({
+  uniforms: {
+    tDiffuse: { value: null },
+    row0: { value: new THREE.Vector3(1, 0, 0) },
+    row1: { value: new THREE.Vector3(0, 1, 0) },
+    row2: { value: new THREE.Vector3(0, 0, 1) }
+  },
+  vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: 'uniform sampler2D tDiffuse; uniform vec3 row0; uniform vec3 row1; uniform vec3 row2; varying vec2 vUv; void main() { vec4 c = texture2D(tDiffuse, vUv); gl_FragColor = vec4(clamp(vec3(dot(row0, c.rgb), dot(row1, c.rgb), dot(row2, c.rgb)), 0.0, 1.0), c.a); }'
+});
+daltonien.enabled = false;
+composer.addPass(daltonien);
+addEventListener('lastrefuge-daltonien', (event) => {
+  const { active, matrix } = event.detail;
+  daltonien.enabled = !!active;
+  if (active) matrix.forEach((row, i) => daltonien.uniforms['row' + i].value.fromArray(row));
+});
+if (window.lastRefugeDaltonien) window.lastRefugeDaltonien.apply();
 function resize() {
   const w = innerWidth,
     h = innerHeight;

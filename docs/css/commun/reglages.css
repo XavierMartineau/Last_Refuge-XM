@@ -770,3 +770,35 @@
 .rg[data-pad="ps"] .rg-padkey--B { background: #d9352b; }
 .rg[data-pad="ps"] .rg-padkey--X { color: #fff; background: #c2559f; }
 .rg[data-pad="ps"] .rg-padkey--Y { color: #fff; background: #2a9d6a; }
+
+/* ---------- Mode daltonien : planches de test + cartes d’accès ---------- */
+.rg-plates {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--rg-line2);
+  background: #f4f1ea;
+}
+
+.rg-cards {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.rg-cards svg { width: 100%; height: auto; filter: drop-shadow(2px 2px 0 #000); }
+
+.rg-cards__legend {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--rg-text);
+  font-family: var(--rg-stencil);
+  font-size: 15px;
+  letter-spacing: .04em;
+}
+
+.rg-row--off .rg-label { text-decoration: line-through; }
+.rg-info { max-height: calc(100% - 20px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--rg-hz) transparent; }

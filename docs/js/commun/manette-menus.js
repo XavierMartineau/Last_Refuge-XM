@@ -9,21 +9,37 @@
   const nameOf = (i) => NAMES[i] || "B" + i;
 
   /* ---------- détection du modèle de manette ---------- */
+  // base = famille de symboles et de schéma (xbox, ps, flydigi, nintendo)
   const MODELS = {
-    xbox: { label: "Manette Xbox", short: "XBOX" },
-    ps: { label: "Manette PlayStation", short: "PLAYSTATION" },
-    flydigi: { label: "Manette Flydigi", short: "FLYDIGI" },
-    nintendo: { label: "Manette Nintendo", short: "NINTENDO" },
-    generique: { label: "Manette générique", short: "MANETTE" }
+    xboxseries: { label: "Manette Xbox Series X|S", base: "xbox" },
+    xboxone: { label: "Manette Xbox One", base: "xbox" },
+    xbox360: { label: "Manette Xbox 360", base: "xbox" },
+    xbox: { label: "Manette Xbox", base: "xbox" },
+    ps5: { label: "Manette PS5 DualSense", base: "ps" },
+    ps4: { label: "Manette PS4 DualShock 4", base: "ps" },
+    ps: { label: "Manette PlayStation", base: "ps" },
+    flydigi: { label: "Manette Flydigi", base: "flydigi" },
+    switch: { label: "Manette Switch Pro", base: "nintendo" },
+    nintendo: { label: "Manette Nintendo", base: "nintendo" },
+    "8bitdo": { label: "Manette 8BitDo", base: "xbox" },
+    generique: { label: "Manette générique", base: "xbox" }
   };
   function detect(id) {
     const s = String(id || "").toLowerCase();
     if (/flydigi|vendor: 2f24|2f24-|04b4/.test(s)) return "flydigi";
-    if (/054c|dualsense|dualshock|playstation|ps5|ps4|wireless controller/.test(s)) return "ps";
-    if (/057e|nintendo|pro controller|joy-con/.test(s)) return "nintendo";
+    if (/0ce6|0df2|dualsense|ps5/.test(s)) return "ps5";
+    if (/05c4|09cc|dualshock|ps4/.test(s)) return "ps4";
+    if (/054c|playstation|wireless controller/.test(s)) return "ps";
+    if (/2009|pro controller/.test(s)) return "switch";
+    if (/057e|nintendo|joy-con/.test(s)) return "nintendo";
+    if (/2dc8|8bitdo/.test(s)) return "8bitdo";
+    if (/xbox 360|028e|x360/.test(s)) return "xbox360";
+    if (/02ea|02dd|02d1|02e3|xbox one/.test(s)) return "xboxone";
+    if (/0b12|0b13|series/.test(s)) return "xboxseries";
     if (/xbox|xinput|045e|x-box/.test(s)) return "xbox";
     return "generique";
   }
+  const baseOf = (type) => (MODELS[type] ? MODELS[type].base : "xbox");
   // libellés des boutons selon le modèle (les noms enregistrés restent ceux de la disposition Xbox)
   const LABELS = {
     ps: { A: "✕", B: "○", X: "□", Y: "△", LB: "L1", RB: "R1", LT: "L2", RT: "R2", View: "Create", Menu: "Options", B16: "PS", B17: "Pavé" },
@@ -34,13 +50,13 @@
   };
   let current = { type: "xbox", id: "", buttons: 17 };
   const typeNow = () => (forced && forced !== "auto" && MODELS[forced] ? forced : current.type);
-  const label = (name, type = typeNow()) => (LABELS[type] && LABELS[type][name]) || (/^B\d+$/.test(name) ? "Bouton " + name.slice(1) : name);
+  const label = (name, type = typeNow()) => (LABELS[baseOf(type)] && LABELS[baseOf(type)][name]) || (/^B\d+$/.test(name) ? "Bouton " + name.slice(1) : name);
   // modèle forcé dans les réglages (« Automatique » par défaut)
   let forced = null;
   try { forced = (JSON.parse(localStorage.getItem("lastrefuge.reglages") || "{}").padModel) || "auto"; } catch (e) { forced = "auto"; }
   addEventListener("lastrefuge-padmodel", (e) => {
     forced = e.detail || "auto";
-    document.documentElement.dataset.manetteType = typeNow();
+    document.documentElement.dataset.manetteType = baseOf(typeNow());
     dispatchEvent(new CustomEvent("lastrefuge-manette", { detail: model() }));
   });
   function updateModel(pad) {
@@ -53,12 +69,13 @@
     const next = { type, id: pad.id, buttons: Math.max(...all.map((p) => p.buttons.length)), forced: forced !== "auto" };
     if (next.type !== current.type || next.buttons !== current.buttons || next.id !== current.id) {
       current = next;
-      document.documentElement.dataset.manetteType = next.type;
+      document.documentElement.dataset.manetteType = baseOf(next.type);
       dispatchEvent(new CustomEvent("lastrefuge-manette", { detail: { ...current, ...MODELS[current.type] } }));
     }
   }
   const listeners = [];
   let captureCb = null;
+  let defaultDetach = null;
   let running = false, padActive = false, prev = [], last = 0;
   const repeat = {};
 
@@ -83,7 +100,7 @@
 
   // navigation spatiale entre boutons d’une fenêtre (digicode, inventaire…)
   function spatial(dir, scope) {
-    const items = [...(scope || document).querySelectorAll("button:not([disabled]),a[href],input:not([type=hidden]),select,[tabindex]:not([tabindex='-1'])")]
+    const items = [...(scope || document).querySelectorAll("button:not([disabled]),a[href],input:not([type=hidden]):not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex='-1'])")]
       .filter((el) => el.offsetParent !== null && el.getBoundingClientRect().width > 0 && !el.classList.contains("skip-link") && !el.closest("[hidden],[inert]"));
     if (!items.length) return;
     const cur = document.activeElement && items.includes(document.activeElement) ? document.activeElement : null;
@@ -137,6 +154,7 @@
 
     for (const l of listeners) {
       const menu = l.menuActive ? l.menuActive() : true;
+      if (l.onFrameAlways) l.onFrameAlways(pad, { pressed, btn, dt, B });
       if (!menu && l.onFrame) { l.onFrame(pad, { pressed, btn, dt, B }); continue; }
       if (!menu) continue;
       const lx = pad.axes[0] || 0, ly = pad.axes[1] || 0;
@@ -148,7 +166,7 @@
         if (l.spatial && l.spatial() && el && el !== document.body) el.click();
         else tap("Enter");
       }
-      if (pressed(B.B)) { if (l.onBack && l.spatial && l.spatial() && !document.querySelector("dialog[open]")) l.onBack(); else tap("Escape"); }
+      if (pressed(B.B)) { if (l.onBack && l.spatial && l.spatial() && (l.onBackInDialog || !document.querySelector("dialog[open]"))) l.onBack(); else tap("Escape"); }
       if (pressed(B.LB)) tap("KeyQ");
       if (pressed(B.RB)) tap("KeyE");
       if (pressed(B.Y)) tap("KeyR");
@@ -173,6 +191,10 @@
   ["mousemove", "keydown", "pointerdown"].forEach((t) => addEventListener(t, (e) => { if (padActive && e.isTrusted) setActive(false); }, { passive: true }));
 
   function attach(opts) {
+    if (defaultDetach) {
+      defaultDetach();
+      defaultDetach = null;
+    }
     listeners.push(opts);
     if (!running && "getGamepads" in navigator) { running = true; requestAnimationFrame(loop); }
     return () => listeners.splice(listeners.indexOf(opts), 1);
@@ -187,11 +209,12 @@
   const capture = (cb) => { captureCb = cb; };
   const index = (name) => { const i = NAMES.indexOf(name); return i >= 0 ? i : /^B\d+$/.test(name) ? +name.slice(1) : -1; };
   const model = () => ({ ...current, type: typeNow(), ...MODELS[typeNow()] });
+  // une manette en mode XInput se présente comme « Xbox 360 » : on garde la détection, le réglage permet de corriger
 
   // Pages du site sans gestionnaire dédié : croix / stick pour passer d’un bouton à l’autre, A valide, B revient.
   document.addEventListener("DOMContentLoaded", () => {
     if (listeners.length) return;
-    attach({ spatial: () => true, onBack: () => history.length > 1 && history.back() });
+    defaultDetach = attach({ spatial: () => true, onBack: () => history.length > 1 && history.back() });
   });
 
   window.LastRefugeManette = { attach, vibrate, tap, key, capture, index, label, model, detect, nameOf, NAMES, BUTTONS: B, get active() { return padActive; } };

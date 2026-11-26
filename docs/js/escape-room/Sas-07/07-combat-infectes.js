@@ -45,7 +45,33 @@ const SPAWNS = [
   [-65, -262],
   [65, -262]
 ];
-function makeZombie() {
+function waveIndex() {
+  let total = 0;
+  for (let i = 0; i < ZC.waveSizes.length; i++) {
+    total += ZC.waveSizes[i];
+    if (State.kills < total) return i;
+  }
+  return ZC.waveSizes.length - 1;
+}
+function waveStats(stats, index) {
+  if (!stats || !Number.isFinite(stats.dmg) || stats.dmg <= 0 || !Number.isFinite(stats.rate))
+    throw new Error('Statistiques de l’arme indisponibles pour la vague de zombies.');
+  const power = Math.min(1, Math.log2(1 + stats.dmg / 25) / 5);
+  const ranged = stats.mag > 0 ? 0.38 + 0.3 * Math.sqrt(Math.min(stats.rate, 3000) / 3000) : 0;
+  return { hp: Math.ceil(stats.dmg * (3 + index)), speed: 0.72 + 0.16 * power + ranged + index * 0.1 };
+}
+function rebalanceZombies() {
+  for (const z of zRoots) {
+    const u = z.userData;
+    if (u.state !== 'walk') continue;
+    const stats = waveStats(AV.stats, u.wave);
+    u.hp = (u.hp / u.maxHp) * stats.hp;
+    u.maxHp = stats.hp;
+    u.speed = stats.speed;
+  }
+}
+function makeZombie(index) {
+  const stats = waveStats(AV.stats, index);
   const root = new THREE.Group(),
     pick = (a) => a[(Math.random() * a.length) | 0],
     sk = pick(zSkin),
@@ -105,19 +131,21 @@ function makeZombie() {
     headG,
     arms,
     legs,
-    hp: ZC.hp,
+    hp: stats.hp,
+    maxHp: stats.hp,
+    wave: index,
     state: 'walk',
     phase: Math.random() * 6,
-    speed: ZC.speed[0] + Math.random() * (ZC.speed[1] - ZC.speed[0]),
+    speed: stats.speed,
     nextHit: 0,
     dieT: 0,
     lean: Math.random() * 0.2
   };
   return root;
 }
-function spawnZombie() {
+function spawnZombie(index = waveIndex()) {
   const p = SPAWNS[(Math.random() * SPAWNS.length) | 0],
-    z = makeZombie();
+    z = makeZombie(index);
   z.position.set(p[0] + (Math.random() - 0.5) * 3, 0, p[1] + Z12 + (Math.random() - 0.5) * 3);
   scene.add(z);
   zRoots.push(z);
@@ -148,10 +176,14 @@ function endFight() {
   setTimeout(() => Actions.handlers.door_shutter(doorShutter), 3200);
 }
 function hud() {
+  const hp = THREE.MathUtils.clamp(State.hp, 0, 100);
+  document.getElementById('hpfill').style.width = hp + '%';
+  document.getElementById('hpbar').setAttribute('aria-valuenow', String(Math.round(hp * 10) / 10));
+  document.getElementById('player-health').textContent = Math.round(hp * 10) / 10 + ' / 100 PV';
   const c = document.getElementById('combat');
   if (!c) return;
   c.style.display = State.armed ? 'flex' : 'none';
-  document.getElementById('hpfill').style.width = Math.max(0, State.hp) + '%';
+  document.getElementById('wave').textContent = 'VAGUE ' + (State.wave || 1) + ' / ' + ZC.waveSizes.length;
   const st = AV.stats;
   document.getElementById('ammo').textContent =
     st && st.mag
@@ -305,7 +337,7 @@ function reload() {
   setTimeout(
     () => {
       State.reloading = false;
-      State.ammo = st.mag;
+      State.ammo = AV.stats ? AV.stats.mag : 0;
       hud();
     },
     AV.state.weapon === 12 ? 2500 : 1400
@@ -331,7 +363,9 @@ function playerHurt(n) {
     State.reloading = false;
     State.ammo = AV.stats ? AV.stats.mag : 0;
     hud();
+    return true;
   }
+  return false;
 }
 const zBlock = (x, z) => {
   for (const c of EXTRA_COLLIDERS)
@@ -347,9 +381,16 @@ function combatFrame(dt, t) {
   if (State.armed && !State.zDone && roomOf(rig.pos.z) === 12 && !State.doorExit) {
     State.spawnT = (State.spawnT || 0) - dt;
     const aliveN = zRoots.filter((z) => z.userData.state === 'walk').length;
-    if (State.spawnT <= 0 && aliveN < ZC.maxAlive && State.spawned < CONFIG.zombieTarget + ZC.extra) {
-      spawnZombie();
+    const index = waveIndex();
+    const limit = ZC.waveSizes.slice(0, index + 1).reduce((total, count) => total + count, 0);
+    if (State.spawnT <= 0 && aliveN < ZC.maxAlive && State.spawned < limit) {
+      if (State.wave !== index + 1) {
+        State.wave = index + 1;
+        say('Vague ' + State.wave + ' / ' + ZC.waveSizes.length + ' : ' + ZC.waveSizes[index] + ' infecté(s).', 3500);
+      }
+      spawnZombie(index);
       State.spawnT = ZC.spawnEvery;
+      hud();
     }
   }
   for (let i = zRoots.length - 1; i >= 0; i--) {
@@ -368,7 +409,7 @@ function combatFrame(dt, t) {
         if (!zBlock(z.position.x, z.position.z + sz)) z.position.z += sz;
       } else if (t > u.nextHit && !State.doorExit) {
         u.nextHit = t + 1;
-        playerHurt(ZC.hitDamage);
+        if (playerHurt(ZC.hitDamage)) return;
         u.swipe = t + 0.3;
       }
       for (const o of zRoots)

@@ -382,6 +382,10 @@ function swatchOf(k, i) {
   return '';
 }
 function renderControls() {
+  const focused = document.activeElement;
+  const focusData = focused && ($('controls').contains(focused) || $('tabs').contains(focused))
+    ? { ...focused.dataset }
+    : null;
   WCTX.w = state.weapon;
   const reg = REGS(state.gender),
     keys = STEPS[step].keys.filter(
@@ -414,6 +418,12 @@ function renderControls() {
   renderStats();
   $('name').value = state.name;
   armDirty = true;
+  if (focusData) {
+    const replacement = [...document.querySelectorAll('#controls button, #tabs button')].find((button) =>
+      Object.keys(focusData).every((key) => button.dataset[key] === focusData[key])
+    );
+    if (replacement) replacement.focus();
+  }
 }
 function renderStats() {
   const e = $('wstats'),
@@ -488,6 +498,8 @@ function openGallery(k) {
     }[k] || (k[0] === 'w' ? 'weapon' : 'full')
   );
   dlg.showModal();
+  const selected = $('gallery-options').querySelector('[aria-pressed="true"]');
+  if (selected) selected.focus();
   if (embedded) window.parent.postMessage({ type: 'afterlock-creator-modal', open: true }, '*');
 }
 $('gallery-close').onclick = () => $('gallery-dialog').close();
@@ -1049,6 +1061,27 @@ const clk = new THREE.Clock();
   character && character.userData.update(t);
   drawView(t);
 })();
+if (window.LastRefugeManette) {
+  const spherical = new THREE.Spherical(), offset = new THREE.Vector3();
+  window.LastRefugeManette.attach({
+    spatial: () => true,
+    scope: () => $('gallery-dialog').open ? $('gallery-dialog') : document,
+    onBackInDialog: true,
+    onBack: () => {
+      if ($('gallery-dialog').open) $('gallery-dialog').close();
+      else if (!$('back').hidden) $('back').click();
+    },
+    onFrameAlways: (pad, { dt }) => {
+      const x = pad.axes[2] || 0, y = pad.axes[3] || 0;
+      if (Math.abs(x) < 0.15 && Math.abs(y) < 0.15) return;
+      goal = null;
+      spherical.setFromVector3(offset.subVectors(camera.position, controls.target));
+      spherical.theta -= x * dt * 2;
+      spherical.phi = clamp(spherical.phi + y * dt * 2, 0.01, controls.maxPolarAngle);
+      camera.position.copy(offset.setFromSpherical(spherical).add(controls.target));
+    }
+  });
+}
 window.Creator = {
   get state() {
     return state;
