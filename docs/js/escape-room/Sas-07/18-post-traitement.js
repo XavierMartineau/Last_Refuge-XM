@@ -232,7 +232,9 @@ const perf = {
   n: 0,
   last: performance.now(),
   cool: 3000,
-  cut: false
+  cut: false,
+  outlineCut: false,
+  outlineRetry: 0
 };
 function perfApply() {
   const pr = perf.base * perf.s;
@@ -253,17 +255,31 @@ function perfTick() {
   perf.acc += d;
   perf.n++;
   perf.cool -= d;
+  perf.outlineRetry = Math.max(0, perf.outlineRetry - d);
   if (perf.n >= 90) {
     const avg = perf.acc / perf.n;
     perf.acc = 0;
     perf.n = 0;
     if (perf.cool <= 0) {
-      if (avg > 21 && perf.s > 0.4) {
-        perf.s = Math.max(0.4, perf.s - 0.2);
-        perfApply();
-      } else if (avg < 14 && perf.s < 1) {
-        perf.s = Math.min(1, perf.s + 0.1);
-        perfApply();
+      if (avg > 21) {
+        if (!perf.outlineCut && outline.enabled) {
+          outline.enabled = false;
+          perf.outlineCut = true;
+          perf.outlineRetry = 30000;
+          perf.cool = 3500;
+        } else if (perf.s > 0.4) {
+          perf.s = Math.max(0.4, perf.s - 0.2);
+          perfApply();
+        }
+      } else if (avg < 14) {
+        if (perf.s < 1) {
+          perf.s = Math.min(1, perf.s + 0.1);
+          perfApply();
+        } else if (perf.outlineCut && perf.outlineRetry === 0) {
+          outline.enabled = true;
+          perf.outlineCut = false;
+          perf.cool = 3500;
+        }
       }
     }
   }

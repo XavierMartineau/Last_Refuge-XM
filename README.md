@@ -35,6 +35,8 @@ Par défaut : **WASD** pour marcher, souris pour regarder (un clic initial autor
 
 Dans le créateur, la croix ou le stick gauche navigue entre les choix, A valide, B revient et le stick droit tourne l’aperçu. Les manettes compatibles avec la disposition standard de l’API Gamepad sont prises en charge ; leur disponibilité dépend du navigateur et de la console.
 
+Si le jeu ralentit, le contour lumineux des objets peut être temporairement désactivé avant de réduire la résolution ; le cadre de sélection reste visible.
+
 Les réglages d’accessibilité proposent une correction ou une simulation des couleurs et une intensité ajustable. Les planches proposées sont des repères visuels, pas un test médical. Les coiffures longues se balancent pendant les mouvements du personnage ; cet effet est réduit avec la préférence de réduction des animations.
 
 Le HUD affiche le portrait et le nom du détenu, avec la police, la couleur et le style choisis, ainsi que sa vie sur 100. Une attaque d’infecté inflige 5 PV avant la réduction accordée par l’équipement renforcé.
