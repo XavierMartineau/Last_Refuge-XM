@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#111310">
-    <meta name="description" content="Tableau de bord de développement LAST REFUGE.">
+    <meta name="theme-color" content="#0e0e0d">
+    <meta name="description" content="Poste de garde : tableau de bord de développement LAST REFUGE.">
     <title>DEV MODE | LAST REFUGE</title>
     <link rel="icon" type="image/svg+xml" href="../../assets/svg/identite/favicon.svg">
     <link rel="stylesheet" href="../../css/commun/site.css">
@@ -14,113 +14,88 @@
     <script src="../../js/dev/index.js" defer></script>
   </head>
   <body class="page-redesign page-dev" data-device-gate>
-    <div class="device-notice">
-      <div class="device-notice__panel">
-        <p class="device-notice__brand">LAST REFUGE · XM</p>
-        <h1>Un écran plus grand<br><em>vous attend.</em></h1>
-        <p>L’expérience est disponible sur tablette et ordinateur. Utilisez un écran d’au moins 768 pixels de largeur.</p>
-      </div>
-    </div>
-    <a class="skip-link" href="#dev-content">Aller au tableau de bord</a>
+    <div class="device-notice"><div class="device-notice__panel">
+      <p class="device-notice__brand">LAST REFUGE · XM</p>
+      <h1>Écran trop petit<br><em>accès refusé.</em></h1>
+      <p>Le terminal du pénitencier exige une tablette ou un ordinateur d’au moins 768 pixels de largeur.</p>
+    </div></div>
+    <a class="skip-link" href="#dev-content">Aller à la console</a>
     <header class="site-header section-shell dev-header">
       <a class="brand" href="../../../index.html" aria-label="LAST REFUGE, accueil">
-        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true">
-          <path d="M24 4 41 11v12c0 10-7 17-17 21C14 40 7 33 7 23V11Z"/>
-          <circle cx="24" cy="24" r="8"/>
-          <path d="M24 19v10m-5-5h10"/>
-        </svg>
-        <span class="brand__word">LAST<span> REFUGE</span></span>
+        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 10v13c0 11-7 18-18 22C13 41 6 34 6 23V10Z"/><path class="brand__bars" d="M17 15v20M24 12v26M31 15v20M12 22h24"/><circle class="brand__light" cx="24" cy="7.5" r="2.2"/></svg>
+        <span class="brand__word">LAST<span> REFUGE</span><small class="brand__tag">PÉNITENCIER MILITAIRE · XM</small></span>
       </a>
+      <div class="header-status dev-header__status"><i></i> ACCÈS RESTREINT · NIVEAU 5</div>
     </header>
     <main class="dev-page section-shell" id="dev-content">
       <section class="dev-hero" aria-labelledby="dev-title">
         <div>
-          <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Poste technique · Accès DEV</p>
-          <h1 id="dev-title"><span data-content="heading">Centre</span><br><span data-content="headingSuffix">de </span><em data-content="headingEmphasis">contrôle.</em></h1>
-          <p data-content="intro">Surveillez les paramètres du navigateur et accédez aux pages du projet depuis un seul poste.</p>
-          <span class="dev-badge"><i aria-hidden="true"></i> DIAGNOSTICS LOCAUX · XM / 01</span>
+          <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Bunker de commandement · Console DEV</p>
+          <h1 id="dev-title"><span data-content="heading">Poste</span><br><span data-content="headingSuffix">de </span><em data-content="headingEmphasis">garde.</em></h1>
+          <p data-content="intro">Surveillez les paramètres du navigateur et accédez à tous les secteurs du projet depuis la console du bunker.</p>
+          <span class="dev-badge"><i aria-hidden="true"></i> DIAGNOSTICS LOCAUX · TERMINAL XM / 01</span>
         </div>
-        <svg class="dev-instrument" viewBox="0 0 240 240" aria-hidden="true">
-          <circle cx="120" cy="120" r="106" fill="#141e18" stroke="#73856f" stroke-width="4"/>
-          <circle cx="120" cy="120" r="93" fill="none" stroke="#e09170" stroke-opacity=".5" stroke-dasharray="2 7"/>
-          <path d="M120 42v156M42 120h156M120 120l58-58" fill="none" stroke="#8fa38a" stroke-width="2"/>
-          <circle cx="120" cy="120" r="70" fill="none" stroke="#8fa38a" stroke-opacity=".5"/>
-          <circle cx="178" cy="62" r="5" fill="#ef8c6f"/>
-        </svg>
+        <div class="dev-monitor" aria-hidden="true">
+          <div class="dev-monitor__screen">
+            <svg class="dev-instrument" viewBox="0 0 240 240">
+              <circle cx="120" cy="120" r="104" fill="#0b1208" stroke="#3d5a1a" stroke-width="3"/>
+              <circle class="dev-instrument__ring" cx="120" cy="120" r="88" fill="none" stroke="#9cc23a" stroke-opacity=".5" stroke-dasharray="3 8"/>
+              <circle cx="120" cy="120" r="60" fill="none" stroke="#9cc23a" stroke-opacity=".3"/>
+              <circle cx="120" cy="120" r="30" fill="none" stroke="#9cc23a" stroke-opacity=".3"/>
+              <path d="M120 16v208M16 120h208" stroke="#9cc23a" stroke-opacity=".3"/>
+              <g class="dev-instrument__sweep"><path d="M120 120 120 18A102 102 0 0 1 192 48Z" fill="#9cc23a" fill-opacity=".22"/></g>
+              <circle class="dev-instrument__blip" cx="168" cy="72" r="5" fill="#ff4a3a"/>
+              <circle class="dev-instrument__blip" cx="84" cy="160" r="4" fill="#ff4a3a"/>
+              <circle cx="146" cy="150" r="3" fill="#c6f24a"/>
+            </svg>
+          </div>
+          <span>DÉTECTEUR DE MOUVEMENT · BLOC C</span>
+        </div>
       </section>
       <div class="bunker-strip" aria-hidden="true">
         <img src="../../assets/svg/commun/bunker.svg" alt="">
-        <div class="bunker-strip__copy"><span>INSTALLATION / CENTRE TECHNIQUE</span><strong>DIAGNOSTIC DU BUNKER</strong><small>CONSOLE DE MAINTENANCE · XM</small></div>
+        <div class="bunker-strip__copy"><span>BUNKER / SALLE DES MACHINES</span><strong>DIAGNOSTIC DU BUNKER</strong><small>CONSOLE DE MAINTENANCE · XM</small></div>
         <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
       </div>
       <section class="dev-dashboard" aria-labelledby="diagnostic-title">
         <div class="dev-dashboard__heading">
           <div>
             <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Instruments</p>
-            <h2 id="diagnostic-title" data-content="dashboardTitle">État du système</h2>
+            <h2 id="diagnostic-title" data-content="dashboardTitle">État des systèmes</h2>
           </div>
           <span>LECTURE LOCALE · MISE À JOUR EN DIRECT</span>
         </div>
         <div class="dev-cards">
-          <article class="dev-card">
-            <span class="dev-card__number">01 / AFFICHAGE</span>
-            <h3>Fenêtre</h3>
-            <strong id="dev-viewport">—</strong>
-            <p>Dimensions actuelles de la zone d’affichage.</p>
-          </article>
-          <article class="dev-card">
-            <span class="dev-card__number">02 / MOUVEMENT</span>
-            <h3>Animations</h3>
-            <strong id="dev-motion">—</strong>
-            <p>Réglage actif, avec respect de la préférence système.</p>
-          </article>
-          <article class="dev-card">
-            <span class="dev-card__number">03 / LISIBILITÉ</span>
-            <h3>Contraste</h3>
-            <strong id="dev-contrast">—</strong>
-            <p>Préférence enregistrée sur cet appareil.</p>
-          </article>
-          <article class="dev-card">
-            <span class="dev-card__number">04 / AUDIO</span>
-            <h3>Retours sonores</h3>
-            <strong id="dev-sound">—</strong>
-            <p>Préférence de son enregistrée sur cet appareil.</p>
-          </article>
-          <article class="dev-card">
-            <span class="dev-card__number">05 / RÉSEAU</span>
-            <h3>État du navigateur</h3>
-            <strong id="dev-network">—</strong>
-            <p>État déclaré par le navigateur, sans test de connexion.</p>
-          </article>
-          <article class="dev-card">
-            <span class="dev-card__number">06 / CONTEXTE</span>
-            <h3>Ouverture</h3>
-            <strong id="dev-protocol">—</strong>
-            <p>Mode d’accès à cette page.</p>
-          </article>
+          <article class="dev-card"><span class="dev-card__number">SYS-01 / AFFICHAGE</span><h3>Fenêtre</h3><strong id="dev-viewport">—</strong><p>Dimensions actuelles de la zone d’affichage.</p></article>
+          <article class="dev-card"><span class="dev-card__number">SYS-02 / MOUVEMENT</span><h3>Animations</h3><strong id="dev-motion">—</strong><p>Réglage actif, avec respect de la préférence système.</p></article>
+          <article class="dev-card"><span class="dev-card__number">SYS-03 / LISIBILITÉ</span><h3>Contraste</h3><strong id="dev-contrast">—</strong><p>Préférence enregistrée sur cet appareil.</p></article>
+          <article class="dev-card"><span class="dev-card__number">SYS-04 / AUDIO</span><h3>Retours sonores</h3><strong id="dev-sound">—</strong><p>Préférence de son enregistrée sur cet appareil.</p></article>
+          <article class="dev-card"><span class="dev-card__number">SYS-05 / RÉSEAU</span><h3>Liaison radio</h3><strong id="dev-network">—</strong><p>État déclaré par le navigateur, sans test de connexion.</p></article>
+          <article class="dev-card"><span class="dev-card__number">SYS-06 / CONTEXTE</span><h3>Ouverture</h3><strong id="dev-protocol">—</strong><p>Mode d’accès à cette page. Les modules 3D exigent un serveur HTTP local.</p></article>
         </div>
         <p class="dev-note" data-content="note">Ces informations restent dans votre navigateur. Modifiez les préférences depuis la page Options.</p>
       </section>
       <section class="dev-directory" aria-labelledby="directory-title">
         <div class="dev-dashboard__heading">
           <div>
-            <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Navigation du projet</p>
-            <h2 id="directory-title">Répertoire des pages</h2>
+            <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Plan du pénitencier</p>
+            <h2 id="directory-title">Répertoire des secteurs</h2>
           </div>
-          <span>07 DESTINATIONS · ACCÈS DIRECT</span>
+          <span>08 SECTEURS · ACCÈS DIRECT</span>
         </div>
         <div class="dev-directory__grid">
-          <a class="dev-route" href="../../../index.html"><span class="dev-route__index">01 / ACCUEIL</span><strong>Zone de quarantaine</strong><span>Entrée principale du projet.</span><b aria-hidden="true">↗</b></a>
-          <a class="dev-route" href="../mode/mode.html"><span class="dev-route__index">02 / EXPÉDITION</span><strong>Choix du mode</strong><span>Solo et multijoueur à venir.</span><b aria-hidden="true">↗</b></a>
-          <a class="dev-route" href="../info/info.html"><span class="dev-route__index">03 / MISSION</span><strong>Hub de préparation</strong><span>Parcours et créateur intégré.</span><b aria-hidden="true">↗</b></a>
-          <a class="dev-route" href="../createur-personnage/createur-personnage.html"><span class="dev-route__index">04 / PERSONNAGE</span><strong>Créateur autonome</strong><span>Personnalisation du survivant.</span><b aria-hidden="true">↗</b></a>
-          <a class="dev-route" href="../options/options.html"><span class="dev-route__index">05 / RÉGLAGES</span><strong>Options &amp; commandes</strong><span>Préférences et guide de jeu.</span><b aria-hidden="true">↗</b></a>
-          <a class="dev-route" href="../../../404.html"><span class="dev-route__index">06 / ERREUR</span><strong>Page introuvable</strong><span>Écran de signal perdu.</span><b aria-hidden="true">↗</b></a>
-          <a class="dev-route dev-route--current" href="./dev.html" aria-current="page"><span class="dev-route__index">07 / POSTE TECHNIQUE</span><strong>DEV MODE</strong><span>Vous êtes sur cette page.</span><b aria-hidden="true">●</b></a>
+          <a class="dev-route" href="../../../index.html"><span class="dev-route__index">S-01 / ACCUEIL</span><strong>Portail du pénitencier</strong><span>Entrée principale du projet.</span><b aria-hidden="true">↗</b></a>
+          <a class="dev-route" href="../mode/mode.html"><span class="dev-route__index">S-02 / PLAN</span><strong>Choix du mode</strong><span>Solo et multijoueur à venir.</span><b aria-hidden="true">↗</b></a>
+          <a class="dev-route" href="../info/info.html"><span class="dev-route__index">S-03 / BRIEFING</span><strong>Plan d’évasion</strong><span>Parcours et créateur intégré.</span><b aria-hidden="true">↗</b></a>
+          <a class="dev-route" href="../createur-personnage/createur-personnage.html"><span class="dev-route__index">S-04 / ÉCROU</span><strong>Créateur 3D</strong><span>Détenu, tenue, équipement et armurerie.</span><b aria-hidden="true">↗</b></a>
+          <a class="dev-route dev-route--alarm" href="../escape-room/escape-room.html"><span class="dev-route__index">S-05 / SAS 07</span><strong>Escape room 3D</strong><span>Prototype jouable : énigmes et infectés.</span><b aria-hidden="true">↗</b></a>
+          <a class="dev-route" href="../options/options.html"><span class="dev-route__index">S-06 / RÉGLAGES</span><strong>Options &amp; commandes</strong><span>Préférences et manuel du détenu.</span><b aria-hidden="true">↗</b></a>
+          <a class="dev-route" href="../../../404.html"><span class="dev-route__index">S-07 / ERREUR</span><strong>Cellule vide</strong><span>Page introuvable.</span><b aria-hidden="true">↗</b></a>
+          <a class="dev-route dev-route--current" href="./dev.html" aria-current="page"><span class="dev-route__index">S-08 / POSTE DE GARDE</span><strong>DEV MODE</strong><span>Vous êtes sur cette console.</span><b aria-hidden="true">●</b></a>
         </div>
       </section>
       <footer class="dev-footer">
-        <span>LAST REFUGE · XM / POSTE TECHNIQUE</span>
+        <span>LAST REFUGE · XM / POSTE DE GARDE</span>
         <a class="action-button action-button--secondary" href="../../../index.html">Retour à l’accueil</a>
       </footer>
     </main>

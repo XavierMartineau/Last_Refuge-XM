@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr" data-motion="full" data-contrast="standard">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0e0e0d">
+    <meta name="description" content="Choisissez votre salle d’évasion dans le pénitencier LAST REFUGE.">
+    <title>Choix de la salle d’évasion | LAST REFUGE</title>
+    <link rel="icon" type="image/svg+xml" href="../../assets/svg/identite/favicon.svg">
+    <link rel="stylesheet" href="../../css/commun/site.css">
+    <link rel="stylesheet" href="../../css/choix-salle/choix-salle.css">
+    <script src="../../js/commun/preferences.js" defer></script>
+    <script src="../../js/commun/progression.js" defer></script>
+    <script src="../../js/commun/escape-rooms.js" defer></script>
+    <script src="../../js/choix-salle/choix-salle.js" defer></script>
+  </head>
+  <body class="page-redesign page-choix" data-device-gate>
+    <div class="device-notice"><div class="device-notice__panel">
+      <p class="device-notice__brand">LAST REFUGE · XM</p>
+      <h1>Écran trop petit<br><em>accès refusé.</em></h1>
+      <p>Le terminal du pénitencier exige une tablette ou un ordinateur d’au moins 768 pixels de largeur.</p>
+    </div></div>
+    <a class="skip-link" href="#choix-content">Aller au catalogue</a>
+    <header class="site-header section-shell">
+      <a class="brand" href="../../../index.html" aria-label="LAST REFUGE, accueil">
+        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 10v13c0 11-7 18-18 22C13 41 6 34 6 23V10Z"/><path class="brand__bars" d="M17 15v20M24 12v26M31 15v20M12 22h24"/><circle class="brand__light" cx="24" cy="7.5" r="2.2"/></svg>
+        <span class="brand__word">LAST<span> REFUGE</span><small class="brand__tag">PÉNITENCIER MILITAIRE · XM</small></span>
+      </a>
+      <div class="header-status"><i></i> ÉTAPE 02 / 03</div>
+    </header>
+
+    <main class="choix section-shell" id="choix-content">
+      <section class="choix-intro">
+        <div>
+          <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Archives du poste de garde · Étape 02</p>
+          <h1>Trouvez votre <em>salle d’évasion.</em></h1>
+          <p>Chaque dossier est classé selon sa difficulté, son nombre de salles et sa durée estimée. Lisez le rapport de situation, puis choisissez la salle que vous voulez tenter.</p>
+        </div>
+        <a class="action-button action-button--secondary" href="../info/info.html#etape-2">← Retour au plan</a>
+      </section>
+
+      <p class="choix-warning" id="choix-warning" hidden><strong>Fiche d’écrou incomplète.</strong> Terminez l’étape 01 pour pouvoir choisir une salle. <a href="../info/info.html">Créer mon détenu ↗</a></p>
+
+      <div class="er-head">
+        <p class="choix-count" id="choix-count"></p>
+        <div class="er-sort" role="group" aria-label="Classer les escape rooms">
+          <span>CLASSER PAR</span>
+          <button type="button" data-sort="difficulty" aria-pressed="true">Difficulté</button>
+          <button type="button" data-sort="rooms" aria-pressed="false">Salles</button>
+          <button type="button" data-sort="time" aria-pressed="false">Durée</button>
+        </div>
+      </div>
+      <div class="er-layout">
+        <div class="er-list" id="er-list" role="radiogroup" aria-label="Escape rooms"></div>
+        <article class="er-detail" id="er-detail" aria-live="polite"></article>
+      </div>
+
+      <footer class="choix-footer"><span>LAST REFUGE <b>·</b> XM</span><a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a><a href="../info/info.html">← RETOUR AU PLAN D’ÉVASION</a></footer>
+    </main>
+  </body>
+</html>

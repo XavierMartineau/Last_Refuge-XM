@@ -1,65 +1,74 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-motion="full" data-contrast="standard">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#141918">
-<meta name="description" content="Créez votre personnage pour l’expédition LAST REFUGE.">
-<title>Créateur de personnage | LAST REFUGE</title>
+<meta name="theme-color" content="#0e0e0d">
+<meta name="description" content="Fiche d’écrou 3D : créez votre détenu pour l’évasion LAST REFUGE.">
+<title>Fiche d’écrou 3D | LAST REFUGE</title>
 <link rel="icon" href="../../assets/svg/identite/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../css/commun/site.css">
 <link rel="stylesheet" href="../../css/createur-personnage/createur-personnage.css">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script src="../../js/commun/preferences.js"></script>
+<script src="../../js/commun/progression.js"></script>
+<script type="module" src="../../js/createur-personnage/createur-personnage.js"></script>
 </head>
-<body>
-<div class="device-notice"><div><p>LAST REFUGE · XM</p><h1>Un écran plus grand <em>vous attend.</em></h1><p>L’expérience est disponible sur tablette et ordinateur. Utilisez un écran d’au moins 768 pixels de largeur.</p></div></div>
-<header class="topbar">
- <a class="brand" href="../../../index.html"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 41 11v12c0 10-7 17-17 21C14 40 7 33 7 23V11Z"/><circle cx="24" cy="24" r="8"/><path d="M24 19v10m-5-5h10"/></svg><span>LAST<span> REFUGE</span></span></a>
- <span class="topbar__label">POSTE DE PERSONNALISATION <b> / XM</b></span>
+<body class="page-createur" data-device-gate>
+<div class="device-notice"><div class="device-notice__panel">
+  <p class="device-notice__brand">LAST REFUGE · XM</p>
+  <h1>Écran trop petit<br><em>accès refusé.</em></h1>
+  <p>Le terminal du pénitencier exige une tablette ou un ordinateur d’au moins 768 pixels de largeur.</p>
+</div></div>
+
+<header class="site-header creator-header">
+  <a class="brand" href="../../../index.html" aria-label="LAST REFUGE, accueil">
+    <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 10v13c0 11-7 18-18 22C13 41 6 34 6 23V10Z"/><path class="brand__bars" d="M17 15v20M24 12v26M31 15v20M12 22h24"/><circle class="brand__light" cx="24" cy="7.5" r="2.2"/></svg>
+    <span class="brand__word">LAST<span> REFUGE</span><small class="brand__tag">FICHE D’ÉCROU · ÉTAPE 01</small></span>
+  </a>
+  <div class="header-status"><i></i> IDENTIFICATION DU DÉTENU</div>
 </header>
-<main class="creator">
- <div class="creator-heading">
-  <div><p class="eyebrow"><span></span> PREMIÈRE ÉTAPE · VOTRE IDENTITÉ</p><h1>Créez votre <em>survivant.</em></h1><p>Préparez votre survivant avant de franchir le périmètre.</p></div>
-  <span class="prototype-tag"><i></i> CRÉATEUR EN DÉVELOPPEMENT</span>
- </div>
- <div class="bunker-strip" aria-hidden="true">
-  <img src="../../assets/svg/commun/bunker.svg" alt="">
-  <div class="bunker-strip__copy"><span>REFUGE / IDENTIFICATION</span><strong>DOSSIER DU SURVIVANT</strong><small>POSTE DE PERSONNALISATION · XM</small></div>
-  <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
- </div>
- <section class="card" id="stage" aria-labelledby="preview-title">
-  <div class="stage-heading"><div><p class="eyebrow">DOSSIER DU SURVIVANT</p><h2 id="preview-title">Votre aperçu</h2></div><span>XM / 01</span></div>
-  <div class="portrait-frame">
-  <svg id="character" viewBox="0 0 300 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Personnage">
-   <!-- Calques, du fond vers l’avant -->
-   <g id="layer-bg"></g><g id="layer-back"></g><g id="layer-special-back"></g><g id="layer-hair-back"></g><g id="layer-neck"></g><g id="layer-outfit"></g>
-   <g id="layer-head"></g><g id="layer-beard"></g><g id="layer-nose"></g><g id="layer-eyes"></g><g id="layer-brows"></g><g id="layer-mouth"></g>
-   <g id="layer-hair-front"></g><g id="layer-over"></g><g id="layer-top"></g><g id="layer-special-head"></g><g id="layer-extra"></g><g id="layer-special-face"></g><g id="layer-glasses"></g><g id="layer-headwear"></g><g id="layer-name"></g>
-  </svg>
-  </div>
-  <div class="stage-caption"><span><i></i> APERÇU EN DIRECT</span><span>LAST REFUGE · XM</span></div>
-  <div class="stage-actions"><button id="rand" type="button">✦ &nbsp; Aléatoire</button><button id="reset" type="button">Réinitialiser</button></div>
-  <p class="stage-note">Votre personnage prend forme au fil de vos choix.</p>
- </section>
- <section class="card editor" aria-labelledby="editor-title">
-  <div class="editor-heading"><div><p class="eyebrow">DOSSIER DE SURVIE</p><h2 id="editor-title">Façonnez votre identité</h2></div><span>01 — 03</span></div>
-  <div class="steps" id="steps" aria-label="Étapes de personnalisation"></div>
-  <div class="editor-intro"><p class="eyebrow" id="step-label">ÉTAPE 01 / 03</p><h2 id="step-title">La base</h2><p id="step-description">Commencez par choisir votre silhouette et les traits de votre personnage.</p></div>
-  <h3 id="type-label">Type de personnage</h3>
-  <div class="tabs" id="tabs"></div>
-  <div id="nameBox" hidden><label for="name">Nom du personnage</label><input id="name" type="text" maxlength="20" placeholder="Écrivez un nom…"></div>
-  <div id="controls"></div>
-  <div id="jsonbox" hidden><h3>Sauvegarde du personnage</h3><p class="help">Copiez ou collez les données JSON pour retrouver un personnage créé précédemment.</p><textarea id="json" spellcheck="false" aria-label="JSON du personnage"></textarea>
-  <div class="tools"><button id="load" type="button">Charger ce JSON</button><button id="dl" type="button">Télécharger .json</button></div><small id="msg" role="status">Les choix sont enregistrés avec leurs index d’origine.</small></div>
-  <div class="nav"><button id="back" type="button">← Étape précédente</button><button class="p" id="next" type="button">Continuer <span>→</span></button><a class="finish" id="finish" href="../info/info.html" hidden>Retour au hub <span>↗</span></a></div>
- </section>
+
+<main class="creator-app">
+  <section id="left" aria-label="Aperçu 3D du détenu">
+    <div id="stage">
+      <div class="hud" id="shots"><button type="button" data-shot="full" aria-pressed="true">Corps entier</button><button type="button" data-shot="bust" aria-pressed="false">Buste</button><button type="button" data-shot="face" aria-pressed="false">Visage</button><button type="button" data-shot="back" aria-pressed="false">Dos</button><button type="button" id="spin" aria-pressed="false">⟳ Rotation</button></div>
+      <div class="hud" id="stage-actions"><button type="button" id="rand">✦ Aléatoire</button><button type="button" id="reset">Réinitialiser</button><button type="button" id="save">★ Enregistrer</button></div>
+      <div class="stage-tag" aria-hidden="true"><span>MATRICULE</span><b>XM-0714</b></div>
+      <p class="stage-loading" id="stage-loading">CHARGEMENT DU MODÈLE 3D…</p>
+    </div>
+  </section>
+
+  <aside class="creator-panel">
+    <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Dossier de survie</p>
+    <h2 class="creator-panel__title">Fiche d’écrou</h2>
+    <div class="steps" id="steps"></div>
+    <div class="step-intro">
+      <p class="eyebrow" id="step-label"></p>
+      <h3 id="step-title"></h3>
+      <p class="help" id="step-description"></p>
+    </div>
+    <h3 id="type-label" class="field-label">Type de personnage</h3><div id="tabs"></div>
+    <div id="nameBox" hidden><label for="name" class="field-label">Nom du détenu</label><input id="name" type="text" maxlength="20" placeholder="Écrivez un nom…"></div>
+    <div id="controls"></div>
+    <div id="wstats" hidden></div>
+    <div id="jsonbox" hidden>
+      <h3 class="field-label">Sauvegarde du détenu (JSON)</h3><p class="help">Les choix sont enregistrés avec leurs index d’origine : compatible avec l’escape room.</p>
+      <textarea id="json" spellcheck="false" aria-label="JSON du personnage"></textarea>
+      <div class="tools"><button type="button" id="load">Charger ce JSON</button><button type="button" id="copy">Copier</button><button type="button" id="dl">Télécharger .json</button><button type="button" id="open-file">Ouvrir un .json…</button><input id="file" type="file" accept=".json,application/json" hidden></div>
+      <h3 class="field-label">Exporter le modèle</h3>
+      <div class="tools"><button type="button" class="p" id="glb">Modèle 3D (.glb)</button><button type="button" id="png">Image (.png)</button></div>
+      <small id="msg" role="status"></small>
+      <h3 class="field-label">Mes détenus</h3><div id="saved"></div>
+    </div>
+    <div class="nav"><button type="button" id="back">← Étape précédente</button><button type="button" class="p" id="next">Continuer →</button><a class="finish" id="finish" href="../info/info.html#etape-2" hidden>Trouver sa salle d’évasion <span aria-hidden="true">▶</span></a></div>
+  </aside>
 </main>
-<dialog id="gallery-dialog" class="gallery-dialog" aria-labelledby="gallery-title">
- <div class="gallery-dialog__header"><div><p class="eyebrow">PERSONNALISATION · XM</p><h2 id="gallery-title"></h2></div><button id="gallery-close" type="button" aria-label="Fermer la sélection">×</button></div>
- <div class="gallery-dialog__body"><div class="gallery-dialog__portrait"><p class="eyebrow">APERÇU EN DIRECT</p><div id="gallery-portrait"></div></div><div class="gallery-dialog__choices"><p class="gallery-dialog__hint">Choisissez une option pour voir le résultat.</p><div id="gallery-options" class="choice-grid"></div></div></div>
+
+<dialog id="gallery-dialog" aria-labelledby="gallery-title">
+  <div class="gd"><div><p class="eyebrow">PERSONNALISATION · XM</p><h2 id="gallery-title"></h2></div><button type="button" id="gallery-close" aria-label="Fermer">×</button></div>
+  <p class="gh">Choisissez une option : le détenu 3D se met à jour en direct (vous pouvez le faire tourner derrière).</p>
+  <div id="gallery-options"></div>
 </dialog>
-<footer class="footer"><span>LAST REFUGE · XM</span><div class="footer__actions"><a class="return-link" href="../dev/dev.html">DEV MODE</a><a class="return-link" href="../info/info.html">← Retour au hub</a></div></footer>
-<script src="../../js/commun/preferences.js" defer></script>
-<script src="../../js/createur-personnage/outils.js" defer></script>
-<script src="../../js/createur-personnage/assets-generes.js" defer></script>
-<script src="../../js/createur-personnage/createur-personnage.js" defer></script>
 </body>
 </html>

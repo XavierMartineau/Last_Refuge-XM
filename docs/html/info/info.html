@@ -3,152 +3,170 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#111310">
-    <meta name="description" content="Préparez votre aventure dans le hub LAST REFUGE.">
-    <title>Hub d’expédition | LAST REFUGE</title>
+    <meta name="theme-color" content="#0e0e0d">
+    <meta name="description" content="Préparez votre évasion dans le poste de garde LAST REFUGE.">
+    <title>Plan d’évasion | LAST REFUGE</title>
     <link rel="icon" type="image/svg+xml" href="../../assets/svg/identite/favicon.svg">
     <link rel="stylesheet" href="../../css/commun/site.css">
     <link rel="stylesheet" href="../../css/info/info.css">
     <script src="../../js/commun/preferences.js" defer></script>
     <script src="../../js/commun/content.js" data-page="info" data-source="../../data/content.json" defer></script>
+    <script src="../../js/commun/progression.js" defer></script>
+    <script src="../../js/commun/escape-rooms.js" defer></script>
     <script src="../../js/info/info.js" defer></script>
   </head>
   <body class="page-redesign page-info" data-device-gate>
-    <div class="device-notice">
-      <div class="device-notice__panel">
-        <p class="device-notice__brand">LAST REFUGE · XM</p>
-        <h1>Un écran plus grand<br><em>vous attend.</em></h1>
-        <p>L’expérience est disponible sur tablette et ordinateur. Utilisez un écran d’au moins 768 pixels de largeur.</p>
-      </div>
-    </div>
-    <a class="skip-link" href="#hub-content">Aller au hub</a>
+    <div class="device-notice"><div class="device-notice__panel">
+      <p class="device-notice__brand">LAST REFUGE · XM</p>
+      <h1>Écran trop petit<br><em>accès refusé.</em></h1>
+      <p>Le terminal du pénitencier exige une tablette ou un ordinateur d’au moins 768 pixels de largeur.</p>
+    </div></div>
+    <a class="skip-link" href="#hub-content">Aller au plan d’évasion</a>
     <header class="site-header section-shell hub-header">
-      <a class="brand hub-brand" href="../../../index.html" aria-label="LAST REFUGE, accueil">
-        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true">
-          <path d="M24 4 41 11v12c0 10-7 17-17 21C14 40 7 33 7 23V11Z"/>
-          <circle cx="24" cy="24" r="8"/><path d="M24 19v10m-5-5h10"/>
-        </svg>
-        <span class="brand__word">LAST<span> REFUGE</span></span>
+      <a class="brand" href="../../../index.html" aria-label="LAST REFUGE, accueil">
+        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 10v13c0 11-7 18-18 22C13 41 6 34 6 23V10Z"/><path class="brand__bars" d="M17 15v20M24 12v26M31 15v20M12 22h24"/><circle class="brand__light" cx="24" cy="7.5" r="2.2"/></svg>
+        <span class="brand__word">LAST<span> REFUGE</span><small class="brand__tag">PÉNITENCIER MILITAIRE · XM</small></span>
       </a>
-      <div class="hub-header__center"><span></span> MISSION SOLO <span></span></div>
+      <div class="hub-header__center"><span></span> ÉVASION SOLO · BLOC C <span></span></div>
     </header>
 
     <main class="hub section-shell" id="hub-content">
       <div id="hub-overview">
-      <section class="hub-hero" aria-labelledby="hub-title">
-        <div class="hub-hero__copy">
-          <p class="hub-kicker"><span class="hub-kicker__light"></span> LAST REFUGE XM <span class="hub-kicker__separator">/</span> POSTE DE SURVIE</p>
-          <h1 id="hub-title"><span data-content="heading">Votre aventure</span><br><em data-content="headingEmphasis">prend forme.</em></h1>
-          <p class="hub-hero__intro" data-content="intro">Bienvenue dans LAST REFUGE, une expérience d’évasion et de survie en développement. Préparez votre survivant et découvrez les zones à venir avant le départ.</p>
-          <div class="hub-hero__meta">
-            <span><i></i> EXPÉRIENCE EN DÉVELOPPEMENT</span>
-            <span>POINT &amp; CLICK <b>·</b> SURVIE</span>
+        <section class="hub-hero" aria-labelledby="hub-title">
+          <div class="hub-hero__copy">
+            <p class="hub-kicker"><span class="hub-kicker__light"></span> DOSSIER XM-07 <span class="hub-kicker__separator">/</span> BRIEFING DU POSTE DE GARDE</p>
+            <h1 id="hub-title"><span data-content="heading">Votre évasion</span><br><em data-content="headingEmphasis">se prépare.</em></h1>
+            <p class="hub-hero__intro" data-content="intro">Bienvenue au pénitencier militaire XM, une escape room de survie en développement. Créez votre détenu, repérez les secteurs du bloc et préparez-vous avant le signal.</p>
+            <div class="hub-hero__meta">
+              <span><i></i> PROTOTYPE EN DÉVELOPPEMENT</span>
+              <span>POINT &amp; CLICK <b>·</b> SURVIE <b>·</b> 3D</span>
+            </div>
           </div>
+          <div class="hub-emblem" aria-hidden="true">
+            <svg viewBox="0 0 360 360" fill="none">
+              <circle cx="180" cy="180" r="166" stroke="#f2b705" stroke-opacity=".25" stroke-width="2"/>
+              <g class="hub-emblem__rotor">
+                <circle cx="180" cy="180" r="150" stroke="#f2b705" stroke-width="14" stroke-dasharray="22 22" stroke-opacity=".75"/>
+              </g>
+              <circle cx="180" cy="180" r="132" fill="#151513" stroke="#5a5850" stroke-width="3"/>
+              <path d="M180 78 254 108v54c0 50-30 80-74 100-44-20-74-50-74-100v-54Z" fill="#222220" stroke="#e8e3d3" stroke-width="4"/>
+              <path d="M146 112v118M180 100v146M214 112v118M120 150h120" stroke="#8d8a80" stroke-width="7"/>
+              <circle class="hub-emblem__light" cx="180" cy="94" r="8" fill="#ff4a3a"/>
+              <path d="M128 268h104" stroke="#f2b705" stroke-width="4"/>
+              <text x="180" y="300" fill="#e8e3d3" font-family="Black Ops One, Impact, sans-serif" font-size="22" letter-spacing="6" text-anchor="middle">BLOC C</text>
+            </svg>
+            <span class="hub-emblem__label hub-emblem__label--top">QUARTIER HAUTE SÉCURITÉ</span>
+            <span class="hub-emblem__label hub-emblem__label--bottom">XM <b>☣</b> SECTEUR 07</span>
+          </div>
+          <span class="stamp hub-hero__stamp" aria-hidden="true">Confidentiel</span>
+        </section>
+
+        <div class="bunker-strip" aria-hidden="true">
+          <img src="../../assets/svg/commun/bloc-cellulaire.svg" alt="">
+          <div class="bunker-strip__copy"><span>BLOC C / COULOIR DES CELLULES</span><strong>CELLULES DÉVERROUILLÉES</strong><small>214 DÉTENUS HORS CELLULE · XM</small></div>
+          <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
         </div>
-        <div class="hub-emblem" aria-hidden="true">
-          <div class="hub-emblem__glow"></div>
-          <svg viewBox="0 0 360 360" fill="none">
-            <circle cx="180" cy="180" r="166" stroke="#b1bda5" stroke-opacity=".16"/>
-            <circle cx="180" cy="180" r="149" stroke="#b1bda5" stroke-opacity=".38" stroke-dasharray="2 8"/>
-            <g class="hub-emblem__rotor">
-              <circle cx="180" cy="180" r="130" stroke="#e09170" stroke-opacity=".65"/>
-              <circle cx="180" cy="180" r="119" stroke="#e09170" stroke-opacity=".4" stroke-dasharray="12 7"/>
-              <path d="M180 31v20m0 258v20M31 180h20m258 0h20M75 75l14 14m182 182 14 14M285 75l-14 14M89 271l-14 14" stroke="#e09170" stroke-width="2"/>
-            </g>
-            <path d="M180 94 247 122v48c0 45-27 72-67 90-40-18-67-45-67-90v-48Z" fill="#1d2921" stroke="#b2c2a8" stroke-width="3"/>
-            <circle cx="180" cy="174" r="35" stroke="#e09170" stroke-width="2"/>
-            <path d="M180 149v50m-25-25h50" stroke="#e09170" stroke-width="5"/>
-            <path d="M133 223h94M143 233h74" stroke="#b2c2a8" stroke-opacity=".5" stroke-width="2"/>
-          </svg>
-          <span class="hub-emblem__label hub-emblem__label--top">PÉRIMÈTRE SÉCURISÉ</span>
-          <span class="hub-emblem__label hub-emblem__label--bottom">A / XM <b>✦</b> SECTEUR 07</span>
+
+        <div class="hub-section-heading">
+          <div>
+            <p class="hub-kicker"><span class="hub-kicker__light"></span> FEUILLE DE ROUTE</p>
+            <h2 data-content="journeyTitle">Plan d’évasion</h2>
+          </div>
+          <p>Trois étapes. <span>Un seul mur à franchir.</span></p>
         </div>
-        <div class="hub-hero__index" aria-hidden="true">01 — 03</div>
+
+        <div class="hub-steps">
+          <section class="hub-card hub-card--character" data-step="1" id="etape-1" tabindex="-1" aria-labelledby="character-title">
+            <div class="hub-card__top"><span class="hub-card__number">01 <small>/ 03</small></span><span class="hub-badge hub-badge--active"><i></i> DISPONIBLE</span></div>
+            <div class="hub-card__art hub-card__art--character" aria-hidden="true">
+              <svg viewBox="0 0 220 130" fill="none">
+                <g stroke="currentColor" stroke-opacity=".35"><path d="M20 20h180M20 40h180M20 60h180M20 80h180M20 100h180"/></g>
+                <g fill="currentColor" fill-opacity=".55" font-family="Share Tech Mono, monospace" font-size="9"><text x="4" y="23">2m</text><text x="4" y="63">1m8</text><text x="4" y="103">1m6</text></g>
+                <g class="hub-survivor">
+                  <circle cx="110" cy="52" r="18" fill="#0d0d0c" stroke="currentColor" stroke-width="2"/>
+                  <path d="M76 130c3-28 16-44 34-44s31 16 34 44z" fill="#b24f17" stroke="currentColor" stroke-width="2"/>
+                </g>
+                <rect x="82" y="96" width="56" height="20" fill="#111" stroke="#f2b705"/>
+                <text x="110" y="110" fill="#f2b705" font-family="Share Tech Mono, monospace" font-size="11" text-anchor="middle">XM-0714</text>
+                <rect class="svg-scan" x="20" y="14" width="180" height="2" fill="#9cc23a"/>
+                <rect class="svg-flash" width="220" height="130" fill="#fff"/>
+              </svg>
+            </div>
+            <p class="hub-card__eyebrow">VOTRE MATRICULE</p>
+            <h3 id="character-title" data-content="stepOneTitle">Fiche d’écrou</h3>
+            <p class="hub-card__description" data-content="stepOneText">Créez votre détenu en 3D : visage, tenue, équipement et arme récupérée à l’armurerie.</p>
+            <div class="hub-card__bottom">
+              <a class="hub-button hub-button--primary" id="open-creator" href="../createur-personnage/createur-personnage.html"><span class="open-creator__label">Créer mon détenu</span><span aria-hidden="true">▶</span></a>
+              <span class="hub-card__footnote">CRÉATEUR 3D · PROTOTYPE</span>
+            </div>
+          </section>
+
+          <section class="hub-card hub-card--rooms is-locked" data-step="2" id="etape-2" tabindex="-1" aria-labelledby="rooms-title">
+            <div class="step-lock" aria-hidden="true"><span class="step-lock__icon">🔒︎</span><strong>Terminez votre fiche d’écrou</strong></div>
+            <div class="hub-card__top"><span class="hub-card__number">02 <small>/ 03</small></span><span class="hub-badge">🔒︎ VERROUILLÉE</span></div>
+            <div class="hub-card__art hub-card__art--rooms" aria-hidden="true">
+              <svg viewBox="0 0 220 130" fill="none">
+                <rect x="60" y="14" width="100" height="112" fill="#0b0b0a" stroke="currentColor" stroke-width="2"/>
+                <g class="hub-infected" fill="#050505"><circle cx="110" cy="62" r="12"/><path d="M92 126l4-46c2-6 8-9 14-9s12 3 14 9l4 46z"/></g>
+                <g class="svg-eyes"><circle cx="105" cy="60" r="1.8" fill="#c6f24a"/><circle cx="115" cy="60" r="1.8" fill="#c6f24a"/></g>
+                <path d="M72 14v112M86 14v112M100 14v112M114 14v112M128 14v112M142 14v112M156 14v112" stroke="currentColor" stroke-width="3"/>
+                <path d="M60 50h100" stroke="currentColor" stroke-width="5"/>
+                <path class="svg-hand" d="M128 92h22l5-3 3 3-3 3 3 3-5 2h-25z" fill="#3e4a2a"/>
+              </svg>
+            </div>
+            <p class="hub-card__eyebrow">VOTRE SECTEUR</p>
+            <h3 id="rooms-title" data-content="stepTwoTitle">Salle d’évasion</h3>
+            <p class="hub-card__description" data-content="stepTwoText">Consultez les dossiers des escape rooms, classés par difficulté, nombre de salles et durée, puis choisissez la vôtre.</p>
+            <p class="launch-summary" id="room-summary">Aucune salle choisie.</p>
+            <div class="hub-card__bottom">
+              <a class="hub-button hub-button--primary" id="choose-room" href="../choix-salle/choix-salle.html"><span id="choose-room-label">Trouver ma salle d’évasion</span><span aria-hidden="true">▶</span></a>
+              <span class="hub-card__footnote">CATALOGUE DES ESCAPE ROOMS</span>
+            </div>
+          </section>
+
+          <section class="hub-card hub-card--launch is-locked" data-step="3" id="etape-3" tabindex="-1" aria-labelledby="launch-title">
+            <div class="step-lock" aria-hidden="true"><span class="step-lock__icon">🔒︎</span><strong>Choisissez une salle d’évasion</strong></div>
+            <div class="hub-card__top"><span class="hub-card__number">03 <small>/ 03</small></span><span class="hub-badge hub-badge--test"><i></i> PROTOTYPE JOUABLE</span></div>
+            <div class="launch-row">
+              <div class="hub-card__art hub-card__art--launch" aria-hidden="true">
+                <svg viewBox="0 0 220 130" fill="none">
+                  <rect x="40" y="18" width="140" height="100" fill="#141413" stroke="currentColor" stroke-width="2"/>
+                  <circle cx="110" cy="68" r="34" stroke="currentColor" stroke-width="4"/>
+                  <g class="hub-art-orbit"><path d="M110 34v68M76 68h68M86 44l48 48M134 44 86 92" stroke="currentColor" stroke-width="3"/></g>
+                  <circle cx="110" cy="68" r="9" fill="#f2b705"/>
+                  <circle class="svg-beacon" cx="110" cy="10" r="5" fill="#ff4a3a"/>
+                  <path d="M40 118h140" stroke="#f2b705" stroke-width="6" stroke-dasharray="10 8"/>
+                </svg>
+              </div>
+              <div class="launch-copy">
+                <p class="hub-card__eyebrow">DERNIERS PRÉPARATIFS</p>
+                <h3 id="launch-title" data-content="stepThreeTitle">Prêt à franchir le mur ?</h3>
+                <p class="hub-card__description" data-content="stepThreeText">Vérifiez votre détenu et le dossier choisi, puis lancez l’évasion.</p>
+                <p class="launch-summary" id="launch-summary">Aucune escape room sélectionnée.</p>
+              </div>
+              <div class="hub-card__bottom">
+                <a class="hub-button hub-button--alarm" id="launch-button" href="../escape-room/escape-room.html" aria-disabled="true"><span>Lancer l’évasion</span><span aria-hidden="true">▶</span></a>
+                <span class="hub-card__footnote" data-content="launchNote">Prototype : la progression n’est pas encore définitive.</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="hub-notice">
+          <span class="hub-notice__icon" aria-hidden="true">!</span>
+          <div><strong>Avis à la population carcérale</strong><p data-content="note">Le créateur 3D est un prototype. Les secteurs, leurs difficultés et le lancement de l’évasion sont encore en développement.</p></div>
+          <button class="hub-notice__reset" id="reset-progress" type="button">Réinitialiser la progression</button>
+          <a href="../options/options.html">Options &amp; commandes <span aria-hidden="true">↗</span></a>
+        </aside>
+        <footer class="hub-footer"><span>LAST REFUGE <b>·</b> XM</span><span>RESTEZ DANS L’OMBRE</span><a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a><a href="../../../index.html">← RETOUR À L’ACCUEIL</a></footer>
+      </div>
+      <section id="hub-creator" class="hub-creator" aria-label="Fiche d’écrou 3D" hidden>
+        <button id="close-creator" class="hub-creator__back" type="button">← Retour au plan d’évasion</button>
+        <iframe id="creator-frame" title="Créateur de détenu 3D" data-src="../createur-personnage/createur-personnage.html?embed=1" allow="fullscreen"></iframe>
       </section>
-
-      <div class="bunker-strip" aria-hidden="true">
-        <img src="../../assets/svg/commun/bunker.svg" alt="">
-        <div class="bunker-strip__copy"><span>REFUGE / SAS SÉCURISÉ</span><strong>POSTE DE PRÉPARATION</strong><small>ACCÈS AU BUNKER · XM</small></div>
-        <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
-      </div>
-      <div class="hub-section-heading">
-        <div>
-          <p class="hub-kicker"><span class="hub-kicker__light"></span> VOTRE FEUILLE DE ROUTE</p>
-          <h2 data-content="journeyTitle">Préparez la mission</h2>
-        </div>
-        <p>Trois étapes. <span>Une aventure.</span></p>
-      </div>
-
-      <div class="hub-steps">
-        <section class="hub-card hub-card--character" aria-labelledby="character-title">
-          <div class="hub-card__top"><span class="hub-card__number">01 <small>/ 03</small></span><span class="hub-badge hub-badge--active"><i></i> EN COURS</span></div>
-          <div class="hub-card__art hub-card__art--character" aria-hidden="true">
-            <svg viewBox="0 0 220 130" fill="none">
-              <circle cx="110" cy="65" r="57" stroke="currentColor" stroke-opacity=".2" stroke-dasharray="2 5"/>
-              <circle cx="110" cy="65" r="44" stroke="currentColor" stroke-opacity=".35"/>
-              <g class="hub-survivor"><path d="M82 103c2-20 13-29 28-29s26 9 28 29M110 68a19 19 0 1 0 0-38 19 19 0 0 0 0 38Z" stroke="currentColor" stroke-width="2"/>
-              <path d="M90 42h40M97 30l4-10h18l4 10M72 65H57m106 0h-15" stroke="currentColor" stroke-width="1.5"/></g>
-              <circle cx="110" cy="65" r="52" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="35 292" class="hub-art-orbit"/>
-            </svg>
-          </div>
-          <p class="hub-card__eyebrow">VOTRE IDENTITÉ</p>
-          <h3 id="character-title" data-content="stepOneTitle">Personnalisation du personnage</h3>
-          <p class="hub-card__description" data-content="stepOneText">Préparez votre survivant dans le prototype du créateur, actuellement en développement.</p>
-          <div class="hub-card__bottom">
-            <a class="hub-button hub-button--primary" id="open-creator" href="../createur-personnage/createur-personnage.html"><span data-content="stepOneLink">Personnaliser mon personnage</span><span aria-hidden="true">↗</span></a>
-            <span class="hub-card__footnote">PROTOTYPE ACCESSIBLE</span>
-          </div>
-        </section>
-
-        <section class="hub-card hub-card--rooms" aria-labelledby="rooms-title">
-          <div class="hub-card__top"><span class="hub-card__number">02 <small>/ 03</small></span><span class="hub-badge"><span aria-hidden="true">✦</span> EN CONSTRUCTION</span></div>
-          <div class="hub-card__art hub-card__art--rooms" aria-hidden="true">
-            <svg viewBox="0 0 220 130" fill="none">
-              <circle cx="110" cy="65" r="54" stroke="currentColor" stroke-opacity=".22" stroke-dasharray="2 5"/>
-              <path d="M78 105V56a32 32 0 0 1 64 0v49M85 105V56a25 25 0 0 1 50 0v49M110 31v74M70 105h80" stroke="currentColor" stroke-width="2"/>
-              <path d="M91 58h38M91 91h38M58 105h104" stroke="currentColor" stroke-opacity=".45"/>
-              <circle cx="118" cy="77" r="2" fill="currentColor"/>
-              <g class="hub-infected" fill="currentColor" opacity=".65"><circle cx="49" cy="74" r="5"/><path d="M45 80h8l3 16-2 12h-4l-2-9-2 9h-4l-1-13-5 5-2-2 8-14z"/><circle cx="170" cy="78" r="4"/><path d="M166 83h8l2 13-2 12h-3l-2-8-2 8h-4l-1-12-5 4-2-2 8-11z"/></g>
-            </svg>
-          </div>
-          <p class="hub-card__eyebrow">VOTRE DESTINATION</p>
-          <h3 id="rooms-title" data-content="stepTwoTitle">Salles &amp; difficulté</h3>
-          <p class="hub-card__description" data-content="stepTwoText">Choisissez bientôt votre salle et son niveau de difficulté. Cette section est en construction.</p>
-          <div class="hub-room-list" aria-label="Salles envisagées">
-            <span data-content="roomWorkshop">Quartier évacué</span><span data-content="roomBoiler">Station abandonnée</span><span data-content="roomLaboratory">Laboratoire</span><span data-content="roomBunker">Refuge</span>
-          </div>
-          <div class="hub-card__bottom"><div class="hub-card__locked"><span aria-hidden="true">◇</span> <span data-content="roomsStatus">Salles et difficultés à venir</span></div><span class="hub-card__footnote">SÉLECTION INDISPONIBLE</span></div>
-        </section>
-
-        <section class="hub-card hub-card--launch" aria-labelledby="launch-title">
-          <div class="hub-card__top"><span class="hub-card__number">03 <small>/ 03</small></span><span class="hub-badge hub-badge--locked"><span aria-hidden="true">◇</span> VERROUILLÉ</span></div>
-          <div class="hub-card__art hub-card__art--launch" aria-hidden="true">
-            <svg viewBox="0 0 220 130" fill="none">
-              <circle cx="110" cy="65" r="54" stroke="currentColor" stroke-opacity=".22" stroke-dasharray="2 5"/>
-              <circle cx="110" cy="65" r="41" stroke="currentColor" stroke-opacity=".4"/>
-              <path d="M94 61V51a16 16 0 0 1 32 0v10M89 61h42v32H89z" stroke="currentColor" stroke-width="2"/>
-              <circle cx="110" cy="73" r="3" stroke="currentColor" stroke-width="2"/><path d="M110 76v7M57 65h12m82 0h12" stroke="currentColor" stroke-width="2"/>
-            </svg>
-          </div>
-          <p class="hub-card__eyebrow">DERNIERS PRÉPARATIFS</p>
-          <h3 id="launch-title" data-content="stepThreeTitle">Prêt pour l’évasion ?</h3>
-          <p class="hub-card__description" data-content="stepThreeText">Retrouvez ici les derniers préparatifs avant de lancer votre escape room. Cette étape arrivera plus tard.</p>
-          <div class="hub-launch-note"><span aria-hidden="true">✧</span> <span data-content="launchNote">Disponible lorsque l’expérience sera prête.</span></div>
-          <div class="hub-card__bottom"><button class="hub-button hub-button--disabled" type="button" disabled><span>Lancer l’aventure</span><span aria-hidden="true">→</span></button><span class="hub-card__footnote">LANCEMENT À VENIR</span></div>
-        </section>
-      </div>
-
-      <aside class="hub-notice">
-        <span class="hub-notice__icon" aria-hidden="true">i</span>
-        <div><strong>Une mission en préparation</strong><p data-content="note">Le créateur est un prototype. Les salles, leurs difficultés et le lancement de l’aventure sont encore en développement.</p></div>
-        <a href="../options/options.html">Options &amp; commandes <span aria-hidden="true">↗</span></a>
-      </aside>
-      <footer class="hub-footer"><span>LAST REFUGE <b>·</b> XM</span><span>RESTEZ EN ALERTE</span><a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a><a href="../../../index.html">← RETOUR À L’ACCUEIL</a></footer>
-      </div>
-      <section id="hub-creator" class="hub-creator" aria-label="Personnalisation du personnage" hidden>
-        <button id="close-creator" class="hub-creator__back" type="button">← Retour au parcours</button>
-        <iframe id="creator-frame" title="Personnalisation du survivant" data-src="../createur-personnage/createur-personnage.html?embed=1"></iframe>
-        <footer class="hub-footer"><span>LAST REFUGE <b>·</b> XM</span><a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a></footer>
+      <section id="hub-game" class="hub-game" aria-label="Escape room en cours" hidden>
+        <div class="hub-game__bar"><span><i></i> <b id="game-title">ESCAPE ROOM</b> · IMMERSION COMPLÈTE</span><button id="exit-game" type="button">✕ Quitter l’évasion</button></div>
+        <iframe id="game-frame" title="Escape room 3D" allow="fullscreen; autoplay; gamepad"></iframe>
       </section>
     </main>
   </body>
