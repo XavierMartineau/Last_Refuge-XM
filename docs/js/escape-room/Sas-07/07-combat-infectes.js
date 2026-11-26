@@ -9,15 +9,7 @@ const ZC = CONFIG.zombies,
   fxParts = [],
   fxTracers = [],
   zRay = new THREE.Raycaster();
-const zSkin = ['#6f7d63', '#7a806a', '#5f6d58', '#84806a', '#667a6a'].map(
-  (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85 })
-);
-const zCloth = ['#3a3f33', '#4a3a30', '#2e3238', '#463c2c', '#2a3a40'].map(
-  (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.95 })
-);
-const zBlood = new THREE.MeshStandardMaterial({ color: 0x5a0a08, roughness: 0.35 }),
-  zEyeM = glow(0xffe46a, 2.4),
-  partM = new THREE.MeshBasicMaterial({ color: 0x7a0d0a }),
+const partM = new THREE.MeshBasicMaterial({ color: 0x7a0d0a }),
   tracM = new THREE.MeshBasicMaterial({
     color: 0xffe6a0,
     transparent: true,
@@ -72,87 +64,23 @@ function rebalanceZombies() {
 }
 function makeZombie(index) {
   const stats = waveStats(AV.stats, index);
-  const root = new THREE.Group(),
-    pick = (a) => a[(Math.random() * a.length) | 0],
-    sk = pick(zSkin),
-    cl = pick(zCloth),
-    pn = pick(zCloth);
-  const body = new THREE.Group();
-  root.add(body);
-  box(0.46, 0.62, 0.26, cl, 0, 1.2, 0, body);
-  [-1, 1].forEach((s) => {
-    const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), cl);
-    shoulder.scale.set(1, 0.75, 0.9);
-    shoulder.position.set(s * 0.23, 1.43, 0);
-    body.add(shoulder);
-  });
-  box(0.4, 0.24, 0.24, pn, 0, 0.8, 0, body);
-  box(0.2, 0.14, 0.01, zBlood, 0.06, 1.25, 0.135, body);
-  box(0.08, 0.3, 0.01, zBlood, -0.1, 1.1, 0.135, body);
-  const headG = new THREE.Group();
-  headG.position.set(0, 1.66, 0.03);
-  body.add(headG);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.125, 16, 12), sk);
-  head.scale.set(0.95, 1.12, 1);
-  head.castShadow = true;
-  head.userData.head = true;
-  headG.add(head);
-  box(0.055, 0.06, 0.045, sk, 0, -0.015, 0.125, headG).userData.head = true;
-  box(0.15, 0.025, 0.025, sk, 0, 0.055, 0.11, headG).userData.head = true;
-  const jaw = box(0.11, 0.05, 0.09, sk, 0, -0.11, 0.05, headG);
-  jaw.userData.head = true;
-  [-0.045, 0.045].forEach((x) => {
-    const e = new THREE.Mesh(new THREE.SphereGeometry(0.017, 8, 6), zEyeM);
-    e.position.set(x, 0.02, 0.112);
-    headG.add(e);
-  });
-  box(0.05, 0.03, 0.02, zBlood, 0.05, -0.07, 0.115, headG);
-  const arms = [-1, 1].map((s) => {
-    const a = new THREE.Group();
-    a.position.set(s * 0.29, 1.46, 0);
-    body.add(a);
-    cyl(0.065, 0.17, cl, 0, -0.085, 0, a, 10);
-    cyl(0.045, 0.3, sk, 0, -0.15, 0, a, 10);
-    const f = new THREE.Group();
-    f.position.set(0, -0.3, 0);
-    a.add(f);
-    cyl(0.04, 0.28, sk, 0, -0.14, 0, f, 10);
-    box(0.08, 0.1, 0.05, sk, 0, -0.3, 0, f);
-    a.userData.f = f;
-    return a;
-  });
-  const legs = [-1, 1].map((s) => {
-    const l = new THREE.Group();
-    l.position.set(s * 0.11, 0.8, 0);
-    body.add(l);
-    cyl(0.07, 0.4, pn, 0, -0.2, 0, l, 10);
-    const k = new THREE.Group();
-    k.position.set(0, -0.4, 0);
-    l.add(k);
-    cyl(0.055, 0.4, pn, 0, -0.2, 0, k, 10);
-    box(0.12, 0.1, 0.23, mats.dark, 0, -0.4, 0.06, k);
-    l.userData.k = k;
-    return l;
-  });
+  const model = ZombieAssets.createZombie(State.spawned);
+  const root = model.root;
   root.userData = {
     zombie: true,
-    body,
-    headG,
-    arms,
-    legs,
+    model,
     hp: stats.hp,
     maxHp: stats.hp,
     wave: index,
     state: 'walk',
-    phase: Math.random() * 6,
     speed: stats.speed,
     nextHit: 0,
-    dieT: 0,
-    lean: Math.random() * 0.2
+    dieT: 0
   };
   return root;
 }
 function spawnZombie(index = waveIndex()) {
+  if (!ZombieAssets.zombiesReady()) return false;
   let spawn = null;
   for (let i = 0; i < 48 && !spawn; i++) {
     const p = SPAWNS[(Math.random() * SPAWNS.length) | 0],
@@ -182,6 +110,7 @@ function killZombie(z, t) {
   if (u.state === 'dead') return;
   u.state = 'dead';
   u.dieT = t;
+  u.animatedDeath = ZombieAssets.killZombieModel(u.model);
   State.kills++;
   SND.play('zdie');
   hud();
@@ -224,6 +153,10 @@ function equipWeapon() {
   State.ammo = AV.stats.mag;
   State.hp = 100;
   State.spawnT = 1.5;
+  ZombieAssets.loadZombies().catch((error) => {
+    console.error('Chargement des infectés impossible :', error);
+    say('Chargement des infectés impossible. Rechargez la page pour réessayer.', 10000);
+  });
   hud();
 }
 function muzzlePos() {
@@ -333,7 +266,7 @@ function fire(e) {
     d.normalize();
     zRay.set(o, d);
     zRay.far = st.range + 4;
-    const hit = zRay.intersectObjects(alive, true)[0],
+    const hit = zRay.intersectObjects(alive.flatMap((z) => z.userData.model.hitboxes), false)[0],
       end = hit ? hit.point : o.clone().addScaledVector(d, Math.min(st.range, 40));
     tracer(muzzlePos(), end);
     if (k === 12) {
@@ -383,6 +316,7 @@ function playerHurt(n) {
     say(TEXTS.msg.zDead, 5000);
     zRoots.forEach((z) => {
       scene.remove(z);
+      ZombieAssets.disposeZombie(z.userData.model);
     });
     zRoots.length = 0;
     State.spawned = State.kills;
@@ -426,7 +360,7 @@ function combatFrame(dt, t) {
     const aliveN = zRoots.filter((z) => z.userData.state === 'walk').length;
     const index = waveIndex();
     const limit = ZC.waveSizes.slice(0, index + 1).reduce((total, count) => total + count, 0);
-    if (State.spawnT <= 0 && aliveN < ZC.maxAlive && State.spawned < limit) {
+    if (ZombieAssets.zombiesReady() && State.spawnT <= 0 && aliveN < ZC.maxAlive && State.spawned < limit) {
       if (State.wave !== index + 1) {
         State.wave = index + 1;
         say('Vague ' + State.wave + ' / ' + ZC.waveSizes.length + ' : ' + ZC.waveSizes[index] + ' infecté(s).', 3500);
@@ -454,7 +388,7 @@ function combatFrame(dt, t) {
         Math.abs(GH(rig.pos.x, rig.pos.z) - GH(z.position.x, z.position.z)) < 1.2) {
         u.nextHit = t + 1;
         if (playerHurt(ZC.hitDamage)) return;
-        u.swipe = t + 0.3;
+        ZombieAssets.attackZombie(u.model);
       }
       for (const o of zRoots)
         if (o !== z && o.userData.state === 'walk') {
@@ -469,41 +403,28 @@ function combatFrame(dt, t) {
           }
         }
       z.position.y = GH(z.position.x, z.position.z);
-      u.phase += dt * sp * 4.2;
-      const s = Math.sin(u.phase);
-      u.legs[0].rotation.x = s * 0.6;
-      u.legs[1].rotation.x = -s * 0.6;
-      u.legs[0].userData.k.rotation.x = Math.max(0, -s) * 0.7;
-      u.legs[1].userData.k.rotation.x = Math.max(0, s) * 0.7;
-      const sw = t < (u.swipe || 0) ? -0.5 : 0;
-      u.arms.forEach((a, j) => {
-        a.rotation.x = -1.35 + Math.sin(u.phase * 0.7 + j) * 0.12 + sw;
-        a.rotation.z = (j ? -1 : 1) * 0.08;
-      });
-      u.body.rotation.x = 0.16 + u.lean + Math.sin(u.phase * 0.5) * 0.03;
-      u.body.position.y = Math.abs(s) * 0.03;
-      u.headG.rotation.z = Math.sin(u.phase * 0.4) * 0.12;
+      ZombieAssets.animateZombie(u.model, dt, d > 0.95 ? sp : 0.35);
       if (State.doorExit) z.visible = false;
     } else {
       // chute puis disparition
       if (u.state === 'collapse') {
         u.state = 'dead';
         u.dieT = t + Math.random() * 0.6;
+        u.animatedDeath = ZombieAssets.killZombieModel(u.model);
       }
       const k = Math.min(1, (t - u.dieT) / 0.6);
-      if (k >= 0) {
-        u.body.rotation.x = 0.16 + (-Math.PI / 2 - 0.16) * k;
-        u.body.position.y = -0.55 * k;
-        z.rotation.y += 0;
+      if (u.animatedDeath) {
+        ZombieAssets.animateZombie(u.model, dt, 1);
+      } else if (k >= 0) {
+        u.model.body.rotation.x = -Math.PI / 2 * k;
+        u.model.body.position.y = -0.55 * k;
       }
       if (t - u.dieT > 4) {
         z.position.y -= dt * 0.4;
       }
       if (t - u.dieT > 7) {
         scene.remove(z);
-        z.traverse((o) => {
-          if (o.geometry) o.geometry.dispose();
-        });
+        ZombieAssets.disposeZombie(u.model);
         zRoots.splice(i, 1);
       }
     }

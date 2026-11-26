@@ -43,6 +43,8 @@ En première personne, les mains et l'arme équipée reprennent l'apparence et l
 
 Dans l’arène, les 13 infectés arrivent en six vagues successives de 1, 1, 2, 2, 3 et 4. Leurs PV valent respectivement 3, 4, 5, 6, 7 et 8 fois les dégâts effectifs de l’arme équipée, accessoires compris. Leur vitesse augmente aussi à chaque vague et dépend des dégâts, de la cadence et du type d’arme : les infectés sont plus lents face aux armes de mêlée. Changer d’arme rééquilibre les infectés encore vivants en conservant leur proportion de vie.
 
+Les trois modèles animés d'infectés sont chargés à l'équipement de l'arme et partagent leurs ressources ; leurs collisions de tir utilisent des volumes simplifiés. Le blob n'a pas de zone de tête.
+
 L'entrée de l'arène comprend une zone sûre délimitée : les infectés ne peuvent pas y entrer ni blesser le joueur, et aucune arme ne peut y être utilisée. Deux trousses à usage unique restaurent progressivement jusqu'à 100 PV à raison de 10 PV par seconde ; deux boîtes à usage unique remplissent instantanément le chargeur. Le rechargement normal reste gratuit et illimité. Les ressources se ramassent avec la commande de prise habituelle et restent disponibles si elles ne sont pas utiles. L'arène comprend des marches praticables, des postes thématiques et des néons moins éblouissants ; plusieurs autres salles ont également reçu des décors adaptés à leur fonction.
 
 ## Ajouter une escape room
@@ -57,6 +59,7 @@ LAST-REFUGE-XM/
 └── docs/
     ├── assets/
     │   ├── creation-personnage/      bibliothèque 3D du détenu (partagée créateur + jeu)
+    │   ├── zombie/                   modèles et animations des infectés
     │   │   ├── personnage_armes.js   point d’entrée unique
     │   │   ├── donnees/              palettes.json, données, sélection/validation
     │   │   ├── outils/ · materiaux/ · tete/ · visage/ · cheveux/ · barbes/
@@ -74,12 +77,11 @@ LAST-REFUGE-XM/
             └── salles/               salle-01-sas.js … salle-12-armurerie-arene.js
 ```
 
-Les modèles 3D utilisés par le jeu sont **générés par le code** : aucun fichier `.glb` n’est nécessaire au lancement, ce qui permet toutes les combinaisons de couleurs et de pièces. Les fichiers `.glb` exportés sont des instantanés statiques ; le mouvement des cheveux est calculé dans le jeu et n’est pas inclus dans ces exports. Le créateur peut exporter un détenu en `.glb` ou en `.png`.
+Les modèles du détenu sont **générés par le code**, ce qui permet toutes les combinaisons de couleurs et de pièces. Les fichiers `.glb` exportés sont des instantanés statiques ; le mouvement des cheveux est calculé dans le jeu et n’est pas inclus dans ces exports. Le créateur peut exporter un détenu en `.glb` ou en `.png`.
 
-### Crédits des ressources proposées
+### Crédits des infectés
 
-Ces ressources ont été proposées pour le jeu mais ne sont pas encore intégrées :
-
+- "ANIMATION ZOMBIE" (https://skfb.ly/pNsAw) by MUD is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - [Living Flesh Blob - Free Organic Horror Asset](https://skfb.ly/pGOHv), par Yury Misiyuk — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
 - [Animated Zombie Cop Running Loop](https://skfb.ly/o9xXZ), par LasquetiSpice — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
 

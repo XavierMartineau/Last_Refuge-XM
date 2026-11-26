@@ -12,6 +12,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import * as CL from '../../../assets/creation-personnage/personnage_armes.js';
+import * as ZombieAssets from '../../../assets/zombie/zombie.js';
 
 Object.assign(window, {
   THREE,
@@ -23,7 +24,8 @@ Object.assign(window, {
   ShaderPass,
   RoomEnvironment,
   RoundedBoxGeometry,
-  CL
+  CL,
+  ZombieAssets
 });
 
 if (document.fonts)
