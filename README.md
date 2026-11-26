@@ -5,13 +5,16 @@ Escape room Point & Click de survie post-apocalyptique, conçu autour d’enviro
 ## Pages
 
 - `index.html` : écran d’accueil.
-- `docs/html/mode/index.html` : choix du mode solo ou multijoueur (à venir).
-- `docs/html/info/index.html` : hub solo de préparation de l’aventure, avec créateur intégré, salles et lancement à venir.
-- `docs/html/options/index.html` : réglages et commandes desktop prévues.
-- `docs/html/dev/index.html` : tableau de bord DEV en lecture locale.
+- `docs/html/mode/mode.html` : choix du mode solo ou multijoueur (à venir).
+- `docs/html/info/info.html` : hub solo de préparation de l’aventure, avec créateur intégré, salles et lancement à venir.
+- `docs/html/createur-personnage/createur-personnage.html` : créateur de personnage.
+- `docs/html/options/options.html` : réglages et commandes desktop prévues.
+- `docs/html/dev/dev.html` : tableau de bord DEV en lecture locale.
 - `404.html` : page introuvable avec retour à l’accueil et panneau DEV.
 
 L’accueil et la page 404 restent à la racine pour l’hébergement statique. Les styles et scripts sont classés par page dans `docs/`, avec les éléments partagés dans `commun/`.
+
+Les pages publiques partagent leur identité visuelle et leurs composants dans `docs/css/commun/site.css`; chaque feuille de page ne gère que sa mise en page et ses illustrations. Le créateur de personnage est volontairement exclu de cette identité pour conserver son interface actuelle.
 
 L’interface est adaptée aux ordinateurs et aux tablettes dès 768 px de largeur. En dessous, les pages publiques affichent un message demandant un écran plus grand; cette limite dépend de la largeur, pas du type d’appareil.
 
@@ -62,15 +65,15 @@ LAST-REFUGE-XM/
 │   │   └── content.json
 │   ├── html/
 │   │   ├── createur-personnage/
-│   │   │   └── index.html
+│   │   │   └── createur-personnage.html
 │   │   ├── dev/
-│   │   │   └── index.html
+│   │   │   └── dev.html
 │   │   ├── info/
-│   │   │   └── index.html
+│   │   │   └── info.html
 │   │   ├── mode/
-│   │   │   └── index.html
+│   │   │   └── mode.html
 │   │   └── options/
-│   │       └── index.html
+│   │       └── options.html
 │   ├── js/
 │   │   ├── 404/index.js
 │   │   ├── accueil/index.js

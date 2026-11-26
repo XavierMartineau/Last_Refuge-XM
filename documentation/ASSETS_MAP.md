@@ -42,5 +42,5 @@ et, si nécessaire, les variantes `--choice-shade-*` : le catalogue généré le
 avec la couleur choisie et ses nuances. Conserver ces marqueurs lors d'une modification.
 
 Le personnage utilise un `viewBox="0 0 300 360"`. Le rendu assemble ses calques dans
-l'ordre défini dans `docs/html/createur-personnage/index.html` ; certains traits gauches
+l'ordre défini dans `docs/html/createur-personnage/createur-personnage.html` ; certains traits gauches
 sont ensuite reproduits en miroir par le script. Les choix sont validés par `sanitize()`.

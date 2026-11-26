@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#111614">
+    <meta name="theme-color" content="#111310">
     <meta name="description" content="LAST REFUGE : une expérience d’évasion et de survie dans un monde envahi par les infectés.">
     <title>LAST REFUGE — Zone de quarantaine</title>
     <link rel="icon" type="image/svg+xml" href="docs/assets/svg/identite/favicon.svg">
@@ -13,7 +13,7 @@
     <script src="docs/js/commun/content.js" data-page="accueil" data-source="docs/data/content.json" defer></script>
     <script src="docs/js/accueil/index.js" defer></script>
   </head>
-  <body class="home-page" data-device-gate>
+  <body class="home-page page-redesign page-home" data-device-gate>
     <div class="device-notice"><div class="device-notice__panel">
       <p class="device-notice__brand">LAST REFUGE · XM</p>
       <h1>Un écran plus grand<br><em>vous attend.</em></h1>
@@ -27,7 +27,11 @@
           <span class="brand__word">LAST<span> REFUGE</span></span>
         </a>
         <div class="home-header__status"><i></i> SIGNAL DE SECOURS ACTIF <span>/ XM</span></div>
-        <nav class="site-nav" aria-label="Navigation principale"><a href="docs/html/mode/index.html">Info</a></nav>
+        <nav class="site-nav" aria-label="Navigation principale">
+          <a aria-current="page" href="#contenu">Accueil</a>
+          <a href="docs/html/mode/mode.html">Expédition</a>
+          <a href="docs/html/options/options.html">Options</a>
+        </nav>
       </header>
 
       <section class="home-hero" aria-labelledby="hero-title">
@@ -37,8 +41,8 @@
           <h1 id="hero-title"><span data-content="heading">Le monde</span><br><em data-content="headingEmphasis">a changé.</em></h1>
           <p class="home-intro" data-content="intro">Les villes sont silencieuses. Les infectés approchent. Trouvez une issue avant que la zone ne se referme.</p>
           <div class="home-actions" aria-label="Actions principales">
-            <a class="action-button action-button--primary" id="start-button" href="docs/html/mode/index.html"><span data-content="start">Démarrer</span><span aria-hidden="true">↗</span></a>
-            <a class="action-button action-button--secondary" href="docs/html/options/index.html"><span data-content="options">Options</span><span aria-hidden="true">＋</span></a>
+            <a class="action-button action-button--primary" id="start-button" href="docs/html/mode/mode.html"><span data-content="start">Démarrer</span><span aria-hidden="true">↗</span></a>
+            <a class="action-button action-button--secondary" href="docs/html/options/options.html"><span data-content="options">Options</span><span aria-hidden="true">＋</span></a>
             <button class="action-button action-button--quiet" id="quit-button" type="button"><span data-content="quit">Quitter</span><span aria-hidden="true">×</span></button>
           </div>
           <div class="home-brief"><span class="home-brief__icon" aria-hidden="true">✚</span><p>UNE EXPÉRIENCE POINT &amp; CLICK<br><strong>Observez. Résolvez. Survivez.</strong></p></div>
@@ -46,17 +50,49 @@
         <div class="home-scene">
           <div class="home-scene__bar"><span><i></i> SECTEUR 07 / ZONE INFECTÉE</span><span>XM · SIGNAL REÇU</span></div>
           <div class="home-scene__image"><img src="docs/assets/svg/accueil/zone-quarantaine.svg" alt="Une ville abandonnée derrière une barricade de quarantaine, sous un ciel rouge.">
-            <svg class="home-infected" viewBox="0 0 760 520" aria-hidden="true">
-              <g class="home-infected__one" fill="#101a14"><circle cx="428" cy="331" r="10"/><path d="M418 344q10-6 20 1l5 22-4 18h-7l-4-18-3 18h-7l-3-21-9 10-4-3 13-21z"/></g>
-              <g class="home-infected__two" fill="#121c16"><circle cx="512" cy="334" r="8"/><path d="M504 345q8-5 16 1l4 20-2 15h-6l-4-14-2 14h-6l-2-19-8 9-4-3 11-19z"/></g>
-              <g class="home-infected__three" fill="#1b241b" opacity=".8"><circle cx="588" cy="326" r="6"/><path d="M582 334q6-3 12 1l3 16-2 14h-5l-2-13-2 13h-5l-2-15-6 6-3-3 9-15z"/></g>
+            <svg class="home-infected" viewBox="0 0 760 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <g transform="translate(0 360) scale(.74)">
+                <g class="home-zombie" fill="#39372c">
+                  <g class="home-zombie__body">
+                    <path d="M29-59c-8-2-14 4-16 13l-6 22c-2 7 2 11 8 10l10-17 1 22c7 5 18 5 26 0l-3-24 8-15c2-7-4-13-13-14z"/>
+                    <path d="M29-61c-6-5-8-13-4-20l-1-9 10 4 8-5c8 5 11 12 9 19l-4 8-7 5-9 3z"/>
+                    <path d="M17-49 27-43l9-5 11 7-7 6-9-3-8 9-8-5z" fill="#26291f"/>
+                    <path d="m21-14 7 7m17-8-5 8" fill="none" stroke="#565440" stroke-width="2"/>
+                    <circle cx="39" cy="-73" r="1.7" fill="#c36b43"/>
+                  </g>
+                  <g transform="translate(18 -48)">
+                    <g class="home-zombie__arm home-zombie__arm--rear">
+                      <path d="M0 0-8 8-13 23-22 31l4 5 12-7 10-15 8-7z"/>
+                      <path d="m-20 34-4 6 2 2 5-6m0 1-2 7 3 1 3-7m0-2 1 7 3 0 1-8"/>
+                    </g>
+                  </g>
+                  <g transform="translate(46 -50)">
+                    <g class="home-zombie__arm home-zombie__arm--front">
+                      <path d="M0 0 9 4l9 15 11 5-2 6-15-3-5-4-9-13-7-3z"/>
+                      <path d="m27 25 7 1-1 3-7 1m5-3 5 4-2 2-5-3m-2-3 4 7-3 1-4-7"/>
+                    </g>
+                  </g>
+                  <g transform="translate(29 -7)">
+                    <g class="home-zombie__leg home-zombie__leg--rear">
+                      <path d="M0 0-8 16-13 34-24 43l4 5 18-3 6-7 8-19L13 1z"/>
+                      <path d="m-24 43-8 3 2 5H1l-1-6" fill="#25271e"/>
+                    </g>
+                  </g>
+                  <g transform="translate(43 -7)">
+                    <g class="home-zombie__leg home-zombie__leg--front">
+                      <path d="M0 0 8 14l14 12 13 3-1 6-18 1-7-4-13-13-7-15z"/>
+                      <path d="m35 29 10 1-1 5H15l-1-5" fill="#25271e"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
             </svg>
             <span class="home-scene__scan" aria-hidden="true"></span><span class="home-scene__coordinate">48° 51’ N &nbsp; / &nbsp; 02° 20’ E</span></div>
           <div class="home-scene__footer"><span><i></i> PÉRIMÈTRE SOUS SURVEILLANCE</span><strong>MENACE <b>ÉLEVÉE</b></strong></div>
         </div>
       </section>
       <div class="home-ticker" aria-label="État du projet"><span>01 / SURVIE</span><span>02 / ÉNIGMES</span><span>03 / EXTRACTION</span><strong>PROJET EN DÉVELOPPEMENT</strong></div>
-      <footer class="home-footer"><a class="home-dev-button" href="docs/html/dev/index.html"><span>▣</span> DEV MODE <b aria-hidden="true">↗</b></a><span>LAST REFUGE <b>·</b> XM</span><span>LA SORTIE N’EST QUE LE DÉBUT</span></footer>
+      <footer class="home-footer"><a class="home-dev-button" href="docs/html/dev/dev.html"><span>▣</span> DEV MODE <b aria-hidden="true">↗</b></a><span>LAST REFUGE <b>·</b> XM</span><span>LA SORTIE N’EST QUE LE DÉBUT</span></footer>
     </main>
     <dialog class="modal modal--exit" id="exit-dialog" aria-labelledby="exit-title">
       <form method="dialog" class="modal__panel">

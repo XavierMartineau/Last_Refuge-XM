@@ -1,7 +1,7 @@
 # Créateur de personnage — guide pour l'IA
 
 Ce fichier explique le projet à un assistant IA (VS Code, Claude Code, Copilot, etc.).
-Lis-le en entier avant de modifier `docs/html/createur-personnage/index.html`.
+Lis-le en entier avant de modifier `docs/html/createur-personnage/createur-personnage.html`.
 **Lis aussi `ASSETS_MAP.md`** : il indique où se trouve chaque asset et comment conserver les index.
 
 Le CSS et le script sont dans `docs/css/createur-personnage/createur-personnage.css`

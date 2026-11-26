@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#11100d">
+    <meta name="theme-color" content="#111310">
     <meta name="description" content="Choisissez votre mode d’expédition LAST REFUGE.">
     <title>Choisir une expédition | LAST REFUGE</title>
     <link rel="icon" type="image/svg+xml" href="../../assets/svg/identite/favicon.svg">
@@ -13,7 +13,7 @@
     <script src="../../js/commun/content.js" data-page="mode" data-source="../../data/content.json" defer></script>
     <script src="../../js/mode/mode.js" defer></script>
   </head>
-  <body data-device-gate>
+  <body class="page-redesign page-mode" data-device-gate>
     <div class="device-notice"><div class="device-notice__panel">
       <p class="device-notice__brand">LAST REFUGE · XM</p>
       <h1>Un écran plus grand<br><em>vous attend.</em></h1>
@@ -25,7 +25,12 @@
         <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 41 11v12c0 10-7 17-17 21C14 40 7 33 7 23V11Z"/><circle cx="24" cy="24" r="8"/><path d="M24 19v10m-5-5h10"/></svg>
         <span class="brand__word">LAST<span> REFUGE</span></span>
       </a>
-      <nav class="site-nav" aria-label="Navigation principale"><a href="../../../index.html">Accueil</a><a href="../options/index.html">Options</a></nav>
+      <nav class="site-nav" aria-label="Navigation principale">
+        <a href="../../../index.html">Accueil</a>
+        <a aria-current="page" href="./mode.html">Expédition</a>
+        <a href="../info/info.html">Mission</a>
+        <a href="../options/options.html">Options</a>
+      </nav>
     </header>
     <main class="mode section-shell" id="mode-content">
       <div class="mode-intro">
@@ -40,7 +45,7 @@
           <p class="mode-card__eyebrow">UNE AVENTURE À VOTRE RYTHME</p>
           <h2 id="solo-title" data-content="soloTitle">En solo<span>.</span></h2>
           <p data-content="soloText">Créez votre survivant et préparez-vous à explorer la zone en solitaire.</p>
-          <a class="mode-action" href="../info/index.html"><span data-content="soloAction">Préparer ma mission</span><span aria-hidden="true">→</span></a>
+          <a class="mode-action" href="../info/info.html"><span data-content="soloAction">Préparer ma mission</span><span aria-hidden="true">→</span></a>
           <small>PERSONNAGE · SALLES · PRÉPARATION</small>
         </section>
         <section class="mode-card mode-card--multi" aria-labelledby="multi-title">

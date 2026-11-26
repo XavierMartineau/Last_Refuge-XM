@@ -564,15 +564,15 @@ AFTERLOCK-XM/
 │   │   └── content.json
 │   ├── html/
 │   │   ├── createur-personnage/
-│   │   │   └── index.html
+│   │   │   └── createur-personnage.html
 │   │   ├── dev/
-│   │   │   └── index.html
+│   │   │   └── dev.html
 │   │   ├── info/
-│   │   │   └── index.html
+│   │   │   └── info.html
 │   │   ├── mode/
-│   │   │   └── index.html
+│   │   │   └── mode.html
 │   │   └── options/
-│   │       └── index.html
+│   │       └── options.html
 │   ├── js/
 │   │   ├── 404/index.js
 │   │   ├── accueil/index.js
@@ -601,7 +601,7 @@ AFTERLOCK-XM/
 | Section | Rôle des Dossiers & Fichiers | Convention de Nommage | Exemples | 
 | ----- | ----- | ----- | ----- | 
 | **Assets** | Médias regroupés dans `docs/assets/`, puis classés par format et usage. | Dossiers en français et en `kebab-case`; noms d’assets descriptifs. | `docs/assets/svg/forge/`, `docs/assets/audio/sound-effects/`, `docs/assets/svg/identite/favicon.svg` | 
-| **HTML** | Accueil et page 404 à la racine; un dossier par page complémentaire dans `docs/html/`. | Noms descriptifs en `kebab-case`; `index.html` comme point d’entrée. | `index.html`, `404.html`, `docs/html/info/index.html`, `docs/html/options/index.html` |
+| **HTML** | Accueil et page 404 à la racine; un dossier par page complémentaire dans `docs/html/`. | Noms descriptifs en `kebab-case`; seul l’accueil utilise `index.html`. | `index.html`, `404.html`, `docs/html/info/info.html`, `docs/html/options/options.html` |
 | **Données** | Textes principaux et commandes des pages publiques dans `docs/data/`. | JSON UTF-8; préférences personnelles enregistrées dans le navigateur. | `docs/data/content.json` |
 | **CSS** | Styles par page dans `docs/css/`; styles partagés dans `commun/`. | Un dossier et un fichier nommés par page; feuille commune `site.css`. | `docs/css/accueil/accueil.css`, `docs/css/commun/site.css` |
 | **JavaScript** | Scripts par page dans `docs/js/`; scripts partagés dans `commun/`. | Un dossier par page; fonctions en `camelCase`; classes en `PascalCase`. | `docs/js/accueil/index.js`, `docs/js/commun/preferences.js` |
