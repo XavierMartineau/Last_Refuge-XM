@@ -15,7 +15,7 @@ non graphiques sont dans `donnees.json`. Après modification, lancer
 Un créateur de personnage 100 % SVG, en français, avec 3 types (Homme / Femme / Autres) et 3 étapes :
 
 1. **Base** : style (Autres seulement), teint, visage, yeux, sourcils, nez, bouche, barbe, cheveux, haut + couleurs.
-2. **Accessoires** : couvre-chef (+ sa couleur), lunettes, détails du visage.
+2. **Accessoires** : couvre-chef (+ sa couleur), lunettes, détails du visage ; ailes, cornes et détails spéciaux pour Autres.
 3. **Fond & nom** : fond (dégradés), motif, nom du personnage, police, couleur, style, taille, position.
 
 L'utilisateur final doit avoir **beaucoup de choix** dans chaque catégorie.
@@ -56,7 +56,7 @@ Le code est réparti entre les outils, les catalogues et le script de rendu :
 ### Le SVG (`viewBox="0 0 300 360"`)
 
 Calques, du fond vers l'avant (ordre à respecter) :
-`bg, back, hair-back, neck, outfit, head, beard, nose, eyes, brows, mouth, hair-front, over, top, extra, glasses, headwear, name`
+`bg, back, special-back, hair-back, neck, outfit, head, beard, nose, eyes, brows, mouth, hair-front, over, top, special-head, extra, special-face, glasses, headwear, name`
 
 ### Où sont les catalogues
 
@@ -74,6 +74,7 @@ Calques, du fond vers l'avant (ordre à respecter) :
 | Lunettes | `GLASSES` | |
 | Couvre-chefs | `HEAD`, `ACCCOL` | fonctions `couleur → svg` |
 | Détails visage | `EXTRA` | |
+| Accessoires spéciaux | `SPECIAL_BACK`, `SPECIAL_HEAD`, `SPECIAL_FACE` | trois choix indépendants, uniquement pour Autres |
 | Espèces | `SPECIES`, `SPNAMES`, `PRESETS` | traits ajoutés (`ears, back, over, top, eyes, brows`) + look complet appliqué au choix d'un style |
 | Fond | `BGP` (paires de couleurs), `BGS`, `PAT` (motifs) | |
 | Nom | `NFONTS`, `NCOL`, `NSTYLE`, `NSIZE`, `NPOS`, `nameSvg()` | polices système |
@@ -83,7 +84,7 @@ Calques, du fond vers l'avant (ordre à respecter) :
 ### L'état du personnage (et du `.json`)
 
 Tous les choix sont des **entiers à partir de 0** (0 = défaut ou « aucun »), plus `gender` (`male`, `female`, `other`) et `name` (texte, 20 caractères max). Clés :
-`species, skin, face, eyes, eyeColor, brows, nose, mouth, beard, hair, hairColor, outfit, outfitColor, glasses, headwear, accColor, extra, background, pattern, nameFont, nameColor, nameStyle, nameSize, namePos`
+`species, skin, face, eyes, eyeColor, brows, nose, mouth, beard, hair, hairColor, outfit, outfitColor, glasses, headwear, accColor, extra, specialBack, specialHead, specialFace, background, pattern, nameFont, nameColor, nameStyle, nameSize, namePos` (les trois clés `special*` sont réservées au type Autres et valent 0 si absentes).
 
 `sanitize()` remet une valeur par défaut si un index est hors limites : ne casse pas ça.
 

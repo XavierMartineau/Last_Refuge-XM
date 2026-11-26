@@ -291,6 +291,24 @@
     },
     "blush": "visages/joues.svg"
   },
+  "specialBack": [
+    "commun/vide.svg",
+    "speciaux/ailes-chauve-souris.svg",
+    "speciaux/ailes-plumes.svg",
+    "speciaux/appendices-mutants.svg"
+  ],
+  "specialHead": [
+    "commun/vide.svg",
+    "speciaux/cornes.svg",
+    "speciaux/antennes.svg",
+    "speciaux/crete-mutante.svg"
+  ],
+  "specialFace": [
+    "commun/vide.svg",
+    "speciaux/cicatrices.svg",
+    "speciaux/implant-cybernetique.svg",
+    "speciaux/marques-mutantes.svg"
+  ],
   "species": [
     {},
     {

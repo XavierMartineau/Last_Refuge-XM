@@ -16,20 +16,20 @@
     "#8a5a3b"
   ],
   "FANT": [
-    "#7fd16a",
-    "#4fb3e8",
-    "#a78bfa",
-    "#9aa3ad",
-    "#e0524d",
-    "#f08fc0",
-    "#3dc9b0",
-    "#f5d94a",
-    "#eaeef2",
-    "#2a2f45",
-    "#f59a3a",
-    "#b8e24a",
-    "#5865d6",
-    "#c0c8d2"
+    "#7a9070",
+    "#718e8c",
+    "#897d86",
+    "#9aa3a0",
+    "#985f50",
+    "#ae8c80",
+    "#638a79",
+    "#b0a378",
+    "#c9c8b7",
+    "#3d4941",
+    "#a97956",
+    "#87966a",
+    "#6c7881",
+    "#a9b0a6"
   ],
   "HAIRCOL": [
     "#16120f",
@@ -257,12 +257,12 @@
   ],
   "PNAMES": [
     "Aucun",
-    "Points",
-    "Rayures",
-    "Grille",
-    "Étoiles",
-    "Rayons",
-    "Cercles"
+    "Repères tactiques",
+    "Bandes de danger",
+    "Grille tactique",
+    "Avertissements",
+    "Barbelés",
+    "Radar"
   ],
   "FACES": [
     [
@@ -307,20 +307,20 @@
     ]
   ],
   "SPNAMES": [
-    "Humanoïde",
-    "Alien",
-    "Elfe",
-    "Démon",
-    "Vampire",
+    "Survivant atypique",
+    "Mutant à antennes",
+    "Mutant aux oreilles pointues",
+    "Mutant cornu",
+    "Infecté aux crocs",
     "Zombie",
-    "Robot",
-    "Cyclope",
-    "Ange",
-    "Homme-chat",
-    "Orc",
-    "Troisième œil",
-    "Dragonnet",
-    "Fée"
+    "Cyborg",
+    "Mutant cyclope",
+    "Mutant ailé",
+    "Mutant félin",
+    "Mutant massif",
+    "Mutant à trois yeux",
+    "Mutant reptilien",
+    "Mutant aux ailes fines"
   ],
   "PRESETS": [
     {

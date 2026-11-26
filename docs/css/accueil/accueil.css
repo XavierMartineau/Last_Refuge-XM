@@ -26,9 +26,10 @@
   z-index: 3;
   max-width: 610px;
   padding: 24px 28px;
-  border-left: 2px solid rgba(195, 129, 78, .8);
-  background: linear-gradient(90deg, rgba(14, 17, 14, .9), rgba(14, 17, 14, .58) 72%, transparent);
-  box-shadow: -16px 0 42px rgba(0, 0, 0, .13);
+  border-left: 3px solid rgba(195, 129, 78, .9);
+  background:
+    linear-gradient(90deg, rgba(14, 17, 14, .96), rgba(14, 17, 14, .74) 72%, transparent);
+  box-shadow: -16px 0 42px rgba(0, 0, 0, .2);
 }
 
 .page-home .home-kicker {
@@ -98,7 +99,7 @@
   place-items: center;
   border: 1px solid var(--line-strong);
   color: #d79a68;
-  background: var(--panel);
+  background: linear-gradient(145deg, #302820, #1a1e18);
   font-size: 22px;
 }
 
@@ -246,10 +247,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 14px 30px;
-  padding: 14px 0;
+  padding: 15px 14px;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  color: #b7b9ab;
+  color: #d3d4c8;
+  background: rgba(17, 20, 16, .8);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .12em;
@@ -304,11 +306,11 @@
 }
 
 :root[data-motion="full"] .page-home .home-zombie {
-  animation: zombie-cross 34s linear 8s infinite;
+  animation: zombie-cross 42s linear 2s infinite;
 }
 
 :root[data-motion="reduced"] .page-home .home-zombie {
-  animation: zombie-cross 58s linear 8s infinite;
+  animation: zombie-cross 70s linear 2s infinite;
 }
 
 .page-home .home-zombie__body {
@@ -321,7 +323,7 @@
 }
 
 :root[data-motion="full"] .page-home .home-zombie__body {
-  animation: zombie-lurch .7s ease-in-out infinite alternate;
+  animation: zombie-lurch .9s ease-in-out infinite alternate;
 }
 
 :root[data-motion="reduced"] .page-home .home-zombie__body {
@@ -330,12 +332,12 @@
 
 :root[data-motion="full"] .page-home .home-zombie__arm--rear,
 :root[data-motion="full"] .page-home .home-zombie__leg--front {
-  animation: zombie-step .62s ease-in-out infinite alternate;
+  animation: zombie-step .9s ease-in-out infinite alternate;
 }
 
 :root[data-motion="full"] .page-home .home-zombie__arm--front,
 :root[data-motion="full"] .page-home .home-zombie__leg--rear {
-  animation: zombie-step-reverse .62s ease-in-out infinite alternate;
+  animation: zombie-step-reverse .9s ease-in-out infinite alternate;
 }
 
 :root[data-motion="reduced"] .page-home .home-zombie__arm--rear,
@@ -360,10 +362,10 @@
 }
 
 @keyframes zombie-cross {
-  0%, 12% { opacity: 0; transform: translateX(-80px); }
-  15% { opacity: .96; }
-  42% { opacity: .96; transform: translateX(950px); }
-  46%, 100% { opacity: 0; transform: translateX(1050px); }
+  0%, 6% { opacity: 0; transform: translateX(-80px); }
+  9% { opacity: .96; }
+  51% { opacity: .96; transform: translateX(890px); }
+  54%, 100% { opacity: 0; transform: translateX(950px); }
 }
 
 @keyframes zombie-lurch {

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#454a3b"/><stop offset="1" stop-color="#151b17"/></linearGradient>
+    <linearGradient id="door" x2="1" y2="1"><stop stop-color="#596052"/><stop offset="1" stop-color="#252c26"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#e0a26b" stop-opacity=".38"/><stop offset="1" stop-color="#e0a26b" stop-opacity="0"/></radialGradient>
+  </defs>
+  <path fill="url(#wall)" d="M0 0h1200v220H0z"/>
+  <path fill="#252b24" d="M0 0h1200v38H0zM0 172h1200v48H0z"/>
+  <path d="M0 40h1200M0 169h1200M0 190h1200" fill="none" stroke="#707260" stroke-opacity=".35" stroke-width="2"/>
+  <path d="M30 40v130m115-130v130m126-130v130m657-130v130m125-130v130m115-130v130" fill="none" stroke="#101711" stroke-width="6" opacity=".6"/>
+  <path d="M290 171V51l46-22h527l46 22v120" fill="#19211b" stroke="#737764" stroke-width="5"/>
+  <path d="M344 168V58h512v110" fill="url(#door)" stroke="#171c17" stroke-width="5"/>
+  <path d="M599 58v110M352 87h494M352 140h494" fill="none" stroke="#202a21" stroke-width="4"/>
+  <path d="M574 87h52v53h-52z" fill="#1c251e" stroke="#8d8a70" stroke-width="3"/>
+  <circle cx="600" cy="113" r="18" fill="none" stroke="#b09a76" stroke-width="4"/>
+  <path d="M600 96v34m-17-17h34" stroke="#b09a76" stroke-width="3"/>
+  <path d="M365 60l-20 23m49-23-20 23m420-23-20 23m49-23-20 23" stroke="#a57e4c" stroke-width="8" opacity=".7"/>
+  <g fill="#c6a076"><circle cx="316" cy="61" r="3"/><circle cx="884" cy="61" r="3"/><circle cx="316" cy="155" r="3"/><circle cx="884" cy="155" r="3"/></g>
+  <path d="M65 154h120v-39H65zM1000 154h120v-39h-120z" fill="#202820" stroke="#6b705d" stroke-width="3"/>
+  <path d="M67 117l55 36m61-36-55 36m874-36 55 36m61-36-55 36" stroke="#67705c" stroke-width="3" opacity=".6"/>
+  <circle cx="215" cy="48" r="75" fill="url(#light)"/><circle cx="985" cy="48" r="75" fill="url(#light)"/>
+  <path d="M202 36h26v12h-26zM972 36h26v12h-26z" fill="#d49762" stroke="#2a2820" stroke-width="3"/>
+  <path d="M0 203l145-10 174 8 176-8 197 8 207-8 160 8 141-7" fill="none" stroke="#85856e" stroke-opacity=".25" stroke-width="2"/>
+</svg>

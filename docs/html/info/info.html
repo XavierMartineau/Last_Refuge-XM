@@ -31,12 +31,6 @@
         <span class="brand__word">LAST<span> REFUGE</span></span>
       </a>
       <div class="hub-header__center"><span></span> MISSION SOLO <span></span></div>
-      <nav class="site-nav" aria-label="Navigation principale">
-        <a href="../../../index.html">Accueil</a>
-        <a href="../mode/mode.html">Modes</a>
-        <a aria-current="page" href="./info.html">Mission</a>
-        <a href="../options/options.html">Options</a>
-      </nav>
     </header>
 
     <main class="hub section-shell" id="hub-content">
@@ -72,6 +66,11 @@
         <div class="hub-hero__index" aria-hidden="true">01 — 03</div>
       </section>
 
+      <div class="bunker-strip" aria-hidden="true">
+        <img src="../../assets/svg/commun/bunker.svg" alt="">
+        <div class="bunker-strip__copy"><span>REFUGE / SAS SÉCURISÉ</span><strong>POSTE DE PRÉPARATION</strong><small>ACCÈS AU BUNKER · XM</small></div>
+        <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
+      </div>
       <div class="hub-section-heading">
         <div>
           <p class="hub-kicker"><span class="hub-kicker__light"></span> VOTRE FEUILLE DE ROUTE</p>
@@ -144,11 +143,12 @@
         <div><strong>Une mission en préparation</strong><p data-content="note">Le créateur est un prototype. Les salles, leurs difficultés et le lancement de l’aventure sont encore en développement.</p></div>
         <a href="../options/options.html">Options &amp; commandes <span aria-hidden="true">↗</span></a>
       </aside>
-      <footer class="hub-footer"><span>LAST REFUGE <b>·</b> XM</span><span>RESTEZ EN ALERTE</span><a href="../../../index.html">← RETOUR À L’ACCUEIL</a></footer>
+      <footer class="hub-footer"><span>LAST REFUGE <b>·</b> XM</span><span>RESTEZ EN ALERTE</span><a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a><a href="../../../index.html">← RETOUR À L’ACCUEIL</a></footer>
       </div>
       <section id="hub-creator" class="hub-creator" aria-label="Personnalisation du personnage" hidden>
         <button id="close-creator" class="hub-creator__back" type="button">← Retour au parcours</button>
         <iframe id="creator-frame" title="Personnalisation du survivant" data-src="../createur-personnage/createur-personnage.html?embed=1"></iframe>
+        <footer class="hub-footer"><span>LAST REFUGE <b>·</b> XM</span><a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a></footer>
       </section>
     </main>
   </body>

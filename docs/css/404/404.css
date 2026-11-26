@@ -6,6 +6,7 @@
 }
 
 .page-not-found .not-found__panel {
+  position: relative;
   display: grid;
   width: min(900px, 100%);
   min-height: 450px;
@@ -15,12 +16,23 @@
   gap: 18px 42px;
   padding: 48px 60px 26px;
   border: 1px solid var(--line-strong);
+  border-left: 3px solid #b97a4e;
   border-radius: 2px;
   background:
     repeating-linear-gradient(135deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 5px),
     radial-gradient(ellipse at 87% 35%, rgba(143, 102, 54, .14), transparent 32%),
     linear-gradient(145deg, #292c23, #171a16 72%);
   box-shadow: 0 24px 60px rgba(0, 0, 0, .35);
+}
+
+.page-not-found .not-found__panel::before {
+  position: absolute;
+  top: -1px;
+  right: 0;
+  width: 80px;
+  height: 5px;
+  background: repeating-linear-gradient(135deg, #b68050 0 8px, #39352a 8px 16px);
+  content: "";
 }
 
 .page-not-found .not-found__copy {
@@ -78,6 +90,23 @@
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.page-not-found .bunker-strip {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.page-not-found .not-found__dev-link {
+  color: #e2b18a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.page-not-found .not-found__dev-link:hover {
+  text-decoration: underline;
 }
 
 .page-not-found .not-found__folio {

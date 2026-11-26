@@ -9,12 +9,14 @@ Escape room Point & Click de survie post-apocalyptique, conçu autour d’enviro
 - `docs/html/info/info.html` : hub solo de préparation de l’aventure, avec créateur intégré, salles et lancement à venir.
 - `docs/html/createur-personnage/createur-personnage.html` : créateur de personnage.
 - `docs/html/options/options.html` : réglages et commandes desktop prévues.
-- `docs/html/dev/dev.html` : tableau de bord DEV en lecture locale.
+- `docs/html/dev/dev.html` : poste DEV, diagnostics locaux en direct et accès direct aux pages du projet.
 - `404.html` : page introuvable avec retour à l’accueil et panneau DEV.
 
 L’accueil et la page 404 restent à la racine pour l’hébergement statique. Les styles et scripts sont classés par page dans `docs/`, avec les éléments partagés dans `commun/`.
 
-Les pages publiques partagent leur identité visuelle et leurs composants dans `docs/css/commun/site.css`; chaque feuille de page ne gère que sa mise en page et ses illustrations. Le créateur de personnage est volontairement exclu de cette identité pour conserver son interface actuelle.
+Les pages publiques partagent leur identité visuelle et leurs composants dans `docs/css/commun/site.css`; chaque feuille de page gère sa mise en page et ses illustrations. Le créateur utilise sa propre feuille de style. Le poste DEV est accessible depuis toutes les pages et ne transmet pas ses diagnostics : l’état réseau affiché est celui déclaré par le navigateur, sans test de connexion.
+
+Les bandeaux de surveillance utilisent des SVG originaux de bunker et de périmètre. Le radar, ses échos et les mouvements des infectés respectent le réglage d’animation et la préférence système de réduction du mouvement, y compris dans le créateur.
 
 L’interface est adaptée aux ordinateurs et aux tablettes dès 768 px de largeur. En dessous, les pages publiques affichent un message demandant un écran plus grand; cette limite dépend de la largeur, pas du type d’appareil.
 

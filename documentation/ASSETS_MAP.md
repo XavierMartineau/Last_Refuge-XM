@@ -4,6 +4,10 @@ Les dessins sont dans `docs/assets/creation-personnage/`, classés par catégori
 par `manifest.json`. `donnees.json` contient les palettes, les dimensions des visages,
 les noms et les looks prédéfinis ; aucun dessin n'y est défini en JavaScript.
 
+Les équipements, détails et décors privilégient le thème militaire et survie zombie.
+Les indices des anciens personnages sont conservés, mais leur apparence peut évoluer
+quand un dessin est remplacé.
+
 Après toute modification d'un SVG, du manifest ou des données, exécuter :
 
 ```text
@@ -24,6 +28,7 @@ directe en `file://`. Ne pas le modifier à la main.
 | `tenues/{male,female,other}/` | vêtements selon le type |
 | `lunettes/`, `couvre-chefs/`, `details/` | accessoires ; certains détails contiennent plusieurs variantes de visage |
 | `especes/` | calques des styles Autres : oreilles, arrière, dessus, yeux et sourcils |
+| `speciaux/` | accessoires exclusifs au type Autres : ailes, cornes et détails du visage |
 | `fonds-et-noms/fonds/`, `fonds-et-noms/motifs/` | fonds et motifs SVG |
 
 Chaque position dans les tableaux du manifest est l'index sauvegardé dans les fichiers

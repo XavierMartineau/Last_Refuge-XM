@@ -42,11 +42,17 @@
           </svg>
           <span>SIGNAL PERDU</span>
         </div>
+        <div class="bunker-strip" aria-hidden="true">
+          <img src="docs/assets/svg/commun/perimetre.svg" alt="">
+          <div class="bunker-strip__copy"><span>SIGNAL PERDU / SECTEUR INCONNU</span><strong>ZONE NON CARTOGRAPHIÉE</strong><small>RETOUR AU REFUGE CONSEILLÉ</small></div>
+          <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
+        </div>
         <footer class="not-found__footer">
           <button class="dev-mode-button" id="dev-mode-toggle" type="button" aria-expanded="false" aria-controls="dev-panel">
             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/><circle cx="7" cy="5" r="1.5"/><circle cx="13" cy="10" r="1.5"/><circle cx="9" cy="15" r="1.5"/></svg>
             <span>DEV MODE</span>
           </button>
+          <a class="not-found__dev-link" href="docs/html/dev/dev.html">Centre de contrôle ↗</a>
           <span class="not-found__folio">LAST REFUGE <i aria-hidden="true"></i> ZONE DE QUARANTAINE</span>
         </footer>
         <aside class="not-found__dev-panel" id="dev-panel" aria-label="Informations de développement" hidden>

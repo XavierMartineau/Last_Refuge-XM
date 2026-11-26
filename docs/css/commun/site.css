@@ -1034,6 +1034,163 @@ body.page-redesign::before {
   pointer-events: none;
 }
 
+.bunker-strip {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 120px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  overflow: hidden;
+  margin: 20px 0;
+  padding: 18px 26px;
+  border: 1px solid #6c6d59;
+  border-left: 3px solid #c18659;
+  color: #f0eee3;
+  background: #1b221c;
+}
+
+.bunker-strip > img {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .8;
+}
+
+.bunker-strip::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(13, 18, 14, .97), rgba(13, 18, 14, .65) 40%, rgba(13, 18, 14, .18) 70%, rgba(13, 18, 14, .75));
+  content: "";
+}
+
+.bunker-strip::after {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d69a72;
+  box-shadow: 0 0 10px rgba(227, 139, 88, .6);
+  content: "";
+}
+
+.bunker-strip__copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.bunker-strip__copy span,
+.bunker-strip__copy small {
+  color: #e0b08b;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+
+.bunker-strip__copy small {
+  color: #d0d1bf;
+}
+
+.bunker-strip__copy strong {
+  color: #f0eee3;
+  font-size: 16px;
+  letter-spacing: .06em;
+}
+
+.bunker-strip__radar {
+  width: 76px;
+  height: 76px;
+  flex: 0 0 76px;
+  fill: none;
+  stroke: #ceaa84;
+  stroke-width: 1;
+}
+
+.bunker-strip__sweep {
+  transform-origin: 40px 40px;
+  fill: rgba(224, 172, 117, .26);
+  stroke: #e0ac75;
+}
+
+.bunker-strip__blip {
+  fill: #f3c08e;
+  stroke: none;
+  opacity: .65;
+}
+
+.bunker-strip__echo {
+  transform-box: fill-box;
+  transform-origin: center;
+  stroke: #e0ac75;
+  opacity: .12;
+}
+
+:root[data-motion="full"] .bunker-strip__sweep {
+  animation: bunker-sweep 8s linear infinite;
+}
+
+:root[data-motion="full"] .bunker-strip__blip {
+  animation: bunker-contact 8s linear infinite;
+}
+
+:root[data-motion="full"] .bunker-strip__echo {
+  animation: bunker-echo 8s ease-out infinite;
+}
+
+:root[data-motion="reduced"] .bunker-strip__sweep {
+  animation: bunker-sweep 24s linear infinite;
+}
+
+:root[data-motion="full"] .bunker-strip > img {
+  animation: bunker-drift 24s ease-in-out infinite alternate;
+}
+
+:root[data-motion="full"] .bunker-strip::after {
+  animation: bunker-beacon 3.5s ease-in-out infinite;
+}
+
+@keyframes bunker-sweep {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bunker-contact {
+  0%, 100% { opacity: 1; }
+  30%, 80% { opacity: .15; }
+}
+
+@keyframes bunker-echo {
+  0% { opacity: .55; transform: scale(.2); }
+  65%, 100% { opacity: 0; transform: scale(1.1); }
+}
+
+@keyframes bunker-drift {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.09); }
+}
+
+@keyframes bunker-beacon {
+  0%, 100% { opacity: .5; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bunker-strip__sweep,
+  .bunker-strip__blip,
+  .bunker-strip__echo,
+  .bunker-strip > img,
+  .bunker-strip::after {
+    animation: none !important;
+  }
+}
+
 :root[data-contrast="high"] body.page-redesign {
   --line: rgba(235, 231, 205, .68);
   --line-strong: rgba(255, 247, 215, .92);
@@ -1083,8 +1240,8 @@ body.page-redesign::before {
 }
 
 .page-redesign .site-nav {
-  gap: clamp(14px, 2vw, 28px);
-  color: #b7b9ae;
+  gap: clamp(8px, 1.3vw, 18px);
+  color: #c9cbbf;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .12em;
@@ -1094,16 +1251,44 @@ body.page-redesign::before {
   display: inline-flex;
   min-height: 44px;
   align-items: center;
-  padding: 8px 0;
+  padding: 8px 10px;
+  border: 1px solid transparent;
 }
 
 .page-redesign .site-nav a[aria-current="page"] {
   color: var(--brass-light);
+  border-color: rgba(185, 111, 60, .4);
+  background: rgba(185, 111, 60, .09);
+}
+
+.page-redesign .site-nav a:hover,
+.page-redesign .site-nav a:focus-visible {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, .035);
 }
 
 .page-redesign .site-nav a::after {
   height: 2px;
   background: var(--brass);
+}
+
+.page-redesign .footer-dev-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #a1a48f;
+  color: #f5f2e6;
+  background: #30352b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.page-redesign .footer-dev-link:hover,
+.page-redesign .footer-dev-link:focus-visible {
+  border-color: var(--brass);
+  color: var(--brass-light);
 }
 
 .page-redesign .nav-status {
@@ -1401,6 +1586,18 @@ body.page-redesign::before {
     linear-gradient(150deg, #30271f, #1b1d17 78%);
 }
 
+.page-redesign .mode-card,
+.page-redesign .hub-card,
+.page-redesign .options-card,
+.page-redesign .dev-card,
+.page-redesign .dev-route {
+  box-shadow: inset 0 1px rgba(226, 218, 185, .08), 0 12px 30px rgba(0, 0, 0, .18);
+}
+
+.page-redesign .site-nav a[aria-current="page"] {
+  box-shadow: inset 0 -2px #c28558;
+}
+
 .page-redesign .hub-badge--active {
   border-color: rgba(185, 111, 60, .55);
   color: #e9b38d;
@@ -1460,7 +1657,8 @@ body.page-redesign::before {
   }
 
   .page-redesign .home-header__status,
-  .page-redesign .hub-header__center {
+  .page-redesign .hub-header__center,
+  .page-redesign .options-header .nav-status {
     display: none;
   }
 
@@ -1548,10 +1746,10 @@ body.page-redesign::before {
   50% { opacity: 1; }
 }
 
-:root[data-motion="full"] .page-redesign .mode-card,
-:root[data-motion="full"] .page-redesign .hub-card,
-:root[data-motion="full"] .page-redesign .options-card,
-:root[data-motion="full"] .page-redesign .dev-card {
+:root[data-motion="full"] .page-redesign .mode-card:nth-child(n),
+:root[data-motion="full"] .page-redesign .hub-card:nth-child(n),
+:root[data-motion="full"] .page-redesign .options-card:nth-child(n),
+:root[data-motion="full"] .page-redesign .dev-card:nth-child(n) {
   transition: transform 260ms ease, border-color 260ms ease, box-shadow 260ms ease;
 }
 
@@ -1609,6 +1807,13 @@ body.page-redesign::before {
 :root[data-motion="full"] .page-redesign .dev-card:first-child,
 :root[data-motion="full"] .page-redesign .home-ticker {
   animation: field-report-enter 650ms cubic-bezier(.2, .7, .2, 1) 260ms both;
+}
+
+:root[data-motion="full"] .page-redesign .mode-card,
+:root[data-motion="full"] .page-redesign .hub-card,
+:root[data-motion="full"] .page-redesign .options-card,
+:root[data-motion="full"] .page-redesign .dev-card {
+  animation-fill-mode: backwards;
 }
 
 :root[data-motion="full"] .page-redesign .hub-card:nth-child(2),

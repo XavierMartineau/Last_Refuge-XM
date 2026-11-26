@@ -14,21 +14,25 @@
 <header class="topbar">
  <a class="brand" href="../../../index.html"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 41 11v12c0 10-7 17-17 21C14 40 7 33 7 23V11Z"/><circle cx="24" cy="24" r="8"/><path d="M24 19v10m-5-5h10"/></svg><span>LAST<span> REFUGE</span></span></a>
  <span class="topbar__label">POSTE DE PERSONNALISATION <b> / XM</b></span>
- <a class="return-link" href="../info/info.html">← Retour au hub</a>
 </header>
 <main class="creator">
  <div class="creator-heading">
   <div><p class="eyebrow"><span></span> PREMIÈRE ÉTAPE · VOTRE IDENTITÉ</p><h1>Créez votre <em>survivant.</em></h1><p>Préparez votre survivant avant de franchir le périmètre.</p></div>
   <span class="prototype-tag"><i></i> CRÉATEUR EN DÉVELOPPEMENT</span>
  </div>
+ <div class="bunker-strip" aria-hidden="true">
+  <img src="../../assets/svg/commun/bunker.svg" alt="">
+  <div class="bunker-strip__copy"><span>REFUGE / IDENTIFICATION</span><strong>DOSSIER DU SURVIVANT</strong><small>POSTE DE PERSONNALISATION · XM</small></div>
+  <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
+ </div>
  <section class="card" id="stage" aria-labelledby="preview-title">
   <div class="stage-heading"><div><p class="eyebrow">DOSSIER DU SURVIVANT</p><h2 id="preview-title">Votre aperçu</h2></div><span>XM / 01</span></div>
   <div class="portrait-frame">
   <svg id="character" viewBox="0 0 300 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Personnage">
    <!-- Calques, du fond vers l’avant -->
-   <g id="layer-bg"></g><g id="layer-back"></g><g id="layer-hair-back"></g><g id="layer-neck"></g><g id="layer-outfit"></g>
+   <g id="layer-bg"></g><g id="layer-back"></g><g id="layer-special-back"></g><g id="layer-hair-back"></g><g id="layer-neck"></g><g id="layer-outfit"></g>
    <g id="layer-head"></g><g id="layer-beard"></g><g id="layer-nose"></g><g id="layer-eyes"></g><g id="layer-brows"></g><g id="layer-mouth"></g>
-   <g id="layer-hair-front"></g><g id="layer-over"></g><g id="layer-top"></g><g id="layer-extra"></g><g id="layer-glasses"></g><g id="layer-headwear"></g><g id="layer-name"></g>
+   <g id="layer-hair-front"></g><g id="layer-over"></g><g id="layer-top"></g><g id="layer-special-head"></g><g id="layer-extra"></g><g id="layer-special-face"></g><g id="layer-glasses"></g><g id="layer-headwear"></g><g id="layer-name"></g>
   </svg>
   </div>
   <div class="stage-caption"><span><i></i> APERÇU EN DIRECT</span><span>LAST REFUGE · XM</span></div>
@@ -52,7 +56,8 @@
  <div class="gallery-dialog__header"><div><p class="eyebrow">PERSONNALISATION · XM</p><h2 id="gallery-title"></h2></div><button id="gallery-close" type="button" aria-label="Fermer la sélection">×</button></div>
  <div class="gallery-dialog__body"><div class="gallery-dialog__portrait"><p class="eyebrow">APERÇU EN DIRECT</p><div id="gallery-portrait"></div></div><div class="gallery-dialog__choices"><p class="gallery-dialog__hint">Choisissez une option pour voir le résultat.</p><div id="gallery-options" class="choice-grid"></div></div></div>
 </dialog>
-<footer class="footer"><span>LAST REFUGE · XM</span><span>RESTEZ EN ALERTE</span></footer>
+<footer class="footer"><span>LAST REFUGE · XM</span><div class="footer__actions"><a class="return-link" href="../dev/dev.html">DEV MODE</a><a class="return-link" href="../info/info.html">← Retour au hub</a></div></footer>
+<script src="../../js/commun/preferences.js" defer></script>
 <script src="../../js/createur-personnage/outils.js" defer></script>
 <script src="../../js/createur-personnage/assets-generes.js" defer></script>
 <script src="../../js/createur-personnage/createur-personnage.js" defer></script>

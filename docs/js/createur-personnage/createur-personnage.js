@@ -1,4 +1,12 @@
 // Nom (texte SVG)
+const creatorMotionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
+function applyCreatorMotion(){
+  document.documentElement.dataset.motion=creatorMotionQuery.matches?'off':window.afterlockPreferences.load().motion;
+}
+creatorMotionQuery.addEventListener('change',applyCreatorMotion);
+window.addEventListener('storage',applyCreatorMotion);
+applyCreatorMotion();
+
 function nameSvg(s){
  const t=(s.name||'').trim(); if(!t)return '';
  const fs=[20,26,32,40][s.nameSize], y=s.namePos?fs+16:344, col=NCOL[s.nameColor], ff=NFONTS[s.nameFont][1];
@@ -13,21 +21,22 @@ function nameSvg(s){
   T(`fill="${col}"`)][s.nameStyle];
 }
 // Listes par type : seules ces entrées changent entre homme / femme / autres
-const REGS=g=>({...(g==='other'?{species:SPECIES}:{}),skin:g==='other'?FANT:HUMAN,face:FACES,eyes:EYES,eyeColor:EYECOL,brows:BROWS,nose:NOSE,mouth:MOUTH,...(g==='female'?{}:{beard:BEARD}),
+const REGS=g=>({...(g==='other'?{species:SPECIES,specialBack:SPECIAL_BACK,specialHead:SPECIAL_HEAD,specialFace:SPECIAL_FACE}:{}),skin:g==='other'?FANT:HUMAN,face:FACES,eyes:EYES,eyeColor:EYECOL,brows:BROWS,nose:NOSE,mouth:MOUTH,...(g==='female'?{}:{beard:BEARD}),
  hair:HAIRS[g],hairColor:HAIRCOL,outfit:OUTFITS[g],outfitColor:OUTCOL,glasses:GLASSES,headwear:HEAD,accColor:ACCCOL,extra:EXTRA,background:BGS,pattern:PAT,nameFont:NFONTS,nameColor:NCOL,nameStyle:NSTYLE,nameSize:NSIZE,namePos:NPOS});
-const LABEL={species:'Style (espèce)',skin:'Teint',face:'Visage',eyes:'Yeux',eyeColor:'Couleur yeux',brows:'Sourcils',nose:'Nez',mouth:'Bouche',beard:'Barbe',hair:'Cheveux',hairColor:'Couleur cheveux',outfit:'Haut',outfitColor:'Couleur haut',glasses:'Lunettes',headwear:'Couvre-chef',extra:'Détail',background:'Fond',accColor:'Couleur couvre-chef',pattern:'Motif du fond',nameFont:'Police du nom',nameColor:'Couleur du nom',nameStyle:'Style du nom',nameSize:'Taille',namePos:'Position'};
+const LABEL={species:'Style (espèce)',skin:'Teint',face:'Visage',eyes:'Yeux',eyeColor:'Couleur yeux',brows:'Sourcils',nose:'Nez',mouth:'Bouche',beard:'Barbe',hair:'Cheveux',hairColor:'Couleur cheveux',outfit:'Haut',outfitColor:'Couleur haut',glasses:'Lunettes',headwear:'Couvre-chef',extra:'Détail',specialBack:'Ailes et appendices',specialHead:'Cornes et antennes',specialFace:'Détails spéciaux',background:'Fond',accColor:'Couleur couvre-chef',pattern:'Motif du fond',nameFont:'Police du nom',nameColor:'Couleur du nom',nameStyle:'Style du nom',nameSize:'Taille',namePos:'Position'};
 const GENDERS={male:'Homme',female:'Femme',other:'Autres'};
-const DEF={species:1,skin:3,face:0,eyes:0,eyeColor:1,brows:1,nose:0,mouth:0,beard:0,hair:3,hairColor:2,outfit:0,outfitColor:0,glasses:0,headwear:0,extra:0,background:0,accColor:0,pattern:0,nameFont:0,nameColor:0,nameStyle:0,nameSize:1,namePos:0};
+const DEF={species:1,skin:3,face:0,eyes:0,eyeColor:1,brows:1,nose:0,mouth:0,beard:0,hair:3,hairColor:2,outfit:0,outfitColor:0,glasses:0,headwear:0,extra:0,specialBack:0,specialHead:0,specialFace:0,background:0,accColor:0,pattern:0,nameFont:0,nameColor:0,nameStyle:0,nameSize:1,namePos:0};
 
 /* ============ 3. RENDU ============ */
 const $=id=>document.getElementById(id), svg=$('character'), mirror=s=>`<g>${s}</g><g transform="translate(300 0) scale(-1 1)">${s}</g>`;
 const STEPS=[{t:'1. Base',keys:['species','skin','face','eyes','eyeColor','brows','nose','mouth','beard','hair','hairColor','outfit','outfitColor']},
- {t:'2. Accessoires',keys:['headwear','accColor','glasses','extra']},{t:'3. Fond & nom',keys:['background','pattern','nameFont','nameColor','nameStyle','nameSize','namePos']}];
+ {t:'2. Accessoires',keys:['headwear','accColor','glasses','extra','specialBack','specialHead','specialFace']},{t:'3. Fond & nom',keys:['background','pattern','nameFont','nameColor','nameStyle','nameSize','namePos']}];
 let cur=0,maxStep=0;   // maxStep : étape la plus loin débloquée (via « Continuer »)
 let state={gender:'male',...DEF};
 let galleryKey=null;
 const emptyChoices=new Set(['hair','beard','glasses','headwear','extra']);
-const choiceName=(k,i)=>i===0&&emptyChoices.has(k)?'Aucun':'Choix '+(i+1);
+const specialNames={specialBack:['Aucun','Ailes de chauve-souris','Ailes de plumes','Appendices mutants'],specialHead:['Aucun','Cornes','Antennes','Crête mutante'],specialFace:['Aucun','Cicatrices','Implant cybernétique','Marques mutantes']};
+const choiceName=(k,i)=>specialNames[k]?.[i]??(i===0&&emptyChoices.has(k)?'Aucun':'Choix '+(i+1));
 const STEP_DETAILS=[
   ['La base','Choisissez la silhouette et les traits de votre survivant.'],
   ['Les accessoires','Complétez votre équipement avant la mission.'],
@@ -44,9 +53,10 @@ function preview(k,i,s,reg,f){
     hair:()=>reg.hair[i].join(''),
     outfit:()=>OUTFITS[s.gender][i](c,s.gender).replaceAll('tcl',`tcl-preview-${i}`),
     glasses:()=>GLASSES[i], headwear:()=>call(HEAD[i],ACCCOL[s.accColor]),
-    extra:()=>call(EXTRA[i],{cw:f[0]})
+    extra:()=>call(EXTRA[i],{cw:f[0]}),
+    specialBack:()=>SPECIAL_BACK[i], specialHead:()=>SPECIAL_HEAD[i], specialFace:()=>SPECIAL_FACE[i]
   };
-  const boxes={face:'75 45 150 175',eyes:'100 105 100 48',brows:'100 90 100 35',nose:'130 135 40 40',mouth:'120 165 60 45',beard:'75 125 150 115',hair:'65 10 170 220',outfit:'45 195 210 165',glasses:'85 105 130 60',headwear:'65 0 170 130',extra:'75 90 150 170'};
+  const boxes={face:'75 45 150 175',eyes:'100 105 100 48',brows:'100 90 100 35',nose:'130 135 40 40',mouth:'120 165 60 45',beard:'75 125 150 115',hair:'65 10 170 220',outfit:'45 195 210 165',glasses:'85 105 130 60',headwear:'65 0 170 130',extra:'75 90 150 170',specialBack:'0 145 300 135',specialHead:'60 20 180 85',specialFace:'90 125 120 65'};
   const art=drawings[k]();
   return art?`<svg viewBox="${boxes[k]}" aria-hidden="true" style="--skin:${reg.skin[s.skin]};--hair:${HAIRCOL[s.hairColor]};--brow:${sh(HAIRCOL[s.hairColor],-.15)}">${art}</svg>`:'<span aria-hidden="true">—</span>';
 }
@@ -62,7 +72,7 @@ function render(raw){
   const [cw]=f, skin=reg.skin[s.skin], hair=HAIRCOL[s.hairColor], c=OUTCOL[s.outfitColor], ec=EYECOL[s.eyeColor], x={cw}, fem=g==='female';
   const lip=fem?'#d6456a':'#c0645a', set=(k,v)=>$('layer-'+k).innerHTML=v||'';
   svg.style.setProperty('--skin',skin); svg.style.setProperty('--hair',hair); svg.style.setProperty('--brow',sh(hair,-.15));
-  set('bg',BGS[s.background]+PAT[s.pattern]); set('back',call(sp.back,x)); set('hair-back',reg.hair[s.hair][0]);
+  set('bg',BGS[s.background]+PAT[s.pattern]); set('back',call(sp.back,x)); set('special-back',g==='other'?SPECIAL_BACK[s.specialBack]:''); set('hair-back',reg.hair[s.hair][0]);
   set('neck',BASE.neck[fem?'female':'male'][s.face]);
   set('outfit',OUTFITS[g][s.outfit](c,g));
   set('head',ol(call(sp.ears,x)??BASE.ears[s.face])+ol(BASE.face[fem?'female':'male'][s.face])+BASE.blush);
@@ -74,7 +84,7 @@ function render(raw){
   set('brows',sp.brows?`<g stroke="var(--brow)">${sp.brows}</g>`:BROWS[s.brows]?`<g stroke="var(--brow)" stroke-width="${bw}" stroke-linecap="round" fill="none">${mirror(`<path d="${BROWS[s.brows]}"/>`)}</g>`:'');
   set('mouth',ol(MOUTH[s.mouth](lip),2.5));
   set('hair-front',reg.hair[s.hair][1]); set('over',sp.over?ol(call(sp.over,x),2.5):''); set('top',sp.top?ol(call(sp.top,x)):'');
-  set('extra',call(EXTRA[s.extra],x)); set('glasses',GLASSES[s.glasses]); set('headwear',call(HEAD[s.headwear],ACCCOL[s.accColor])); set('name',nameSvg(s));
+  set('special-head',g==='other'?SPECIAL_HEAD[s.specialHead]:''); set('extra',call(EXTRA[s.extra],x)); set('special-face',g==='other'?SPECIAL_FACE[s.specialFace]:''); set('glasses',GLASSES[s.glasses]); set('headwear',call(HEAD[s.headwear],ACCCOL[s.accColor])); set('name',nameSvg(s));
   $('json').value=JSON.stringify(s,null,2);
   const SW={skin:reg.skin,hairColor:HAIRCOL,eyeColor:EYECOL,outfitColor:OUTCOL,accColor:ACCCOL,nameColor:NCOL,background:BGP.map(p=>`linear-gradient(135deg,${p[0]},${p[1]})`)};
   const CH={species:i=>[SPNAMES[i]],pattern:i=>[PNAMES[i]],nameFont:i=>[NFONTS[i][0],'font-family:'+NFONTS[i][1]],nameStyle:i=>[NSTYLE[i]],nameSize:i=>[NSIZE[i]],namePos:i=>[NPOS[i]]};
@@ -103,7 +113,7 @@ function renderGallery(){
  portrait.querySelectorAll('*').forEach(el=>[...el.attributes].forEach(attr=>{let value=attr.value;ids.forEach((next,old)=>{value=value.replaceAll(`url(#${old})`,`url(#${next})`);if(value===`#${old}`)value=`#${next}`});if(value!==attr.value)el.setAttribute(attr.name,value)}));
  portrait.removeAttribute('id');portrait.setAttribute('aria-label','Aperçu du personnage');
  $('gallery-portrait').replaceChildren(portrait);
- $('gallery-options').innerHTML=reg[galleryKey].map((_,i)=>`<button type="button" data-i="${i}" aria-label="${LABEL[galleryKey]} ${i+1}" aria-pressed="${s[galleryKey]===i}">${preview(galleryKey,i,s,reg,f)}<span>${choiceName(galleryKey,i)}</span></button>`).join('');
+ $('gallery-options').innerHTML=reg[galleryKey].map((_,i)=>`<button type="button" data-i="${i}" aria-label="${specialNames[galleryKey]?`${LABEL[galleryKey]} : ${choiceName(galleryKey,i)}`:`${LABEL[galleryKey]} ${i+1}`}" aria-pressed="${s[galleryKey]===i}">${preview(galleryKey,i,s,reg,f)}<span>${choiceName(galleryKey,i)}</span></button>`).join('');
 }
 $('tabs').innerHTML=Object.entries(GENDERS).map(([k,v])=>`<button data-g="${k}">${v}</button>`).join('');
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(b)render({gender:b.dataset.g,name:state.name,...(b.dataset.g==='other'?{...PRESETS[DEF.species],species:DEF.species}:{})})};   // changer de type = valeurs par défaut du type

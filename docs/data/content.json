@@ -70,9 +70,9 @@
     "heading": "Centre",
     "headingSuffix": "de ",
     "headingEmphasis": "contrôle.",
-    "intro": "Un espace pour observer les réglages du poste et préparer les futurs outils de développement.",
+    "intro": "Surveillez les paramètres du navigateur et accédez aux pages du projet depuis un seul poste.",
     "dashboardTitle": "État du système",
-    "note": "Première version : ces informations sont affichées localement. Les outils de développement seront ajoutés plus tard."
+    "note": "Ces informations restent dans votre navigateur. Modifiez les préférences depuis la page Options."
   },
   "notFound": {
     "heading": "Cette page",

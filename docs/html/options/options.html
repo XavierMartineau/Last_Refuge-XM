@@ -32,13 +32,6 @@
         </svg>
         <span class="brand__word">LAST<span> REFUGE</span></span>
       </a>
-      <nav class="site-nav" aria-label="Navigation principale">
-        <a href="../../../index.html">Accueil</a>
-        <a href="../mode/mode.html">Expédition</a>
-        <a href="../info/info.html">Mission</a>
-        <a aria-current="page" href="./options.html">Options</a>
-        <span class="nav-status"><i aria-hidden="true"></i> Réglages XM</span>
-      </nav>
     </header>
 
     <main class="options-page section-shell" id="options-content">
@@ -58,6 +51,11 @@
         </span>
       </header>
 
+      <div class="bunker-strip" aria-hidden="true">
+        <img src="../../assets/svg/commun/bunker.svg" alt="">
+        <div class="bunker-strip__copy"><span>INSTALLATION / SALLE DES COMMANDES</span><strong>CONSOLE DU REFUGE</strong><small>SYSTÈMES LOCAUX · XM</small></div>
+        <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
+      </div>
       <div class="options-page__grid">
         <section class="options-card options-card--settings" aria-labelledby="settings-title">
           <header class="options-card__heading">
@@ -178,6 +176,7 @@
 
       <footer class="options-page__footer">
         <span>LAST REFUGE <i aria-hidden="true"></i> L’ÉCHAPPÉE MÉCANIQUE</span>
+        <a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a>
         <a class="action-button action-button--primary" href="../../../index.html">
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4m5 5-5-5 5-5"/></svg>
           <span>Retour à l’accueil</span>

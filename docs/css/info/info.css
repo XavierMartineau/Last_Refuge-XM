@@ -40,6 +40,7 @@
   overflow: hidden;
   margin-top: 28px;
   padding: 36px 44px;
+  border-left: 3px solid #b97a4e;
   background:
     repeating-linear-gradient(135deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 5px),
     radial-gradient(ellipse at 82% 45%, rgba(167, 118, 63, .13), transparent 38%),
@@ -289,7 +290,13 @@
   height: 135px;
   margin: 8px 0 4px;
   place-items: center;
+  border-block: 1px solid rgba(186, 168, 130, .2);
   color: #b5b79e;
+  background:
+    linear-gradient(rgba(185, 183, 151, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(185, 183, 151, .035) 1px, transparent 1px),
+    rgba(13, 17, 13, .22);
+  background-size: 24px 24px;
 }
 
 .page-info .hub-card__art svg {
@@ -414,6 +421,7 @@
   margin-top: 20px;
   padding: 17px 20px;
   border: 1px solid var(--line);
+  border-left: 3px solid #a87a50;
   background: #1d211a;
 }
 
@@ -450,7 +458,9 @@
   display: flex;
   justify-content: space-between;
   gap: 20px;
-  padding: 26px 0 0;
+  margin-top: 26px;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--line);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: .13em;

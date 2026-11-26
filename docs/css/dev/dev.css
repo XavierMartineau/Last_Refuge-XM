@@ -11,6 +11,7 @@
   overflow: hidden;
   padding: 42px 48px;
   border: 1px solid var(--line-strong);
+  border-left: 3px solid #b97a4e;
   border-radius: 2px;
   background:
     repeating-linear-gradient(135deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 5px),
@@ -102,13 +103,16 @@
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
 }
 
 .page-dev .dev-dashboard__heading .eyebrow {
   margin-bottom: 8px;
 }
 
-.page-dev .dev-dashboard h2 {
+.page-dev .dev-dashboard h2,
+.page-dev .dev-directory h2 {
   margin: 0;
   font-size: 28px;
 }
@@ -162,7 +166,7 @@
 
 .page-dev .dev-card strong {
   color: #d4a176;
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 700;
 }
 
@@ -172,12 +176,77 @@
   font-size: 12px;
 }
 
+.page-dev .dev-note {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: #1b1e18;
+}
+
+.page-dev .dev-directory {
+  padding-top: 46px;
+}
+
+.page-dev .dev-directory__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.page-dev .dev-route {
+  position: relative;
+  display: grid;
+  min-height: 138px;
+  align-content: start;
+  gap: 8px;
+  padding: 20px 46px 20px 20px;
+  border: 1px solid var(--line);
+  color: #c4c6b8;
+  background: linear-gradient(145deg, #292c23, #191c17);
+  font-size: 12px;
+  line-height: 1.5;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.page-dev .dev-route:hover,
+.page-dev .dev-route:focus-visible {
+  border-color: #c28c60;
+  background: linear-gradient(145deg, #37352a, #20231c);
+}
+
+.page-dev .dev-route--current {
+  border-color: #8e7554;
+  background: linear-gradient(145deg, #332c22, #1d211a);
+}
+
+.page-dev .dev-route__index {
+  color: #d3a178;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+
+.page-dev .dev-route strong {
+  color: var(--text);
+  font-size: 16px;
+}
+
+.page-dev .dev-route b {
+  position: absolute;
+  top: 17px;
+  right: 18px;
+  color: #d4a176;
+  font-size: 16px;
+}
+
 .page-dev .dev-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding-top: 30px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
 }
 
 @keyframes dev-radar-turn {
@@ -197,6 +266,10 @@
 
   .page-dev .dev-card {
     padding: 18px;
+  }
+
+  .page-dev .dev-directory__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

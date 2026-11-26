@@ -53,7 +53,7 @@ data.brows = data.brows.map(body => {
 const result = `// Généré à partir de docs/assets/creation-personnage/manifest.json.
 const CHARACTER_ASSETS=${JSON.stringify(data)};
 const {HUMAN,FANT,HAIRCOL,EYECOL,OUTCOL,BGP,ACCCOL,NCOL,NFONTS,NSTYLE,NSIZE,NPOS,PNAMES,FACES,SPNAMES,PRESETS}=CHARACTER_ASSETS.data;
-const {nose:NOSE,glasses:GLASSES,hair:HAIRS,base:BASE,background:BGS,pattern:PAT,lash:LASH,brows:BROWS}=CHARACTER_ASSETS;
+const {nose:NOSE,glasses:GLASSES,hair:HAIRS,base:BASE,background:BGS,pattern:PAT,lash:LASH,brows:BROWS,specialBack:SPECIAL_BACK,specialHead:SPECIAL_HEAD,specialFace:SPECIAL_FACE}=CHARACTER_ASSETS;
 const assetColor=(svg,color)=>svg.replaceAll('var(--choice-color, #123456)',color).replace(/var\\(--choice-shade-([mp\\d]+), #[0-9a-f]{6}\\)/g,(_,amount)=>sh(color,Number(amount.replace('m','-').replace('p','.'))));
 const faceIndex=cw=>{const i=FACES.findIndex(face=>face[0]===cw);if(i<0)throw new Error('Visage inconnu : '+cw);return i};
 const EYES=CHARACTER_ASSETS.eyes.map(svg=>color=>assetColor(svg,color));
