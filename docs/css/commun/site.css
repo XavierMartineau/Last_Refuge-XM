@@ -29,6 +29,9 @@
   --toxic: #9cc23a;
   --toxic-dim: #5f7a24;
   --uniform: #d9621e;
+  /* encadré de sélection : vert fluo mêlé de vert armée */
+  --focus: #a8ff3e;
+  --focus-army: #4b5a2e;
   /* compatibilité avec les anciens noms de variables */
   --brass: var(--hazard);
   --brass-light: var(--hazard-light);
@@ -123,8 +126,16 @@ button:focus-visible,
 a:focus-visible,
 select:focus-visible,
 input:focus-visible {
-  outline: 2px dashed var(--hazard);
+  outline: 2px solid var(--focus);
   outline-offset: 4px;
+  box-shadow: 0 0 0 6px rgba(75, 90, 46, .65), 0 0 18px rgba(168, 255, 62, .45);
+}
+
+/* navigation à la manette : élément sélectionné bien visible */
+.manette-active :focus {
+  outline: 3px solid var(--focus) !important;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 7px rgba(75, 90, 46, .75), 0 0 26px rgba(168, 255, 62, .5) !important;
 }
 
 ::selection {
@@ -467,10 +478,13 @@ h2 em {
   min-width: 160px;
   border-color: #111;
   color: var(--hazard-ink);
-  background:
-    linear-gradient(var(--hazard), var(--hazard)) padding-box;
-  box-shadow: 0 0 0 2px var(--hazard), 5px 5px 0 #000;
-  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  background: var(--hazard);
+  /* pas de découpe (clip-path) : elle rognait l’ombre et le contour de sélection */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35), 5px 5px 0 #000;
+}
+
+.action-button--primary:focus-visible {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35), 5px 5px 0 #000, 0 0 0 6px rgba(75, 90, 46, .65), 0 0 18px rgba(168, 255, 62, .45);
 }
 
 .action-button--primary::before {
@@ -486,7 +500,7 @@ h2 em {
 
 .action-button--primary:hover {
   background: var(--hazard-light);
-  box-shadow: 0 0 0 2px var(--hazard-light), 5px 5px 0 #000, 0 0 30px rgba(242, 183, 5, .35);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35), 5px 5px 0 #000, 0 0 30px rgba(242, 183, 5, .35);
 }
 
 .action-button--secondary {

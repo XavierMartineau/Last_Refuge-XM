@@ -11,6 +11,8 @@
   --rg-hz2: #ffd23f;
   --rg-red: #ff4a3a;
   --rg-toxic: #9cc23a;
+  --rg-focus: #a8ff3e;
+  --rg-army: #4b5a2e;
   --rg-stencil: "Black Ops One", "Stardos Stencil", Impact, "Arial Narrow", sans-serif;
   --rg-mono: "Share Tech Mono", VT323, Consolas, monospace;
   --rg-type: "Special Elite", "Courier New", monospace;
@@ -87,7 +89,7 @@
 }
 
 .rg.rg button:hover { background: none; color: inherit; border-color: transparent; }
-.rg button:focus-visible { outline: 2px dashed var(--rg-hz); outline-offset: 2px; }
+.rg button:focus-visible { outline: 2px solid var(--rg-focus); outline-offset: 2px; }
 .rg-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 /* ---------- En-tête de console ---------- */
@@ -219,6 +221,7 @@
 
 /* ---------- Sommaire : uniquement des ronds (nom au survol ou sur la section active) ---------- */
 .rg-sections {
+  position: relative;
   display: flex;
   grid-area: secs;
   flex-direction: column;
@@ -229,27 +232,28 @@
   padding: 10px 0;
 }
 
-.rg .rg-dot {
+/* rail continu derrière les ronds */
+.rg-sections::before {
+  position: absolute;
+  z-index: -1;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  width: 30px;
+  border: 1px solid var(--rg-line);
+  border-radius: 15px;
+  background: rgba(0, 0, 0, .55);
+  content: "";
+}
+
+.rg.rg .rg-dot {
   position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   height: 30px;
-  padding: 0 10px;
+  padding: 0 0 0 10px;
   color: var(--rg-faint);
-}
-
-.rg-dot::before {
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: 0;
-  width: 30px;
-  border: 1px solid var(--rg-line);
-  border-radius: 15px;
-  background: rgba(0, 0, 0, .5);
-  content: "";
-  z-index: -1;
 }
 
 .rg-dot i {
@@ -381,9 +385,9 @@
 .rg-row--changed .rg-num::after { content: " •"; }
 
 .rg-row.is-focus {
-  border-color: var(--rg-hz);
-  background: linear-gradient(90deg, rgba(242, 183, 5, .16), rgba(242, 183, 5, .04) 70%);
-  box-shadow: 0 0 0 1px #000, 0 0 22px rgba(242, 183, 5, .14);
+  border-color: var(--rg-focus);
+  background: linear-gradient(90deg, rgba(75, 90, 46, .55), rgba(168, 255, 62, .05) 70%);
+  box-shadow: 0 0 0 1px #000, 0 0 0 4px rgba(75, 90, 46, .6), 0 0 24px rgba(168, 255, 62, .22);
   clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
 
