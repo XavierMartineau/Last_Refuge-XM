@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050605">
+<meta name="description" content="Sas 07 : escape room 3D du pénitencier LAST REFUGE.">
+<title>Sas 07 – Escape room 3D | LAST REFUGE</title>
+<link rel="icon" href="../../../assets/svg/identite/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Caveat:wght@500;700&family=Special+Elite&family=Rock+Salt&family=Stardos+Stencil:wght@400;700&family=VT323&display=swap">
+<link rel="stylesheet" href="../../../css/commun/reglages.css">
+<link rel="stylesheet" href="../../../css/escape-room/Sas-07/escape-room.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script src="../../../js/commun/preferences.js"></script>
+<script src="../../../js/commun/reglages.js"></script>
+<script src="../../../js/commun/manette-menus.js"></script>
+<script type="module" src="../../../js/escape-room/Sas-07/escape-room.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<div class="hud" id="obj"><small id="objl">OBJECTIF</small><span id="objt"></span><ul id="objs"></ul></div>
+<div class="hud" id="tip"></div>
+<div class="hud" id="sel"><i></i><i></i><i></i><i></i><b id="selt"></b></div>
+<div class="hud" id="msg"></div>
+<div id="alarmfx"></div>
+<div id="touchui"><div id="joy"><i></i></div><div id="tbtns"><button data-a="take">E</button><button data-a="fire">✹</button><button data-a="reload">⟳</button><button data-a="flash">🔦</button><button data-a="crouch">⤓</button><button data-a="inv">🎒</button></div></div>
+<div id="hurt"></div>
+<div class="hud" id="combat" style="display:none"><div id="hpbar"><div id="hpfill"></div></div><div id="ammo"></div><div id="kills"></div></div>
+
+<div class="hud" id="genq"></div><button class="hud" id="back">← Quitter le zoom</button>
+<button class="hud" id="menub" aria-label="Menu" title="Menu (Échap)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<div class="modal" id="menu"><div class="box menu" role="dialog" aria-label="Options">
+  <header><div><small>BUNKER 07 · SECTEUR NORD</small><h3>Options</h3></div><button id="menux" class="x" aria-label="Fermer">×</button></header>
+  <section><h4>Jeu</h4>
+    <div class="opts"><button id="snd" class="tg sw ic-snd"></button><button id="fl" class="tg sw ic-fl"></button><button id="vw" class="tg ic-eye"></button><button id="chr" class="tg ic-user">Personnage</button></div></section>
+  <section><h4>Volume</h4>
+    <label class="sl"><span>Général</span><input type="range" id="vmas" min="0" max="100"><output id="vmaso"></output></label>
+    <label class="sl"><span>Musique</span><input type="range" id="vmus" min="0" max="100"><output id="vmuso"></output></label>
+    <label class="sl"><span>Effets</span><input type="range" id="vsfx" min="0" max="100"><output id="vsfxo"></output></label></section>
+  <section><h4>Développeur</h4><div class="opts"><button id="devmb" class="tg">Dev Mode (code requis)</button></div></section>
+  <section><h4>Contrôles</h4><ul id="help"></ul></section>
+  <footer><button id="menuquit" class="tg">Quitter l’escape room</button><button class="p" id="menuok">Reprendre la partie</button></footer>
+</div></div>
+
+<div class="hud" id="inv"></div>
+<div id="invfull"><div class="ibox"><header><div><small>ÉQUIPEMENT · BRIEFING</small><h3>Sac &amp; missions</h3></div><span id="ifc"></span><button class="x" id="ifx">✕</button></header><div class="ibody"><section><h4>Équipement</h4><div id="ifg"></div></section><section id="ifm"></section></div><footer>H ou Échap pour fermer</footer></div></div>
+<div class="modal" id="keypad"><div class="kp"><button class="kx" id="kno" aria-label="Fermer">✕</button><div class="kmain"><div class="kscr"><div id="kt"></div><div class="digs" id="digs"></div><div id="kst"></div></div><div id="kgrid"></div></div><aside id="kside"></aside></div></div>
+<div class="modal" id="charm"><div class="box" style="max-width:560px;width:92vw"><h3>PERSONNAGE</h3><p style="margin:0 0 8px">Collez le JSON exporté par <b>createur-personnage-3d.html</b>, ou reprenez la sauvegarde de ce navigateur.</p><textarea id="chj" rows="7" spellcheck="false" placeholder='{"gender":"male", …}'></textarea><div style="margin-top:10px"><button id="chok">Charger</button> <button id="chls">Mon navigateur</button> <button id="chdef">Par défaut</button> <button id="chv" class="no">Vue 1re/3e</button> <button class="no" id="chno">Fermer</button></div><p id="chmsg" style="min-height:1.2em;margin:8px 0 0;color:#9fc8a0"></p></div></div>
+<div class="modal" id="end"><div class="box"><h3 id="endt"></h3><p id="endp"></p><button id="endb" onclick="location.reload()"></button></div></div>
+</body>
+</html>
