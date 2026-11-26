@@ -3,185 +3,28 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#111310">
-    <meta name="description" content="Réglages et commandes de l’aventure LAST REFUGE.">
-    <title>Options et commandes | LAST REFUGE</title>
+    <meta name="theme-color" content="#0b0b0a">
+    <meta name="description" content="Réglages et commandes de LAST REFUGE.">
+    <title>Réglages | LAST REFUGE</title>
     <link rel="icon" type="image/svg+xml" href="../../assets/svg/identite/favicon.svg">
-    <link rel="shortcut icon" href="../../assets/svg/identite/favicon.svg">
     <link rel="stylesheet" href="../../css/commun/site.css">
+    <link rel="stylesheet" href="../../css/commun/reglages.css">
     <link rel="stylesheet" href="../../css/options/options.css">
     <script src="../../js/commun/preferences.js" defer></script>
-    <script src="../../js/commun/content.js" data-page="options" data-source="../../data/content.json" defer></script>
+    <script src="../../js/commun/reglages.js" defer></script>
+    <script src="../../js/commun/manette-menus.js" defer></script>
     <script src="../../js/options/index.js" defer></script>
   </head>
-  <body class="page-redesign page-options" data-device-gate>
-    <div class="device-notice">
-      <div class="device-notice__panel">
-        <p class="device-notice__brand">LAST REFUGE · XM</p>
-        <h1>Un écran plus grand<br><em>vous attend.</em></h1>
-        <p>L’expérience est disponible sur tablette et ordinateur. Utilisez un écran d’au moins 768 pixels de largeur.</p>
-      </div>
-    </div>
-    <a class="skip-link" href="#options-content">Aller aux options</a>
-    <header class="site-header options-header section-shell">
-      <a class="brand" href="../../../index.html" aria-label="LAST REFUGE, accueil">
-        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true">
-          <path d="M24 4 41 11v12c0 10-7 17-17 21C14 40 7 33 7 23V11Z"/>
-          <circle cx="24" cy="24" r="8"/>
-          <path d="M24 19v10m-5-5h10"/>
-        </svg>
-        <span class="brand__word">LAST<span> REFUGE</span></span>
-      </a>
-    </header>
-
-    <main class="options-page section-shell" id="options-content">
-      <header class="options-page__title">
-        <div>
-          <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Poste de réglage</p>
-          <h1><span data-content="heading">Options </span><em data-content="headingEmphasis">&amp; commandes.</em></h1>
-          <p data-content="intro">Personnalisez votre confort et gardez les commandes de l’expédition à portée de main.</p>
-        </div>
-        <span class="options-page__folio" aria-hidden="true">
-          <svg viewBox="0 0 80 80" fill="none">
-            <circle cx="40" cy="40" r="34"/>
-            <circle cx="40" cy="40" r="28" stroke-dasharray="2 5"/>
-            <path d="M40 3v7m0 60v7M3 40h7m60 0h7M14 14l5 5m42 42 5 5m0-52-5 5M19 61l-5 5"/>
-          </svg>
-          <span>XM<br><small>SECTEUR 07</small></span>
-        </span>
-      </header>
-
-      <div class="bunker-strip" aria-hidden="true">
-        <img src="../../assets/svg/commun/bunker.svg" alt="">
-        <div class="bunker-strip__copy"><span>INSTALLATION / SALLE DES COMMANDES</span><strong>CONSOLE DU REFUGE</strong><small>SYSTÈMES LOCAUX · XM</small></div>
-        <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
-      </div>
-      <div class="options-page__grid">
-        <section class="options-card options-card--settings" aria-labelledby="settings-title">
-          <header class="options-card__heading">
-            <span>01</span>
-            <div>
-              <p>CONFORT DE JEU</p>
-              <h2 id="settings-title" data-content="settingsTitle">Réglages</h2>
-            </div>
-          </header>
-
-          <div class="options-settings">
-            <label class="setting-row" for="motion-setting">
-              <span><strong data-content="motionTitle">Animations</strong><small data-content="motionDescription">Intensité des animations de l’interface</small></span>
-              <select id="motion-setting" name="motion">
-                <option value="full">Fluide</option>
-                <option value="reduced">Réduite</option>
-                <option value="off">Désactivée</option>
-              </select>
-            </label>
-            <label class="setting-row" for="sound-setting">
-              <span><strong data-content="soundTitle">Retours sonores</strong><small data-content="soundDescription">Signaux sonores de l’interface</small></span>
-              <input class="switch" id="sound-setting" type="checkbox">
-            </label>
-            <label class="setting-row" for="contrast-setting">
-              <span><strong data-content="contrastTitle">Contraste renforcé</strong><small data-content="contrastDescription">Contours et texte plus lisibles</small></span>
-              <input class="switch" id="contrast-setting" type="checkbox">
-            </label>
-          </div>
-          <p class="settings-status" id="settings-status" aria-live="polite"></p>
-        </section>
-
-        <section class="options-card options-card--controls" aria-labelledby="controls-title">
-          <header class="options-card__heading">
-            <span>02</span>
-            <div>
-              <p>GUIDE DU SURVIVANT</p>
-              <h2 id="controls-title" data-content="controlsTitle">Commandes desktop</h2>
-            </div>
-          </header>
-
-          <div class="controls-table-wrap">
-            <table class="controls-table">
-              <thead>
-                <tr>
-                  <th scope="col">Action</th>
-                  <th scope="col">Souris</th>
-                  <th scope="col">Clavier</th>
-                  <th scope="col">Fonction</th>
-                </tr>
-              </thead>
-              <tbody data-controls>
-                <tr>
-                  <th scope="row">Interagir / inspecter</th>
-                  <td>Clic gauche</td>
-                  <td>—</td>
-                  <td>Activer un point d’intérêt ou manipuler un objet.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Fermer zoom / annuler</th>
-                  <td>Clic droit</td>
-                  <td><kbd>Échap</kbd></td>
-                  <td>Revenir à la vue d’ensemble.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Zoom dynamique</th>
-                  <td>Molette</td>
-                  <td><kbd>+</kbd> <kbd>−</kbd></td>
-                  <td>Ajuster l’échelle de la scène.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Panoramique</th>
-                  <td>Clic milieu maintenu / glisser</td>
-                  <td><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> ou flèches</td>
-                  <td>Déplacer la vue lorsqu’elle est zoomée.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Radar d’interactions</th>
-                  <td>Appui court / maintenu</td>
-                  <td><kbd>Tab</kbd> ou <kbd>H</kbd></td>
-                  <td>Repérer les éléments interactifs découverts.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Outil de l’avatar</th>
-                  <td>—</td>
-                  <td><kbd>F</kbd></td>
-                  <td>Activer ou désactiver l’outil équipé.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Afficher l’inventaire</th>
-                  <td>—</td>
-                  <td><kbd>E</kbd></td>
-                  <td>Afficher ou masquer l’inventaire.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Inventaire</th>
-                  <td>Clic sur la barre d’objets</td>
-                  <td><kbd>1</kbd> à <kbd>5</kbd></td>
-                  <td>Sélectionner un objet de l’inventaire.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Carnet / journal</th>
-                  <td>Clic sur le carnet</td>
-                  <td><kbd>I</kbd></td>
-                  <td>Afficher ou masquer les notes trouvées.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Gestion du son</th>
-                  <td>Clic sur l’icône audio</td>
-                  <td><kbd>M</kbd></td>
-                  <td>Couper ou rétablir les sons du jeu.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="options-card__hint" data-content="controlsNote">Ces commandes décrivent le fonctionnement prévu; les mécaniques de jeu sont encore en conception.</p>
-        </section>
-      </div>
-
-      <footer class="options-page__footer">
-        <span>LAST REFUGE <i aria-hidden="true"></i> L’ÉCHAPPÉE MÉCANIQUE</span>
-        <a class="footer-dev-link" href="../dev/dev.html">DEV MODE ↗</a>
-        <a class="action-button action-button--primary" href="../../../index.html">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4m5 5-5-5 5-5"/></svg>
-          <span>Retour à l’accueil</span>
-        </a>
-      </footer>
+  <body class="page-options" data-device-gate>
+    <div class="device-notice"><div class="device-notice__panel">
+      <p class="device-notice__brand">LAST REFUGE · XM</p>
+      <h1>Écran trop petit<br><em>accès refusé.</em></h1>
+      <p>Le terminal du pénitencier exige une tablette ou un ordinateur d’au moins 768 pixels de largeur.</p>
+    </div></div>
+    <main class="options-console" id="options-content">
+      <h1 class="rg-sr">Réglages</h1>
+      <button class="options-close" id="options-close" type="button" aria-label="Fermer les réglages et revenir à la page précédente">✕</button>
+      <div class="options-host" id="options-host"></div>
     </main>
   </body>
 </html>

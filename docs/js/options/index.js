@@ -1,54 +1,30 @@
 (() => {
   const root = document.documentElement;
-  const motionSetting = document.querySelector("#motion-setting");
-  const soundSetting = document.querySelector("#sound-setting");
-  const contrastSetting = document.querySelector("#contrast-setting");
-  const settingsStatus = document.querySelector("#settings-status");
-  const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const preferences = window.afterlockPreferences.load();
+  const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const fallback = "../../../index.html";
 
-  function updateStatus() {
-    settingsStatus.textContent = reducedMotionQuery.matches
-      ? "La préférence système maintient les animations désactivées."
-      : "Vos préférences sont enregistrées sur cet appareil.";
+  function applyPreferences(values) {
+    root.dataset.motion = motionQuery.matches ? "off" : values.motion;
+    root.dataset.contrast = values.contrast ? "high" : "standard";
   }
 
-  function applySettings() {
-    root.dataset.motion = reducedMotionQuery.matches ? "off" : preferences.motion;
-    root.dataset.contrast = preferences.contrast ? "high" : "standard";
-    motionSetting.value = preferences.motion;
-    soundSetting.checked = preferences.sound;
-    contrastSetting.checked = preferences.contrast;
-    updateStatus();
+  /* ✕ : retour à la page d’où l’on vient (accueil, plan d’évasion, poste de garde…) */
+  function close() {
+    let sameSite = false;
+    try { sameSite = document.referrer && new URL(document.referrer).origin === location.origin && !/options\.html/.test(document.referrer); } catch (e) { sameSite = false; }
+    if (sameSite && history.length > 1) history.back();
+    else if (document.referrer && !/options\.html/.test(document.referrer) && location.protocol === "file:") location.href = document.referrer;
+    else location.href = fallback;
   }
 
-  function saveSettings() {
-    const saved = window.afterlockPreferences.save(preferences);
-    applySettings();
-    if (!saved) {
-      settingsStatus.textContent = "Impossible d’enregistrer les réglages dans ce navigateur.";
-    } else if (reducedMotionQuery.matches) {
-      settingsStatus.textContent = "Réglages enregistrés; la préférence système garde les animations coupées.";
-    } else {
-      settingsStatus.textContent = "Réglages enregistrés et appliqués.";
-    }
-  }
-
-  motionSetting.addEventListener("change", () => {
-    preferences.motion = motionSetting.value;
-    saveSettings();
+  const ui = window.LastRefugeReglages.mount(document.getElementById("options-host"), {
+    context: "site",
+    backLabel: "Retour",
+    onBack: close,
+    onChange: (_id, _value, values) => applyPreferences(values)
   });
-
-  soundSetting.addEventListener("change", () => {
-    preferences.sound = soundSetting.checked;
-    saveSettings();
-  });
-
-  contrastSetting.addEventListener("change", () => {
-    preferences.contrast = contrastSetting.checked;
-    saveSettings();
-  });
-
-  reducedMotionQuery.addEventListener("change", applySettings);
-  applySettings();
+  applyPreferences(ui.values());
+  motionQuery.addEventListener("change", () => applyPreferences(ui.values()));
+  document.getElementById("options-close").addEventListener("click", close);
+  if (window.LastRefugeManette) window.LastRefugeManette.attach({ onPad: (on) => ui.setPad(on) });
 })();
