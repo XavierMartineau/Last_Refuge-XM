@@ -10,7 +10,7 @@ window.LAST_REFUGE_ESCAPE_ROOMS = [
     difficulty: 4,
     rooms: 12,
     minutes: [60, 90],
-    url: "../escape-room/escape-room.html",
+    url: "../escape-room/Sas-07/escape-room.html",
     tags: ["3D", "Combat", "Énigmes", "Électricité"],
     description: "Traversez les 12 salles du bunker sous le pénitencier : relancez le générateur, forcez la chambre forte et atteignez la zone d’évacuation.",
     narration: "Vous reprenez conscience dans un sas plongé dans le noir. Les sirènes se sont tues depuis longtemps ; seul le grésillement d’une radio vous rappelle que le bunker de commandement devait servir de dernier refuge aux gardiens. Votre lampe torche fonctionne encore. Derrière la porte blindée, l’électricité est coupée, les cellules sont ouvertes et quelque chose gratte contre les murs. Pour rejoindre la zone d’évacuation, il faudra rétablir le courant, trouver les codes des gardiens… et ne pas rester trop longtemps au même endroit."

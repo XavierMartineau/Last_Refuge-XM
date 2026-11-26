@@ -157,6 +157,12 @@ body.page-createur {
 
 .page-createur button:hover { border-color: var(--hazard); color: var(--hazard); }
 
+.page-createur .hud button[aria-pressed="true"],
+.page-createur .hud button {
+  background: rgba(20, 20, 18, .85);
+  backdrop-filter: blur(3px);
+}
+
 .page-createur button[aria-pressed="true"],
 .page-createur button[aria-current="true"],
 .page-createur button.p,
@@ -172,10 +178,7 @@ body.page-createur {
 
 .page-createur button.no { color: var(--alarm-light); }
 
-.page-createur .hud button {
-  background: rgba(20, 20, 18, .85);
-  backdrop-filter: blur(3px);
-}
+
 
 /* ---------- Panneau du dossier ---------- */
 .creator-panel {

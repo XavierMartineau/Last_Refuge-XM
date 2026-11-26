@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#111310">
+    <meta name="theme-color" content="#0e0e0d">
     <meta name="description" content="Le signal de cette page a été perdu dans LAST REFUGE.">
     <title>404 — Page introuvable | LAST REFUGE</title>
     <link rel="icon" type="image/svg+xml" href="docs/assets/svg/identite/favicon.svg">
@@ -15,17 +15,15 @@
     <script src="docs/js/404/index.js" defer></script>
   </head>
   <body class="page-redesign page-not-found" data-device-gate>
-    <div class="device-notice">
-      <div class="device-notice__panel">
-        <p class="device-notice__brand">LAST REFUGE · XM</p>
-        <h1>Un écran plus grand<br><em>vous attend.</em></h1>
-        <p>L’expérience est disponible sur tablette et ordinateur. Utilisez un écran d’au moins 768 pixels de largeur.</p>
-      </div>
-    </div>
+    <div class="device-notice"><div class="device-notice__panel">
+      <p class="device-notice__brand">LAST REFUGE · XM</p>
+      <h1>Écran trop petit<br><em>accès refusé.</em></h1>
+      <p>Le terminal du pénitencier exige une tablette ou un ordinateur d’au moins 768 pixels de largeur.</p>
+    </div></div>
     <main class="not-found">
       <section class="not-found__panel" aria-labelledby="not-found-title">
         <div class="not-found__copy">
-          <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Erreur de navigation</p>
+          <p class="eyebrow"><span class="eyebrow__rule" aria-hidden="true"></span> Appel du soir · Erreur 404</p>
           <h1 id="not-found-title"><span data-content="heading">Cette page</span><br><em data-content="headingEmphasis">s’est égarée.</em></h1>
           <p data-content="intro">Le signal est perdu. La page demandée n’existe pas ou a changé de chemin.</p>
           <a class="action-button action-button--primary" href="./index.html">
@@ -35,16 +33,17 @@
         </div>
         <div class="not-found__seal" aria-hidden="true">
           <svg viewBox="0 0 180 180">
-            <circle cx="90" cy="90" r="76" fill="#18231d" stroke="#8a9b83" stroke-width="3"/>
-            <circle cx="90" cy="90" r="64" fill="none" stroke="#e09170" stroke-dasharray="3 7"/>
-            <path d="M90 28v20M90 132v20M28 90h20m84 0h20" stroke="#b3c2a9" stroke-width="2"/>
-            <text x="90" y="102" fill="#efaa8d" font-family="Arial,sans-serif" font-weight="700" font-size="32" text-anchor="middle">404</text>
+            <rect x="20" y="14" width="140" height="152" fill="#0b0b0a" stroke="#5a5850" stroke-width="4"/>
+            <g class="not-found__bars"><path d="M40 14v152M60 14v152M80 14v152M100 14v152M120 14v152M140 14v152" stroke="#8d8a80" stroke-width="6"/></g>
+            <path d="M20 64h140" stroke="#5a5850" stroke-width="8"/>
+            <path class="not-found__gap" d="M100 64v102" stroke="#0b0b0a" stroke-width="14"/>
+            <text x="90" y="128" fill="#f2b705" font-family="Black Ops One, Impact, sans-serif" font-size="40" text-anchor="middle">404</text>
           </svg>
-          <span>SIGNAL PERDU</span>
+          <span class="stamp">Évadé</span>
         </div>
         <div class="bunker-strip" aria-hidden="true">
-          <img src="docs/assets/svg/commun/perimetre.svg" alt="">
-          <div class="bunker-strip__copy"><span>SIGNAL PERDU / SECTEUR INCONNU</span><strong>ZONE NON CARTOGRAPHIÉE</strong><small>RETOUR AU REFUGE CONSEILLÉ</small></div>
+          <img src="docs/assets/svg/commun/enceinte.svg" alt="">
+          <div class="bunker-strip__copy"><span>APPEL DU SOIR / CELLULE INCONNUE</span><strong>DÉTENU MANQUANT</strong><small>RETOUR AU BLOC CONSEILLÉ</small></div>
           <svg class="bunker-strip__radar" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="21"/><circle class="bunker-strip__echo" cx="40" cy="40" r="28"/><path d="M40 5v70M5 40h70"/><circle class="bunker-strip__blip" cx="56" cy="24" r="2"/><g class="bunker-strip__sweep"><path d="M40 40 62 18 51 41Z"/></g></svg>
         </div>
         <footer class="not-found__footer">
@@ -52,8 +51,8 @@
             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/><circle cx="7" cy="5" r="1.5"/><circle cx="13" cy="10" r="1.5"/><circle cx="9" cy="15" r="1.5"/></svg>
             <span>DEV MODE</span>
           </button>
-          <a class="not-found__dev-link" href="docs/html/dev/dev.html">Centre de contrôle ↗</a>
-          <span class="not-found__folio">LAST REFUGE <i aria-hidden="true"></i> ZONE DE QUARANTAINE</span>
+          <a class="not-found__dev-link" href="docs/html/dev/dev.html">Poste de garde ↗</a>
+          <span class="not-found__folio">LAST REFUGE <i aria-hidden="true"></i> PÉNITENCIER XM</span>
         </footer>
         <aside class="not-found__dev-panel" id="dev-panel" aria-label="Informations de développement" hidden>
           <p>OUTILS DE DÉVELOPPEMENT <strong>404</strong></p>

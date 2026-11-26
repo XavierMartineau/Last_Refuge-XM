@@ -1,104 +1,71 @@
 # LAST-REFUGE-XM
 
-Escape room Point & Click de survie post-apocalyptique, conçu autour d’environnements et d’interactions SVG.
+Escape room de survie dans un **pénitencier militaire tombé aux mains des infectés** (thème prison / bunker / zombie post-apocalyptique). Le site prépare l’évasion (fiche d’écrou 3D, choix de la salle) puis lance l’escape room 3D en immersion complète, jouable au **clavier / souris** et à la **manette Xbox**.
 
-## Pages
+## Lancer le projet
 
-- `index.html` : écran d’accueil.
-- `docs/html/mode/mode.html` : choix du mode solo ou multijoueur (à venir).
-- `docs/html/info/info.html` : hub solo de préparation de l’aventure, avec créateur intégré, salles et lancement à venir.
-- `docs/html/createur-personnage/createur-personnage.html` : créateur de personnage.
-- `docs/html/options/options.html` : réglages et commandes desktop prévues.
-- `docs/html/dev/dev.html` : poste DEV, diagnostics locaux en direct et accès direct aux pages du projet.
-- `404.html` : page introuvable avec retour à l’accueil et panneau DEV.
+Les pages 3D (créateur, escape room) utilisent des modules JavaScript et chargent des données JSON : ouvrez le projet avec un **serveur HTTP local**, pas en `file://`.
 
-L’accueil et la page 404 restent à la racine pour l’hébergement statique. Les styles et scripts sont classés par page dans `docs/`, avec les éléments partagés dans `commun/`.
+```bash
+python -m http.server 8000
+# puis http://localhost:8000/index.html
+```
 
-Les pages publiques partagent leur identité visuelle et leurs composants dans `docs/css/commun/site.css`; chaque feuille de page gère sa mise en page et ses illustrations. Le créateur utilise sa propre feuille de style. Le poste DEV est accessible depuis toutes les pages et ne transmet pas ses diagnostics : l’état réseau affiché est celui déclaré par le navigateur, sans test de connexion.
+three.js est chargé depuis le CDN jsDelivr (connexion Internet requise).
 
-Les bandeaux de surveillance utilisent des SVG originaux de bunker et de périmètre. Le radar, ses échos et les mouvements des infectés respectent le réglage d’animation et la préférence système de réduction du mouvement, y compris dans le créateur.
+## Parcours
 
-L’interface est adaptée aux ordinateurs et aux tablettes dès 768 px de largeur. En dessous, les pages publiques affichent un message demandant un écran plus grand; cette limite dépend de la largeur, pas du type d’appareil.
+1. `index.html` — portail du pénitencier.
+2. `docs/html/mode/mode.html` — choix du plan d’évasion (solo ; multijoueur à venir).
+3. `docs/html/info/info.html` — plan d’évasion en 3 étapes verrouillées :
+   - **01 Fiche d’écrou** : créateur 3D intégré ; son dernier bouton « Trouver sa salle d’évasion » débloque l’étape 02 ;
+   - **02 Salle d’évasion** : ouvre `docs/html/choix-salle/choix-salle.html` (catalogue classé par difficulté, nombre de salles et durée, avec description et rapport de situation) ;
+   - **03 Lancement** : débloquée quand une salle est choisie, lance le jeu en plein écran.
+4. `docs/html/escape-room/Sas-07/escape-room.html` — escape room 3D « Sas 07 » (12 salles).
 
-Les textes principaux et les commandes des pages publiques sont chargés depuis `docs/data/content.json`. Les préférences sont enregistrées dans le navigateur. Certains navigateurs bloquent la lecture JSON en `file://` : un message apparaît alors et il faut utiliser un serveur local HTTP. Le créateur est intégré au hub et reste accessible directement.
+Autres pages : `docs/html/createur-personnage/createur-personnage.html` (créateur seul), `docs/html/options/options.html` (réglages, bouton ✕ qui ramène à la page d’origine), `docs/html/dev/dev.html` (poste de garde / DEV), `404.html`.
 
-Les éléments du créateur sont regroupés par catégorie dans `docs/assets/creation-personnage/`, sous forme de SVG indexés dans `manifest.json`. Les palettes et données non graphiques sont dans `donnees.json`. Après leur modification, exécuter `node docs/js/createur-personnage/build-assets.cjs` pour actualiser le fichier utilisé par la page, y compris en `file://`.
+La progression (fiche terminée, salle choisie) est enregistrée dans le navigateur (`lastrefuge.progress`), ainsi que les réglages (`lastrefuge.reglages`) et le détenu (`lastrefuge-3d-character`).
 
-## Nomenclature
+## Réglages et manette
+
+`docs/js/commun/reglages.js` + `docs/css/commun/reglages.css` forment la console de réglages commune à la page Options et au menu Échap du jeu : affichage, audio, clavier & souris, manette, accessibilité (et « Partie » en jeu). Toutes les touches clavier et tous les boutons de manette sont **réaffectables** ; les indices du jeu affichent les touches choisies.
+
+Par défaut : **WASD** pour marcher, souris pour regarder (regard automatique, curseur capturé ; Échap ouvre le menu). À la manette Xbox : sticks pour marcher / regarder, A interagir, B s’accroupir, X recharger, Y lampe, RT tirer, L3 courir, LB inventaire, RB carnet, View carte, R3 vue, Menu réglages. `docs/js/commun/manette-menus.js` gère la navigation des menus à la manette.
+
+## Ajouter une escape room
+
+Ajoutez une entrée dans `docs/js/commun/escape-rooms.js` (code, nom, difficulté 1–5, nombre de salles, durée, description, narration, `url`). Sans `url`, le dossier s’affiche « en préparation ».
+
+## Organisation
 
 ```text
 LAST-REFUGE-XM/
-├── .vscode/
-│   └── settings.json
-├── docs/
-│   ├── assets/
-│   │   ├── audio/
-│   │   │   ├── ambient/
-│   │   │   └── sound-effects/
-│   │   │       ├── interface/
-│   │   │       ├── mechanics/
-│   │   │       └── tools/
-│   │   ├── creation-personnage/
-│   │   │   ├── cheveux/
-│   │   │   ├── tenues/
-│   │   │   └── ... (visages, accessoires, fonds et données)
-│   │   ├── images/
-│   │   └── svg/
-│   │       ├── accueil/
-│   │       ├── animations-depart/
-│   │       ├── cles/
-│   │       ├── connexion/
-│   │       ├── fin/
-│   │       ├── forge/
-│   │       ├── ia/
-│   │       ├── identite/
-│   │       │   └── favicon.svg
-│   │       └── motifs/
-│   ├── css/
-│   │   ├── 404/404.css
-│   │   ├── accueil/accueil.css
-│   │   ├── commun/site.css
-│   │   ├── createur-personnage/createur-personnage.css
-│   │   ├── dev/dev.css
-│   │   ├── info/info.css
-│   │   ├── mode/mode.css
-│   │   └── options/options.css
-│   ├── data/
-│   │   └── content.json
-│   ├── html/
-│   │   ├── createur-personnage/
-│   │   │   └── createur-personnage.html
-│   │   ├── dev/
-│   │   │   └── dev.html
-│   │   ├── info/
-│   │   │   └── info.html
-│   │   ├── mode/
-│   │   │   └── mode.html
-│   │   └── options/
-│   │       └── options.html
-│   ├── js/
-│   │   ├── 404/index.js
-│   │   ├── accueil/index.js
-│   │   ├── commun/
-│   │   │   ├── content.js
-│   │   │   └── preferences.js
-│   │   ├── createur-personnage/createur-personnage.js
-│   │   ├── createur-personnage/outils.js
-│   │   ├── dev/index.js
-│   │   ├── info/info.js
-│   │   └── options/index.js
-│   └── README.md
-├── documentation/
-│   ├── AFTERLOCK-ESCAPE-ROOM-XM.md
-│   ├── AGENTS.md
-│   └── ASSETS_MAP.md
-├── lag-fix/
-├── tests/
-├── 404.html
-├── index.html
-└── README.md
+├── index.html · 404.html            points d’entrée à la racine
+└── docs/
+    ├── assets/
+    │   ├── creation-personnage/      bibliothèque 3D du détenu (partagée créateur + jeu)
+    │   │   ├── personnage_armes.js   point d’entrée unique
+    │   │   ├── donnees/              palettes.json, données, sélection/validation
+    │   │   ├── outils/ · materiaux/ · tete/ · visage/ · cheveux/ · barbes/
+    │   │   ├── lunettes/ · couvre-chefs/ · details-visage/ · especes/
+    │   │   ├── corps/ · tenues/ · pantalons/ · bottes/ · gants/ · bras/
+    │   │   ├── equipement/ · sacs-a-dos/ · armes/ · assemblage/
+    │   └── svg/                      illustrations (pénitencier, enceinte, bloc cellulaire, bunker, favicon)
+    ├── css/      commun/ (site.css, reglages.css) + une feuille par page ; escape-room/Sas-07/
+    ├── data/     content.json (textes des pages)
+    ├── html/     une page par dossier ; escape-room/Sas-07/
+    └── js/
+        ├── commun/                   préférences, contenu, progression, catalogue des salles, réglages, manette
+        ├── createur-personnage/      scène et interface du créateur
+        └── escape-room/Sas-07/       chargeur escape-room.js + fichiers du jeu dans l’ordre
+            └── salles/               salle-01-sas.js … salle-12-armurerie-arene.js
 ```
 
-`docs/assets/` rassemble les médias par format et usage; `docs/data/` contient les données des pages; `docs/css/`, `docs/html/` et `docs/js/` regroupent les ressources complémentaires. `documentation/` contient les guides, `lag-fix/` les correctifs de performance et `tests/` les vérifications. Les dossiers descriptifs utilisent le kebab-case; les points d’entrée d’hébergement restent à la racine.
+Les modèles 3D sont **générés par le code** (aucun fichier .glb à télécharger) : c’est plus léger (~140 Ko compressés pour le créateur et les 12 salles) et cela permet toutes les combinaisons de couleurs et de pièces. Le créateur peut toujours exporter un détenu en `.glb` ou en `.png`.
 
-La documentation principale se trouve dans [documentation/AFTERLOCK-ESCAPE-ROOM-XM.md](documentation/AFTERLOCK-ESCAPE-ROOM-XM.md).
+Les fichiers du Sas 07 partagent la même portée : `escape-room.js` les lit dans l’ordre de sa liste `FICHIERS` et les exécute comme un seul script. Pour ajouter du code au jeu, créez un fichier dans `docs/js/escape-room/Sas-07/` et ajoutez-le à cette liste.
+
+L’interface vise les ordinateurs, tablettes et consoles dès 768 px de largeur ; les animations respectent le réglage « Animations » et la préférence système de réduction du mouvement.
+
+La documentation de conception se trouve dans [documentation/AFTERLOCK-ESCAPE-ROOM-XM.md](documentation/AFTERLOCK-ESCAPE-ROOM-XM.md).
