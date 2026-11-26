@@ -80,6 +80,12 @@ function makeZombie(index) {
   const body = new THREE.Group();
   root.add(body);
   box(0.46, 0.62, 0.26, cl, 0, 1.2, 0, body);
+  [-1, 1].forEach((s) => {
+    const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), cl);
+    shoulder.scale.set(1, 0.75, 0.9);
+    shoulder.position.set(s * 0.23, 1.43, 0);
+    body.add(shoulder);
+  });
   box(0.4, 0.24, 0.24, pn, 0, 0.8, 0, body);
   box(0.2, 0.14, 0.01, zBlood, 0.06, 1.25, 0.135, body);
   box(0.08, 0.3, 0.01, zBlood, -0.1, 1.1, 0.135, body);
@@ -91,6 +97,8 @@ function makeZombie(index) {
   head.castShadow = true;
   head.userData.head = true;
   headG.add(head);
+  box(0.055, 0.06, 0.045, sk, 0, -0.015, 0.125, headG).userData.head = true;
+  box(0.15, 0.025, 0.025, sk, 0, 0.055, 0.11, headG).userData.head = true;
   const jaw = box(0.11, 0.05, 0.09, sk, 0, -0.11, 0.05, headG);
   jaw.userData.head = true;
   [-0.045, 0.045].forEach((x) => {
@@ -103,6 +111,7 @@ function makeZombie(index) {
     const a = new THREE.Group();
     a.position.set(s * 0.29, 1.46, 0);
     body.add(a);
+    cyl(0.065, 0.17, cl, 0, -0.085, 0, a, 10);
     cyl(0.045, 0.3, sk, 0, -0.15, 0, a, 10);
     const f = new THREE.Group();
     f.position.set(0, -0.3, 0);
@@ -121,7 +130,7 @@ function makeZombie(index) {
     k.position.set(0, -0.4, 0);
     l.add(k);
     cyl(0.055, 0.4, pn, 0, -0.2, 0, k, 10);
-    box(0.1, 0.06, 0.2, zBlood, 0, -0.42, 0.05, k);
+    box(0.12, 0.1, 0.23, mats.dark, 0, -0.4, 0.06, k);
     l.userData.k = k;
     return l;
   });
@@ -144,13 +153,29 @@ function makeZombie(index) {
   return root;
 }
 function spawnZombie(index = waveIndex()) {
-  const p = SPAWNS[(Math.random() * SPAWNS.length) | 0],
-    z = makeZombie(index);
-  z.position.set(p[0] + (Math.random() - 0.5) * 3, 0, p[1] + Z12 + (Math.random() - 0.5) * 3);
+  let spawn = null;
+  for (let i = 0; i < 48 && !spawn; i++) {
+    const p = SPAWNS[(Math.random() * SPAWNS.length) | 0],
+      x = p[0] + (Math.random() - 0.5) * 3,
+      z = p[1] + Z12 + (Math.random() - 0.5) * 3;
+    if (!zBlock(x, z)) spawn = [x, z];
+  }
+  if (!spawn) {
+    const p = SPAWNS.find(([x, z]) => !zBlock(x, z + Z12));
+    if (p) spawn = [p[0], p[1] + Z12];
+  }
+  if (!spawn) {
+    console.error('Aucun point d’apparition libre pour les infectés.');
+    say('Les infectés ne peuvent pas apparaître : aucun point libre.', 4000);
+    return false;
+  }
+  const z = makeZombie(index);
+  z.position.set(spawn[0], GH(spawn[0], spawn[1]), spawn[1]);
   scene.add(z);
   zRoots.push(z);
   State.spawned++;
   SND.play('zgroan');
+  return true;
 }
 function killZombie(z, t) {
   const u = z.userData;
@@ -183,14 +208,11 @@ function hud() {
   const c = document.getElementById('combat');
   if (!c) return;
   c.style.display = State.armed ? 'flex' : 'none';
+  document.getElementById('ammo-panel').style.display = State.armed ? 'flex' : 'none';
   document.getElementById('wave').textContent = 'VAGUE ' + (State.wave || 1) + ' / ' + ZC.waveSizes.length;
   const st = AV.stats;
-  document.getElementById('ammo').textContent =
-    st && st.mag
-      ? State.reloading
-        ? 'RECHARGEMENT…'
-        : 'MUNITIONS ' + State.ammo + ' / ' + st.mag
-      : 'ARME BLANCHE';
+  document.getElementById('ammo-state').textContent = State.reloading ? 'RECHARGEMENT…' : 'CHARGEUR';
+  document.getElementById('ammo').textContent = st && st.mag ? State.ammo + ' / ' + st.mag : 'ARME BLANCHE';
   document.getElementById('kills').textContent = 'ZOMBIES ABATTUS : ' + State.kills;
 }
 function equipWeapon() {
@@ -246,7 +268,9 @@ function hitZombie(z, dmg, head, p, t) {
   if (u.hp <= 0) killZombie(z, t);
 }
 let fireT = 0,
-  hurtT = 0;
+  hurtT = 0,
+  healingRemaining = 0,
+  wasInSafeZone = false;
 function fire(e) {
   if (
     !State.armed ||
@@ -255,7 +279,8 @@ function fire(e) {
     modalOpen ||
     State.doorExit ||
     rig.locked ||
-    State.reloading
+    State.reloading ||
+    inSafeZone(rig.pos.x, rig.pos.z)
   )
     return;
   const t = clock.elapsedTime,
@@ -274,6 +299,7 @@ function fire(e) {
   const alive = zRoots.filter((z) => z.userData.state === 'walk' || z.userData.state === 'collapse');
   if (k === 1 || k === 11) {
     // arme blanche : touche les zombies proches, devant soi
+    firstPersonFire(true);
     SND.play('swing');
     const fw = new THREE.Vector3(-Math.sin(rig.yaw), 0, -Math.cos(rig.yaw));
     alive.forEach((z) => {
@@ -290,6 +316,7 @@ function fire(e) {
     return;
   }
   State.ammo--;
+  firstPersonFire(false);
   hud();
   SND.play('shot', k);
   mFlash.position.copy(muzzlePos());
@@ -344,6 +371,7 @@ function reload() {
   );
 }
 function playerHurt(n) {
+  if (inSafeZone(rig.pos.x, rig.pos.z)) return false;
   n *= Math.max(0.35, 1 - 0.06 * (State.bonus || 0));
   State.hp -= n;
   hurtT = 0.5;
@@ -351,6 +379,7 @@ function playerHurt(n) {
   hud();
   if (State.hp <= 0) {
     State.hp = 100;
+    healingRemaining = 0;
     say(TEXTS.msg.zDead, 5000);
     zRoots.forEach((z) => {
       scene.remove(z);
@@ -368,11 +397,25 @@ function playerHurt(n) {
   return false;
 }
 const zBlock = (x, z) => {
+  if (inSafeZone(x, z, 0.4)) return true;
   for (const c of EXTRA_COLLIDERS)
     if (x > c[0] - 0.3 && x < c[1] + 0.3 && z > c[2] - 0.3 && z < c[3] + 0.3) return true;
   return Math.abs(x) > 74.3 || z < -271 + Z12 || z > -222.4 + Z12;
 };
 function combatFrame(dt, t) {
+  if (healingRemaining > 0) {
+    const amount = Math.min(healingRemaining, 10 * dt, 100 - State.hp);
+    State.hp += amount;
+    healingRemaining -= amount;
+    if (State.hp >= 100 || healingRemaining <= 0.0001) healingRemaining = 0;
+    hud();
+  }
+  const safe = inSafeZone(rig.pos.x, rig.pos.z);
+  if (safe !== wasInSafeZone) {
+    wasInSafeZone = safe;
+    if (State.armed && !State.zDone)
+      say(safe ? 'Zone sûre : protégé des infectés, tir interdit.' : 'Vous quittez la zone sûre.', 2500);
+  }
   const hurt = document.getElementById('hurt');
   if (hurt) {
     hurtT = Math.max(0, hurtT - dt);
@@ -407,7 +450,8 @@ function combatFrame(dt, t) {
           sz = (dz / d) * sp * dt;
         if (!zBlock(z.position.x + sx, z.position.z)) z.position.x += sx;
         if (!zBlock(z.position.x, z.position.z + sz)) z.position.z += sz;
-      } else if (t > u.nextHit && !State.doorExit) {
+      } else if (t > u.nextHit && !State.doorExit && !safe &&
+        Math.abs(GH(rig.pos.x, rig.pos.z) - GH(z.position.x, z.position.z)) < 1.2) {
         u.nextHit = t + 1;
         if (playerHurt(ZC.hitDamage)) return;
         u.swipe = t + 0.3;
@@ -418,10 +462,13 @@ function combatFrame(dt, t) {
             oz = z.position.z - o.position.z,
             od = Math.hypot(ox, oz);
           if (od < 0.6 && od > 0.001) {
-            z.position.x += (ox / od) * 0.6 * dt;
-            z.position.z += (oz / od) * 0.6 * dt;
+            const sx = (ox / od) * 0.6 * dt,
+              sz = (oz / od) * 0.6 * dt;
+            if (!zBlock(z.position.x + sx, z.position.z)) z.position.x += sx;
+            if (!zBlock(z.position.x, z.position.z + sz)) z.position.z += sz;
           }
         }
+      z.position.y = GH(z.position.x, z.position.z);
       u.phase += dt * sp * 4.2;
       const s = Math.sin(u.phase);
       u.legs[0].rotation.x = s * 0.6;

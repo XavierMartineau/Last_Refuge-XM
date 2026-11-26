@@ -7,6 +7,11 @@ const Z12 = -90,
   _c12 = EXTRA_COLLIDERS.length,
   _sceneAdd = scene.add.bind(scene),
   G12 = new THREE.Group();
+const SAFE_ZONE = { x0: -4, x1: 4, z0: -233 + Z12, z1: -224 + Z12 };
+function inSafeZone(x, z, padding = 0) {
+  return x >= SAFE_ZONE.x0 - padding && x <= SAFE_ZONE.x1 + padding &&
+    z >= SAFE_ZONE.z0 - padding && z <= SAFE_ZONE.z1 + padding;
+}
 G12.position.z = Z12;
 _sceneAdd(G12);
 scene.add = (...o) => G12.add(...o);
@@ -142,13 +147,114 @@ scatter(
     [6, 10, -260, -256],
     [-2, 2, -248, -244],
     [-14, -10, -260, -256],
-    [-14, -10, -249, -245]
+    [-14, -10, -249, -245],
+    [-5, 5, -234, -223],
+    [4, 10, -240, -229],
+    [-6, -2, -258, -254],
+    [2, 6, -258, -254],
+    [-20, -10, -246, -238],
+    [10, 20, -246, -238]
   ],
-  ['crates', 'barrels', 'pallet', 'drum', 'tarp']
+  ['crates', 'sand', 'tarp', 'stretcher', 'machine']
 );
 beacon(-24, 8, -228, () => !State.zDone);
 beacon(24, 8, -262, () => !State.zDone);
-widenRoom(_r12, { room: 12, hw: 25, thr: 5, zs: [-222, -272], y: 8.6, fill: 36, group: G12, zoff: Z12 });
+const arenaOutposts = [
+  [-15, -242, 'INFIRMERIE', 0x3e7668],
+  [15, -242, 'ATELIER', 0xb77b2d],
+  [-42, -234, 'TRIAGE', 0x498272],
+  [42, -234, 'CONTRÔLE', 0x68869c],
+  [-42, -259, 'QUARANTAINE', 0x9b713b],
+  [42, -259, 'RAVITAILLEMENT', 0x8c704a]
+];
+widenRoom(_r12, {
+  room: 12, hw: 25, thr: 5, zs: [-222, -272], y: 8.6, fill: 36, group: G12, zoff: Z12,
+  kinds: ['crates', 'tarp', 'stretcher', 'machine', 'workbench'],
+  avoid: arenaOutposts.map(([x, z]) => [x - 5, x + 5, z - 4, z + 4])
+});
+
+function arenaOutpost(x, z, title, color) {
+  const g = new THREE.Group();
+  g.position.set(x, 0, z);
+  scene.add(g);
+  const accent = new THREE.MeshStandardMaterial({ color, roughness: 0.8 });
+  box(8, 0.04, 6, accent, 0, 0.03, 0, g);
+  box(8, 0.14, 6, mats.cloth, 0, 3.15, 0, g);
+  [-3.8, 3.8].forEach((dx) => [-2.8, 2.8].forEach((dz) => {
+    box(0.12, 3.1, 0.12, mats.steel, dx, 1.55, dz, g);
+    fillCols.push([x + dx - 0.1, x + dx + 0.1, z + dz + Z12 - 0.1, z + dz + Z12 + 0.1]);
+  }));
+  box(8, 2.2, 0.12, mats.dark, 0, 1.15, -2.9, g);
+  fillCols.push([x - 4, x + 4, z - 3 + Z12, z - 2.8 + Z12]);
+  plane(3.2, 0.55, sign([title], '#d4c8a2'), 0, 2.5, -2.8, g);
+  box(2.4, 0.12, 0.8, mats.steel, -2, 0.8, -1.7, g);
+  [-2.9, -1.1].forEach((dx) => box(0.1, 0.8, 0.7, mats.dark, dx, 0.4, -1.7, g));
+  box(0.65, 0.35, 0.5, accent, -2, 1.04, -1.7, g);
+  fillCols.push([x - 3.3, x - 0.7, z - 2.2 + Z12, z - 1.2 + Z12]);
+  if (title === 'INFIRMERIE' || title === 'TRIAGE') {
+    box(2.3, 0.12, 0.9, mats.steel, 1.8, 0.7, -1.5, g);
+    box(2.1, 0.18, 0.75, mats.mattress, 1.8, 0.85, -1.5, g);
+    [-0.9, 0.9].forEach((dx) => box(0.08, 0.65, 0.7, mats.dark, 1.8 + dx, 0.35, -1.5, g));
+    const red = new THREE.MeshStandardMaterial({ color: 0xb42b22 });
+    box(0.5, 0.12, 0.02, red, 1.8, 1.8, -2.8, g);
+    box(0.12, 0.5, 0.02, red, 1.8, 1.8, -2.8, g);
+  } else {
+    box(2.3, 1.25, 0.7, mats.lockerA, 1.8, 0.625, -1.7, g);
+    box(2, 0.06, 0.7, mats.steel, 1.8, 1.28, -1.7, g);
+    [1, 1.8, 2.6].forEach((dx) => box(0.45, 0.25, 0.45, accent, dx, 1.43, -1.7, g));
+  }
+  fillCols.push([x + 0.6, x + 3, z - 2.2 + Z12, z - 0.9 + Z12]);
+  const light = new THREE.PointLight(color, 15, 11, 2);
+  light.position.set(0, 2.8, 0.5);
+  g.add(light);
+}
+arenaOutposts.forEach(([x, z, title, color]) => arenaOutpost(x, z, title, color));
+
+{
+  const marker = glow(0x56e6ca, 1.2);
+  box(8, 0.025, 9, new THREE.MeshStandardMaterial({ color: 0x174139, roughness: 0.8 }), 0, 0.014, -228.5);
+  [-4, 4].forEach((x) => box(0.1, 0.035, 9, marker, x, 0.035, -228.5));
+  [-233, -224].forEach((z) => box(8, 0.035, 0.1, marker, 0, 0.035, z));
+  plane(3.2, 0.55, sign(['ZONE SÛRE · TIR INTERDIT']), 0, 2.8, -222.2, scene, Math.PI);
+  const safeLight = new THREE.PointLight(0x45e6c6, 18, 14, 2);
+  safeLight.position.set(0, 4, -228.5);
+  scene.add(safeLight);
+  [-10, 10].forEach((x) => {
+    const alarm = new THREE.PointLight(0xff2518, 0, 25, 2);
+    alarm.position.set(x, 6.8, -250);
+    alarm.userData.on = () => State.armed && !State.zDone && State.room === 12;
+    alarms.push(alarm);
+    scene.add(alarm);
+    beacon(x, 6.8, -250, () => State.armed && !State.zDone);
+  });
+  for (let i = 0; i < ARENA_STAIR.steps; i++) {
+    const height = (i + 1) * ARENA_STAIR.rise;
+    box(4, height, 1, mats.steel, 7, height / 2, -230.5 - i);
+    box(4, 0.025, 0.08, marker, 7, height + 0.015, -230 - i);
+  }
+  box(4, 1.5, 3, mats.steel, 7, 0.75, -237.5);
+}
+function arenaSupply(id, x, z, medical) {
+  const g = new THREE.Group();
+  g.position.set(x, 0.25, z);
+  scene.add(g);
+  const main = new THREE.MeshStandardMaterial({ color: medical ? 0xe9e9dc : 0x56643e, roughness: 0.7 });
+  box(0.75, 0.5, 0.48, main, 0, 0, 0, g);
+  box(0.35, 0.05, 0.08, mats.dark, 0, 0.28, 0, g);
+  if (medical) {
+    const red = new THREE.MeshStandardMaterial({ color: 0xb51e1e });
+    box(0.36, 0.1, 0.02, red, 0, 0, 0.25, g);
+    box(0.1, 0.36, 0.02, red, 0, 0, 0.25, g);
+  } else {
+    box(0.52, 0.08, 0.02, glow(0xe8c26a, 0.7), 0, 0, 0.25, g);
+  }
+  hitBox(0.9, 0.7, 0.65, 0, 0, 0, g);
+  interactive(g, id, medical ? 'Utiliser la trousse de soin progressive' : 'Recharger instantanément', 'pickup');
+}
+arenaSupply('arena_medkit_1', -2, -227, true);
+arenaSupply('arena_ammo_1', 2, -227, false);
+arenaSupply('arena_medkit_2', -4, -256, true);
+arenaSupply('arena_ammo_2', 4, -256, false);
 scene.add = _sceneAdd;
 for (let i = _c12; i < EXTRA_COLLIDERS.length; i++) {
   const c = EXTRA_COLLIDERS[i];

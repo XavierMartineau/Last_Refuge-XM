@@ -31,7 +31,7 @@ La progression (fiche terminée, salle choisie) est enregistrée dans le navigat
 
 `docs/js/commun/reglages.js` + `docs/css/commun/reglages.css` forment la console de réglages commune à la page Options et au menu Échap du jeu : affichage, audio, clavier & souris, manette, accessibilité (et « Partie » en jeu). Toutes les touches clavier et tous les boutons de manette sont **réaffectables** ; les indices du jeu affichent les touches choisies.
 
-Par défaut : **WASD** pour marcher, souris pour regarder (un clic initial autorise la capture du curseur, puis il n’est plus nécessaire de maintenir le clic ; Échap libère le curseur). Le navigateur doit autoriser le verrouillage du pointeur. À la manette : sticks pour marcher / regarder, A interagir, B s’accroupir, X recharger, Y lampe, RT tirer, L3 courir, LB inventaire, RB carnet, View carte, R3 vue, Menu réglages. `docs/js/commun/manette-menus.js` gère la navigation des menus à la manette.
+Par défaut : **WASD** pour marcher, souris pour regarder (un clic initial autorise la capture du curseur, puis il n’est plus nécessaire de maintenir le clic ; Échap libère le curseur). Maintenez le **clic droit** pour viser avec une arme à feu. Le navigateur doit autoriser le verrouillage du pointeur. À la manette : sticks pour marcher / regarder, A interagir, B s’accroupir, X recharger, Y lampe, RT tirer, LT viser, L3 courir, LB inventaire, RB carnet, View carte, R3 vue, Menu réglages. `docs/js/commun/manette-menus.js` gère la navigation des menus à la manette.
 
 Dans le créateur, la croix ou le stick gauche navigue entre les choix, A valide, B revient et le stick droit tourne l’aperçu. Les manettes compatibles avec la disposition standard de l’API Gamepad sont prises en charge ; leur disponibilité dépend du navigateur et de la console.
 
@@ -39,7 +39,11 @@ Les réglages d’accessibilité proposent une correction ou une simulation des 
 
 Le HUD affiche le portrait et le nom du détenu, avec la police, la couleur et le style choisis, ainsi que sa vie sur 100. Une attaque d’infecté inflige 5 PV avant la réduction accordée par l’équipement renforcé.
 
+En première personne, les mains et l'arme équipée reprennent l'apparence et les accessoires du personnage. Le compteur en bas à droite indique les balles restantes dans le chargeur et sa capacité, y compris pendant le rechargement ; les armes blanches sont indiquées séparément.
+
 Dans l’arène, les 13 infectés arrivent en six vagues successives de 1, 1, 2, 2, 3 et 4. Leurs PV valent respectivement 3, 4, 5, 6, 7 et 8 fois les dégâts effectifs de l’arme équipée, accessoires compris. Leur vitesse augmente aussi à chaque vague et dépend des dégâts, de la cadence et du type d’arme : les infectés sont plus lents face aux armes de mêlée. Changer d’arme rééquilibre les infectés encore vivants en conservant leur proportion de vie.
+
+L'entrée de l'arène comprend une zone sûre délimitée : les infectés ne peuvent pas y entrer ni blesser le joueur, et aucune arme ne peut y être utilisée. Deux trousses à usage unique restaurent progressivement jusqu'à 100 PV à raison de 10 PV par seconde ; deux boîtes à usage unique remplissent instantanément le chargeur. Le rechargement normal reste gratuit et illimité. Les ressources se ramassent avec la commande de prise habituelle et restent disponibles si elles ne sont pas utiles. L'arène comprend des marches praticables, des postes thématiques et des néons moins éblouissants ; plusieurs autres salles ont également reçu des décors adaptés à leur fonction.
 
 ## Ajouter une escape room
 
@@ -71,6 +75,13 @@ LAST-REFUGE-XM/
 ```
 
 Les modèles 3D utilisés par le jeu sont **générés par le code** : aucun fichier `.glb` n’est nécessaire au lancement, ce qui permet toutes les combinaisons de couleurs et de pièces. Les fichiers `.glb` exportés sont des instantanés statiques ; le mouvement des cheveux est calculé dans le jeu et n’est pas inclus dans ces exports. Le créateur peut exporter un détenu en `.glb` ou en `.png`.
+
+### Crédits des ressources proposées
+
+Ces ressources ont été proposées pour le jeu mais ne sont pas encore intégrées :
+
+- [Living Flesh Blob - Free Organic Horror Asset](https://skfb.ly/pGOHv), par Yury Misiyuk — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
+- [Animated Zombie Cop Running Loop](https://skfb.ly/o9xXZ), par LasquetiSpice — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 Les fichiers du Sas 07 partagent la même portée : `escape-room.js` les lit dans l’ordre de sa liste `FICHIERS` et les exécute comme un seul script. Pour ajouter du code au jeu, créez un fichier dans `docs/js/escape-room/Sas-07/` et ajoutez-le à cette liste.
 

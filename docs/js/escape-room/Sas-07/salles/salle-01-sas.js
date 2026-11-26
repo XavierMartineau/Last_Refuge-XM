@@ -895,7 +895,7 @@ function widenRoom(i0, o) {
       [
         [-x1, -x0],
         [x0, x1]
-      ].forEach(([a, b]) => scatter(a, b, o.zs[0] - 3, o.zs[1] + 3, o.fill));
+      ].forEach(([a, b]) => scatter(a, b, o.zs[0] - 3, o.zs[1] + 3, o.fill, o.avoid || [], o.kinds));
       fillCols.push(
         ...EXTRA_COLLIDERS.splice(n0).map((c) => [c[0], c[1], c[2] + (o.zoff || 0), c[3] + (o.zoff || 0)])
       );

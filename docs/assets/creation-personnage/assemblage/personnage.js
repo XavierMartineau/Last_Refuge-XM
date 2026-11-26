@@ -105,6 +105,7 @@ function buildCharacter(raw, opt = {}) {
   root.userData.setPitch = (p) => {
     C.pitch = p;
   };
+  root.userData.getFirstPersonParts = () => C.weapon ? [...C.arms.map((a) => a.ag), C.weapon] : [];
   // clignement des yeux
   let nextB = 2;
   C.anim.push((t) => {

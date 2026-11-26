@@ -26,7 +26,8 @@ function buildHand(C, eg, side) {
     pm = gm || skin;
   const bulk = (gl && gl.bulk) || (gl && gl.thin ? 0.93 : 0) || 1,
     fem = C.fem ? 0.92 : 1,
-    hg = grp(0, -0.275, 0, eg);
+    hg = grp(0, -0.275, 0, eg),
+    fingers = [];
   hg.rotation.x = -0.08;
   ell(0.021 * bulk, 0.052 * bulk * fem, 0.043 * bulk * fem, pm, 0, -0.05, 0, hg); // paume (épaisseur selon x, doigts alignés selon z)
   for (let i = 0; i < 4; i++) {
@@ -39,6 +40,7 @@ function buildHand(C, eg, side) {
     cyl(r, r * 0.93, L, pm, 0, -L / 2, 0, f1, 8);
     const f2 = grp(0, -L, 0, f1);
     f2.rotation.z = -side * 0.55;
+    fingers.push({ base: f1, tip: f2 });
     const L2 = L * 0.85;
     cyl(r * 0.92, r * 0.78, L2, fs, 0, -L2 / 2, 0, f2, 8);
     ell(r * 0.8, r * 0.8, r * 0.8, fs, 0, -L2, 0, f2);
@@ -56,6 +58,7 @@ function buildHand(C, eg, side) {
       box(0.014, 0.012, 0.016, metal('#3a3f3a', 0.5), side * 0.028, -0.108, -0.03 + i * 0.02, hg);
   }
   if (gl) cyl(0.043 * bulk, 0.045 * bulk, gl.cuff, gm, 0, gl.cuff * 0.3, 0, hg, 14, true); // poignet du gant
+  return { root: hg, fingers, thumb: th, thumbTip: t2 };
 }
 
 export { GLOVECOL, GLV, buildHand };

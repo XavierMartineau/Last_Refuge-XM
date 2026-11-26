@@ -65,6 +65,29 @@ const PROPS = {
     box(1.6, 0.5, 1.2, mats.cloth, x, 0.25, z);
     box(1, 0.35, 0.9, mats.cloth, x + 0.1, 0.62, z);
     pushC(x, z, 0.9, 0.7);
+  },
+  machine(x, z) {
+    box(1.3, 1.2, 0.8, mats.dark, x, 0.6, z);
+    box(1.1, 0.5, 0.05, mats.steel, x, 0.9, z + 0.43);
+    for (let i = 0; i < 4; i++) box(0.7, 0.035, 0.02, mats.dark, x, 0.75 + i * 0.1, z + 0.46);
+    cyl(0.2, 0.15, mats.rustpipe, x, 1.28, z);
+    pushC(x, z, 0.75, 0.55);
+  },
+  stretcher(x, z) {
+    box(1.8, 0.09, 0.75, mats.steel, x, 0.75, z);
+    box(1.65, 0.15, 0.65, mats.cloth, x, 0.87, z);
+    [-0.75, 0.75].forEach((dx) => [-0.3, 0.3].forEach((dz) => {
+      box(0.05, 0.65, 0.05, mats.dark, x + dx, 0.38, z + dz);
+      cyl(0.1, 0.06, mats.rubber, x + dx, 0.1, z + dz).rotation.z = Math.PI / 2;
+    }));
+    pushC(x, z, 1, 0.5);
+  },
+  workbench(x, z) {
+    box(1.8, 0.12, 0.75, mats.wood, x, 0.85, z);
+    [-0.75, 0.75].forEach((dx) => box(0.1, 0.8, 0.6, mats.dark, x + dx, 0.4, z));
+    box(0.45, 0.2, 0.3, mats.rustpipe, x + 0.4, 1.01, z);
+    box(0.6, 0.04, 0.06, mats.steel, x - 0.35, 0.94, z + 0.15);
+    pushC(x, z, 1, 0.5);
   }
 };
 function scatter(x0, x1, z0, z1, n, avoid = [], kinds = Object.keys(PROPS)) {
@@ -203,9 +226,9 @@ scatter(-18, 18, -70, -34, 95, [
   [14.8, 17.2, -65, -63],
   [-2, 6, -72, -69],
   [-4, 4, -35, -31]
-]);
+], ['crates', 'barrels', 'pallet', 'drum', 'machine', 'workbench']);
 beacon(-19, 6, -40, () => !State.power5);
 beacon(19, 6, -60, () => !State.power5);
 
-widenRoom(_r5, { room: 5, hw: 20, thr: 5, zs: [-32, -72], y: 7.6, fill: 28 });
+widenRoom(_r5, { room: 5, hw: 20, thr: 5, zs: [-32, -72], y: 7.6, fill: 28, kinds: ['crates', 'pallet', 'machine', 'workbench'] });
 /* ── Pièce 6 : l’entrepôt (rayonnages) ── */

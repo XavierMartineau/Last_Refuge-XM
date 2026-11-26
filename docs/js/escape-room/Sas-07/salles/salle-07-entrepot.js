@@ -52,8 +52,8 @@ pushC(11, -124, 1, 0.6);
 scatter(-14, 14, -130, -104, 48, [
   [-5.5, 5.5, -123, -111],
   [9.5, 12.5, -125, -123]
-]);
+], ['barrels', 'drum', 'machine', 'workbench']);
 beacon(-14, 8, -110, () => !State.key);
 beacon(14, 8, -126, () => !State.key);
 
-widenRoom(_r7, { room: 7, hw: 15, thr: 4, zs: [-102, -132], y: 11.6, fill: 14 });
+widenRoom(_r7, { room: 7, hw: 15, thr: 4, zs: [-102, -132], y: 11.6, fill: 14, kinds: ['barrels', 'drum', 'machine'] });

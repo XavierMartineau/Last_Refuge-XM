@@ -4,7 +4,7 @@
    Manette (disposition Xbox « standard ») :
      Stick gauche  marcher            Stick droit  regarder         L3  courir (bascule)
      A  interagir / prendre           B  s’accroupir / quitter le zoom
-     X  recharger                     Y  lampe torche              RT  tirer (maintenir)
+     X  recharger                     Y  lampe torche              RT  tirer · LT viser (maintenir)
      LB inventaire   RB carnet        View  carte                   R3  vue 1re / 3e personne
      Menu  réglages                   Croix ↑ carnet · ↓ inventaire
    En vue rapprochée (zoom sur un objet), un viseur se déplace au stick gauche et A clique dessous. */
@@ -36,7 +36,7 @@
       case 'fov':
         CONFIG.fov = v;
         if (!State.focus) {
-          camera.fov = v;
+          camera.fov = rig.fov = v;
           camera.updateProjectionMatrix();
         }
         break;
@@ -70,7 +70,7 @@
     TEXTS.ui.flashOn = `🔦 Lampe : ON (${K('flashlight')})`;
     TEXTS.ui.flashOff = `🔦 Lampe : OFF (${K('flashlight')})`;
     TEXTS.msg.pressE = `Appuyez sur ${K('take')} (ou A à la manette) pour le prendre.`;
-    TEXTS.ui.help = `Souris : regarder · ${move} : marcher · ${K('turnLeft')} ${K('turnRight')} : tourner · ${K('sprint')} : courir · ${K('crouch')} : s’accroupir · ${K('inventory')} : inventaire · ${K('objectives')} : objectifs · ${K('flashlight')} : lampe torche · ${K('view')} : vue 1re/3e personne · ${K('fire')} : tirer · ${K('reload')} : recharger · Clic : interagir · Échap : menu`;
+    TEXTS.ui.help = `Souris : regarder · ${move} : marcher · ${K('turnLeft')} ${K('turnRight')} : tourner · ${K('sprint')} : courir · ${K('crouch')} : s’accroupir · ${K('inventory')} : inventaire · ${K('objectives')} : objectifs · ${K('flashlight')} : lampe torche · ${K('view')} : vue 1re/3e personne · ${K('fire')} : tirer · Clic droit : viser · ${K('reload')} : recharger · Clic : interagir · Échap : menu`;
   }
   try {
     keyTexts();
@@ -204,7 +204,10 @@
     PAD.attach({
       menuActive: () => {
         const active = modalOpen || menuOn();
-        if (active) releaseKeys();
+        if (active) {
+          releaseKeys();
+          padAim = false;
+        }
         return active;
       },
       spatial: () => !menuOn(),
@@ -213,6 +216,7 @@
         if (menuOn()) $g('menuok').click();
       },
       onPad: (on) => {
+        if (!on) padAim = false;
         document.body.classList.toggle('pad', on);
         if (ui) ui.setPad(on);
         releaseKeys();
@@ -241,6 +245,7 @@
         reticle.classList.toggle('on', zoom);
 
         if (zoom) {
+          padAim = false;
           // vue rapprochée : viseur libre au stick gauche (ou droit), A = clic
           releaseKeys();
           cursor.x = Math.min(innerWidth - 4, Math.max(4, cursor.x + (lx + rx) * 900 * dt));
@@ -287,7 +292,10 @@
           if (hit('reload', 'X')) reload();
           if (hit('flashlight', 'Y') && !modalOpen) toggleFlash();
           const fi = P('fire', 'RT'),
-            fb = pad.buttons[fi];
+            fb = pad.buttons[fi],
+            ai = P('aim', 'LT'),
+            ab = pad.buttons[ai];
+          padAim = !!(ab && free() && (ab.value > trig || (ab.pressed && ai !== B.LT && ai !== B.RT)));
           if (fb && (fb.value > trig || (fb.pressed && fi !== B.LT && fi !== B.RT))) {
             const before = State.ammo;
             fire();
@@ -357,6 +365,7 @@
   canvas.addEventListener(
     'pointerdown',
     (e) => {
+      if (e.button !== 0) return;
       if (!auto() || !freeLook()) return;
       e.stopImmediatePropagation();
       if (!locked()) lock();
@@ -366,6 +375,7 @@
   canvas.addEventListener(
     'pointerup',
     (e) => {
+      if (e.button !== 0) return;
       if (!auto() || !locked()) return;
       e.stopImmediatePropagation();
       click(center());
@@ -426,7 +436,7 @@
       wantMenu = true;
       document.exitPointerLock();
     }
-    cross.classList.toggle('on', on && freeLook());
+    cross.classList.toggle('on', (on && freeLook()) || isAiming());
     hint.classList.toggle('on', auto() && !on && freeLook() && !document.body.classList.contains('pad'));
     if ((on || (window.LastRefugeManette && window.LastRefugeManette.active)) && freeLook() && t - hoverT > 90) {
       hoverT = t;

@@ -18,6 +18,11 @@ outline.pulsePeriod = 0;
 outline.visibleEdgeColor.set(0x22d3ee);
 outline.hiddenEdgeColor.set(0x0a4a5a); // bordure cyan FIXE (aucun pulsement)
 composer.addPass(outline);
+const firstPersonPass = new RenderPass(FP.scene, FP.camera);
+firstPersonPass.clear = false;
+firstPersonPass.clearDepth = true;
+firstPersonPass.enabled = false;
+composer.addPass(firstPersonPass);
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.34, 0.4, 0.93);
 composer.addPass(bloom);
 bloom.enabled = !TOUCH || CONFIG.device.bloomMobile;

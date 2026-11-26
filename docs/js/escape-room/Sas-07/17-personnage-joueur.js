@@ -7,6 +7,40 @@
    • Bouton « 👤 Personnage » : collez le JSON exporté par le créateur (ou « Mon navigateur » pour reprendre la sauvegarde locale).
    Réglages : AV.dist (distance caméra), AV.shoulder (décalage d’épaule), AV.tp (true = 3e personne).
    ════════════════════════════════════════════════════════════════ */
+const FP = (() => {
+  const scene = new THREE.Scene(),
+    camera = new THREE.PerspectiveCamera(CONFIG.fov, 1, 0.05, 10),
+    model = new THREE.Group(),
+    light = new THREE.DirectionalLight(0xffe6c6, 1.5);
+  scene.add(model, new THREE.HemisphereLight(0xdce9ec, 0x40382c, 1.3), light);
+  light.position.set(-1, 2, 1);
+  return {
+    scene,
+    camera,
+    model,
+    kick: 0,
+    melee: false,
+    reducedMotion: typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
+  };
+})();
+function firstPersonFire(melee) {
+  if (!AV.tp && !(FP.reducedMotion && FP.reducedMotion.matches)) {
+    FP.kick = 1;
+    FP.melee = melee;
+  }
+}
+function setFirstPersonAvatar(avatar) {
+  FP.model.clear();
+  FP.kick = 0;
+  const parts = avatar.userData.getFirstPersonParts();
+  if (!parts.length) return;
+  const body = new THREE.Group();
+  body.position.set(0.23, -1.55 * avatar.scale.y, -0.05);
+  body.rotation.y = Math.PI;
+  body.scale.copy(avatar.scale);
+  parts.forEach((part) => body.add(part.clone()));
+  FP.model.add(body);
+}
 let _env = null;
 function charEnv() {
   if (_env) return _env;
@@ -66,6 +100,7 @@ function loadAvatar(json) {
   try {
     let st = CL.sanitize(json || {});
     if (State.armed && !st.weapon) st = CL.sanitize({ ...st, weapon: 2 });
+    FP.model.clear();
     if (AV.obj) {
       scene.remove(AV.obj);
       try {
@@ -89,6 +124,7 @@ function loadAvatar(json) {
     scene.add(o);
     AV.obj = o;
     AV.state = st;
+    setFirstPersonAvatar(o);
     if (State.armed) {
       AV.stats = CL.weaponStats(st);
       State.ammo = Math.min(State.ammo, AV.stats.mag);
@@ -112,6 +148,24 @@ function camCollide(x, z) {
 }
 function avatarFrame(dt, t) {
   const o = AV.obj;
+  const fp = !!o && State.armed && !AV.tp && !State.focus && !State.doorExit && FP.model.children.length > 0;
+  firstPersonPass.enabled = fp;
+  if (fp) {
+    if (FP.camera.fov !== rig.fov || FP.camera.aspect !== camera.aspect) {
+      FP.camera.fov = rig.fov;
+      FP.camera.aspect = camera.aspect;
+      FP.camera.updateProjectionMatrix();
+    }
+    FP.kick = Math.max(0, FP.kick - dt * (FP.melee ? 3.5 : 8));
+    const motion = FP.reducedMotion && FP.reducedMotion.matches ? 0 : 1,
+      walk = rig.moving ? Math.sin(walkD * 4.2) : 0;
+    const body = FP.model.children[0],
+      weapon = body.children[2];
+    body.position.x = THREE.MathUtils.lerp(0.23, weapon.position.x * body.scale.x, aimBlend);
+    body.position.y = THREE.MathUtils.lerp(-1.55, -1.43, aimBlend) * body.scale.y;
+    FP.model.position.set(walk * 0.008 * motion, Math.abs(walk) * 0.006 * motion, FP.kick * 0.06);
+    FP.model.rotation.set(-FP.kick * (FP.melee ? 0.35 : 0.1), 0, FP.kick * (FP.melee ? 0.18 : 0.025));
+  }
   if (!o) return;
   const tp = AV.tp && !State.focus && !State.doorExit;
   o.visible = tp && AV.vis;
@@ -164,8 +218,9 @@ function applyRig(t) {
     camera.position.set(rig.pos.x, rig.pos.y + (rig.bob || 0) + Math.sin(t * 1.3) * 0.004, rig.pos.z);
     camera.rotation.set(rig.pitch, rig.yaw, 0);
   }
-  if (Math.abs(camera.fov - rig.fov) > 0.01) {
-    camera.fov = rig.fov;
+  const fov = rig.fov * (1 - 0.3 * aimBlend);
+  if (Math.abs(camera.fov - fov) > 0.01) {
+    camera.fov = fov;
     camera.updateProjectionMatrix();
   }
 }

@@ -75,7 +75,8 @@ const neonPool = Array.from({ length: 8 }, () => {
 }); // 8 lampes qui se posent sous les néons les plus proches du joueur
 const ambNeon = new THREE.AmbientLight(0xaec8ff, 0);
 scene.add(ambNeon);
-let _npF = 0;
+let _npF = 0,
+  _npRoom = 0;
 const _npV = new THREE.Vector3(),
   _npCache = {};
 function neonPoolUpdate(rr, dt) {
@@ -85,23 +86,45 @@ function neonPoolUpdate(rr, dt) {
   ambNeon.color.setHex(lit ? 0xaec8ff : 0x9a9ea3);
   ambNeon.intensity = (rr >= 5 ? 0.55 : 0.42) * k * CONFIG.light.neonPower;
   const list = _npCache[rr] || (_npCache[rr] = neon.tubes.filter((o) => o.room === rr));
-  if (_npF++ % 6 === 0) {
+  const changedRoom = rr !== _npRoom;
+  if (changedRoom || _npF++ % 6 === 0) {
+    _npRoom = rr;
     const arr = list
       .map((o) => {
         o.t.getWorldPosition(_npV);
-        return { x: _npV.x, y: _npV.y, z: _npV.z, d: (_npV.x - rig.pos.x) ** 2 + (_npV.z - rig.pos.z) ** 2 };
+        const distance = Math.hypot(_npV.x - rig.pos.x, _npV.z - rig.pos.z),
+          retained = !changedRoom && neonPool.some((p) => p.tube === o.t);
+        return { tube: o.t, x: _npV.x, y: _npV.y, z: _npV.z, d: distance - (retained ? 1.5 : 0) };
       })
-      .sort((a, b) => a.d - b.d);
+      .sort((a, b) => a.d - b.d)
+      .slice(0, neonPool.length);
+    const assigned = neonPool.map((p) => !changedRoom && arr.find((a) => a.tube === p.tube));
+    const available = arr.filter((a) => !assigned.includes(a));
     neonPool.forEach((p, i) => {
-      const a = arr[i];
+      let index = 0;
+      if (!changedRoom && p.init && !assigned[i] && available.length) {
+        let best = Infinity;
+        available.forEach((a, j) => {
+          const d = (a.x - p.tx) ** 2 + (a.z - p.tz) ** 2;
+          if (d < best) {
+            best = d;
+            index = j;
+          }
+        });
+      }
+      const a = assigned[i] || available.splice(index, 1)[0];
       if (a) {
+        p.tube = a.tube;
         p.tx = a.x;
-        p.ty = a.y - 0.35;
+        p.ty = a.y - (rr === 12 ? 2 : 0.35);
         p.tz = a.z;
         p.ti = 1;
-      } else p.ti = 0;
-      if (!p.init && a) {
-        p.L.position.set(a.x, a.y - 0.35, a.z);
+      } else {
+        p.tube = null;
+        p.ti = 0;
+      }
+      if ((!p.init || changedRoom) && a) {
+        p.L.position.set(p.tx, p.ty, p.tz);
         p.init = 1;
       }
     });
@@ -113,7 +136,7 @@ function neonPoolUpdate(rr, dt) {
     p.L.position.z += (p.tz - p.L.position.z) * f;
     p.L.color.setHex(col);
     const y = Math.max(2.5, p.ty + 0.35);
-    p.L.intensity = p.ti * k * y * y * (rr >= 5 ? 3.1 : 1.2) * CONFIG.light.neonPower;
+    p.L.intensity = p.ti * k * y * y * (rr >= 5 ? 3.1 : 1.2) * CONFIG.light.neonPower * (rr === 12 ? 0.4 : 1);
   });
 }
 const blinkers = [],

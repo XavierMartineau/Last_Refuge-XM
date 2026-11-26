@@ -38,6 +38,19 @@ function aimArm(a, T, pole) {
   a.eg.quaternion.setFromUnitVectors(down, w);
   a.posed = true;
 }
+function gripHand(C, arm, weapon, grip) {
+  C.root.updateMatrixWorld(true);
+  const target = arm.eg.worldToLocal(weapon.localToWorld(grip.clone())),
+    direction = target.sub(arm.hand.root.position);
+  if (direction.lengthSq() > 0.000001)
+    arm.hand.root.quaternion.setFromUnitVectors(V(0, -1, 0), direction.normalize());
+  arm.hand.fingers.forEach(({ base, tip }, i) => {
+    base.rotation.z = -arm.side * (i === 0 ? 0.75 : 1.05);
+    tip.rotation.z = -arm.side * (i === 0 ? 0.8 : 1.1);
+  });
+  arm.hand.thumb.rotation.z = -arm.side * 0.75;
+  arm.hand.thumbTip.rotation.x = 0.65;
+}
 function buildWeapon(C) {
   const s = C.s,
     k = s.weapon;
@@ -65,8 +78,11 @@ function buildWeapon(C) {
   } // on rapproche l’arme du corps jusqu’à ce que les deux mains l’atteignent
   wg.updateMatrix();
   aimArm(Rr, wr(), V(0.6, -1, -0.25));
-  if (H.two) aimArm(Ll, wl(), V(-0.6, -1, -0.25));
-  else aimArm(Ll, V(-0.12, 1.1, 0.3), V(-0.6, -1, 0.1));
+  gripHand(C, Rr, wg, G.gR);
+  if (H.two) {
+    aimArm(Ll, wl(), V(-0.6, -1, -0.25));
+    gripHand(C, Ll, wg, G.gL);
+  } else aimArm(Ll, V(-0.12, 1.1, 0.3), V(-0.6, -1, 0.1));
 }
 
 export { WHOLD, aimArm, buildWeapon };

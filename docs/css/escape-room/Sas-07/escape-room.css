@@ -20,6 +20,8 @@ html,body{margin:0;height:100%;background:var(--ink);color:var(--txt);font:500 1
 #objs{list-style:none;margin:6px 0 0;padding:0;font:600 14px 'Barlow Condensed','Arial Narrow',sans-serif;color:#b8bba6}#objs li{padding:1px 0}#objs li::before{content:'☐ ';color:#c9a24a}#objs li.d{color:#6f7566;text-decoration:line-through}#objs li.d::before{content:'☑ ';color:#6bbf6b}
 #hurt{position:fixed;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,transparent 45%,#8a0b0bcc 100%);z-index:5}
 #combat{left:50%;translate:-50% 0;top:calc(12px + env(safe-area-inset-top,0px));flex-direction:column;align-items:center;gap:4px;background:#0a0c0acc;padding:8px 18px;border:1px solid #7d8072;font:600 17px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.08em;color:var(--amber)}
+#ammo-panel{right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));flex-direction:column;align-items:flex-end;gap:2px;min-width:100px;padding:8px 14px;background:linear-gradient(180deg,#1b1d19ed,#0b0c0af2);border:1px solid #6b5a3a;box-shadow:0 2px 8px #000a;font:600 12px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.12em;color:#d6c6a1}
+#ammo{font:700 26px/1 "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.04em;font-variant-numeric:tabular-nums;color:#f1e7c9}
 #hpbar{width:200px;height:8px;background:#2a1010;border:1px solid #7d8072}#hpfill{height:100%;width:100%;background:#b4281e;transition:width .15s}
 #msg{left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));translate:-50% 0;width:min(640px,92vw);background:#0a0c0ae6;border-left:4px solid var(--amber);padding:10px 16px;opacity:0;transition:opacity .4s}
 #msg.on{opacity:1}
@@ -31,6 +33,7 @@ html,body{margin:0;height:100%;background:var(--ink);color:var(--txt);font:500 1
 body.touch #touchui{display:block}
 body.touch #inv{bottom:calc(190px + env(safe-area-inset-bottom,0px))}
 body.touch #msg{bottom:calc(200px + env(safe-area-inset-bottom,0px))}
+body.touch #ammo-panel{bottom:calc(250px + env(safe-area-inset-bottom,0px))}
 #joy{position:fixed;left:calc(22px + env(safe-area-inset-left,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));width:var(--stick,120px);height:var(--stick,120px);border-radius:50%;background:#0a0c0a88;border:2px solid #7d8072aa;touch-action:none;z-index:6}
 #joy i{position:absolute;left:50%;top:50%;width:46%;height:46%;margin:-23%;border-radius:50%;background:#c9cbb8aa;border:2px solid #e9ead8cc}
 #tbtns{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(2,var(--btn,62px));gap:12px;z-index:6}

@@ -57,7 +57,7 @@ scatter(
     [0.5, 4.5, -192, -184],
     [-3, 3, -222, -218]
   ],
-  ['crates', 'barrels', 'pallet', 'sand', 'drum', 'tarp']
+  ['crates', 'sand', 'tarp', 'stretcher', 'workbench']
 );
 beacon(-24, 7, -178, () => !State.key2);
 beacon(24, 7, -216, () => !State.key2);

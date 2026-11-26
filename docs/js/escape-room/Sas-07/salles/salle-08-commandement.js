@@ -159,5 +159,5 @@ scatter(
 beacon(-24, 8, -138, () => !State.power8);
 beacon(24, 8, -168, () => !State.power8);
 
-widenRoom(_r8, { room: 8, hw: 25, thr: 5, zs: [-132, -172], y: 9.6, fill: 36 });
+widenRoom(_r8, { room: 8, hw: 25, thr: 5, zs: [-132, -172], y: 9.6, fill: 36, kinds: ['rackrow', 'deskset', 'crates'] });
 /* ── Pièce 9 : aire d’évacuation (véhicules) ── */

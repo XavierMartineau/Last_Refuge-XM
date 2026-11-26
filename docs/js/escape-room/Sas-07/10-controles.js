@@ -7,7 +7,49 @@
    ════════════════════════════════════════════════════════════════ */
 let drag = null;
 const el = renderer.domElement;
+let mouseAim = false,
+  padAim = false,
+  aimBlend = 0,
+  aimedMouseShot = false;
+function canAim() {
+  return !!(State.armed && AV.stats && AV.stats.mag && !State.focus && !modalOpen && !rig.locked && !State.doorExit);
+}
+function isAiming() {
+  return canAim() && (mouseAim || padAim);
+}
+function updateAim(dt) {
+  if (!canAim()) mouseAim = padAim = false;
+  const target = isAiming() ? 1 : 0;
+  aimBlend += (target - aimBlend) * Math.min(1, dt * 12);
+}
+el.addEventListener('mousedown', (e) => {
+  if (e.button === 2) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    mouseAim = canAim();
+  } else if (e.button === 0 && isAiming()) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    aimedMouseShot = true;
+    drag = null;
+    fire();
+  }
+}, true);
+el.addEventListener('contextmenu', (e) => e.preventDefault());
+el.addEventListener('pointerup', (e) => {
+  if (e.button === 0 && aimedMouseShot) e.stopImmediatePropagation();
+}, true);
+addEventListener('mouseup', (e) => {
+  if (e.button === 2) mouseAim = false;
+  if (e.button === 0) {
+    if (aimedMouseShot) drag = null;
+    aimedMouseShot = false;
+  }
+}, true);
+addEventListener('pointercancel', () => { mouseAim = aimedMouseShot = false; drag = null; });
+addEventListener('blur', () => { mouseAim = padAim = aimedMouseShot = false; });
 el.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
   drag = { x: e.clientX, y: e.clientY, moved: false };
   el.setPointerCapture(e.pointerId);
 });
@@ -28,6 +70,7 @@ el.addEventListener('pointermove', (e) => {
   } else hover(e);
 });
 el.addEventListener('pointerup', (e) => {
+  if (e.button !== 0) return;
   if (drag && !drag.moved) click(e);
   drag = null;
 });

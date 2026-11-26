@@ -20,6 +20,7 @@ function loop() {
     }
   }
   updateControls(dt, t);
+  updateAim(dt);
   applyRig(t);
   avatarFrame(dt, t);
   combatFrame(dt, t);
@@ -59,10 +60,10 @@ function loop() {
   } // plancher : jamais sous 10 % une fois le courant rétabli
   neon.tubes.forEach((o) => {
     const k = neon.k[o.room];
-    o.m.emissiveIntensity = 3.2 * k;
+    o.m.emissiveIntensity = (o.room === 12 ? 0.8 : 3.2) * k;
     o.m.emissive.setHex(k > 0.6 ? 0xcfe4ff : 0x8e9296);
     if (o.hm) {
-      o.hm.opacity = 0.62 * k;
+      o.hm.opacity = (o.room === 12 ? 0 : 0.62) * k;
       o.hm.color.setHex(k > 0.6 ? 0xbcd6ff : 0x8e9296);
     }
   }); // plein feu : blanc-bleu · en flash : gris-blanc faible
@@ -93,9 +94,10 @@ function loop() {
                       ? 4.8
                       : 6.5,
       kk = big ? neon.k[rr] * CONFIG.light.neonPower : 0; // 3 lampes « suiveuses » éclairent les grandes salles
+    bloom.strength = rr === 12 ? 0.12 : 0.34;
     bigLights.forEach((L, i) => {
-      L.position.set(rig.pos.x * 0.7, hh, rig.pos.z + (i - 1) * 13);
-      L.intensity = kk * hh * hh * (i === 1 ? 2 : 1.2);
+      L.position.set(rig.pos.x * 0.7, rr === 12 ? hh - 2 : hh, rig.pos.z + (i - 1) * 13);
+      L.intensity = kk * hh * hh * (i === 1 ? 2 : 1.2) * (rr === 12 ? 0.65 : 1);
     });
     neonPoolUpdate(rr, dt);
   }

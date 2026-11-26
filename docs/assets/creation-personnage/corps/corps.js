@@ -56,8 +56,8 @@ function buildBody(C) {
     eg.rotation.x = -0.14;
     ell(P.arm * 0.9, P.arm * 0.9, P.arm * 0.9, C.skin, 0, 0, 0, eg);
     cyl(P.arm * 0.85, P.arm * 0.62, 0.27, C.skin, 0, -0.135, 0, eg, 14);
-    buildHand(C, eg, side);
-    C.arms.push({ ag, eg, side });
+    const hand = buildHand(C, eg, side);
+    C.arms.push({ ag, eg, side, hand });
   }
   buildLegs(C);
   C.chest = body;

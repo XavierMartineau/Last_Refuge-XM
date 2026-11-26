@@ -146,6 +146,7 @@
         pb("reload", "Recharger", "X"),
         pb("flashlight", "Lampe torche", "Y"),
         pb("fire", "Tirer (maintenir)", "RT"),
+        pb("aim", "Viser (maintenir)", "LT"),
         pb("sprint", "Courir (bascule)", "L3"),
         pb("inventory", "Inventaire", "LB"),
         pb("objectives", "Carnet de mission", "RB"),

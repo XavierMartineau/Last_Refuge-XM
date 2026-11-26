@@ -72,6 +72,7 @@ function setHover(o) {
 }
 function click(e) {
   if (rig.locked || modalOpen) return;
+  if (isAiming()) return fire();
   const o = pick(e);
   if (!o) {
     if (!State.focus && State.armed) fire(e);

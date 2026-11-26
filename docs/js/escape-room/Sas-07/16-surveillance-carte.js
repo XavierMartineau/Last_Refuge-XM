@@ -1405,6 +1405,28 @@ R('key_03', (o) => {
   say(M.key3Taken);
   setObjective(TEXTS.objectives.needLocker);
 });
+['arena_medkit_1', 'arena_medkit_2'].forEach((id) =>
+  R(id, (o) => {
+    if (State.hp >= 100) return say('Votre vie est déjà au maximum.', 2500);
+    if (healingRemaining > 0) return say('Un soin progressif est déjà en cours.', 2500);
+    healingRemaining = 100;
+    hideObj(o);
+    SND.play('paper');
+    say('Trousse utilisée : votre vie remonte progressivement.', 3000);
+  })
+);
+['arena_ammo_1', 'arena_ammo_2'].forEach((id) =>
+  R(id, (o) => {
+    if (!State.armed || !AV.stats || !AV.stats.mag) return say('Équipez une arme à feu pour utiliser cette boîte.', 2500);
+    if (State.reloading) return say('Attendez la fin du rechargement.', 2500);
+    if (State.ammo >= AV.stats.mag) return say('Votre chargeur est déjà plein.', 2500);
+    State.ammo = AV.stats.mag;
+    hideObj(o);
+    SND.play('reload');
+    hud();
+    say('Chargeur rempli instantanément.', 2500);
+  })
+);
 [0, 1, 2, 4, 5].forEach((i) =>
   R('locker_x' + i, (o) => {
     const u = o.userData,

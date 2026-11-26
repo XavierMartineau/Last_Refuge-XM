@@ -68,5 +68,5 @@ decal(bloodDecal(4), 4, 4, 12, 0.015, -80, scene, 0, -Math.PI / 2);
 beacon(-19, 5, -75, () => !State.wareCode);
 beacon(19, 5, -100, () => !State.wareCode);
 
-widenRoom(_r6, { room: 6, hw: 20, thr: 5, zs: [-72, -102], y: 5.6, fill: 22 });
+widenRoom(_r6, { room: 6, hw: 20, thr: 5, zs: [-72, -102], y: 5.6, fill: 22, kinds: ['crates', 'pallet', 'workbench', 'machine'] });
 /* ── Pièce 7 : le silo ── */
