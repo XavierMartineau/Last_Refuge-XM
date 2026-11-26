@@ -151,6 +151,15 @@
   window.addEventListener("storage", () => { progress = store.load(); render(); });
   window.addEventListener("pageshow", () => { progress = store.load(); render(); });
 
+  // manette : navigation dans le plan d’évasion uniquement (le créateur et le jeu ont leur propre gestion)
+  if (window.LastRefugeManette) {
+    window.LastRefugeManette.attach({
+      menuActive: () => !overview.hidden,
+      spatial: () => true,
+      onBack: () => { location.href = "../mode/mode.html"; }
+    });
+  }
+
   render();
   const target = { "#etape-2": stepTwo, "#etape-3": stepThree }[location.hash];
   if (target) requestAnimationFrame(() => showOverview(target));

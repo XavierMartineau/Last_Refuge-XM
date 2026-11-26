@@ -2,6 +2,16 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8">
+    <script>
+      // GitHub Pages affiche cette page pour toute URL introuvable, à n’importe quelle profondeur :
+      // on fixe la racine du site pour que les chemins relatifs (docs/…) restent valides.
+      (function () {
+        if (location.protocol === "file:") return;
+        var parts = location.pathname.split("/");
+        var root = location.hostname.endsWith("github.io") && parts[1] ? "/" + parts[1] + "/" : "/";
+        document.write('<base href="' + root + '">');
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0e0e0d">
     <meta name="description" content="Le signal de cette page a été perdu dans LAST REFUGE.">
@@ -11,6 +21,7 @@
     <link rel="stylesheet" href="docs/css/commun/site.css">
     <link rel="stylesheet" href="docs/css/404/404.css">
     <script src="docs/js/commun/preferences.js" defer></script>
+    <script src="docs/js/commun/manette-menus.js" defer></script>
     <script src="docs/js/commun/content.js" data-page="notFound" data-source="docs/data/content.json" defer></script>
     <script src="docs/js/404/index.js" defer></script>
   </head>

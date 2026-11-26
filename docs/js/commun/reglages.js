@@ -117,6 +117,11 @@
       ]}
     ]},
     { id: "manette", label: "Manette", sections: [
+      { title: "Manette détectée", rows: [
+        { id: "padModel", label: "Modèle de manette", type: "choice", def: "auto",
+          options: [["auto", "Automatique"], ["xbox", "Xbox"], ["ps", "PlayStation"], ["flydigi", "Flydigi"], ["nintendo", "Nintendo"], ["generique", "Générique"]],
+          desc: "Choisit les symboles et le schéma affichés. En mode XInput, Windows présente beaucoup de manettes (Flydigi, 8BitDo…) comme une manette Xbox : choisissez ici votre vrai modèle si la détection automatique se trompe." }
+      ]},
       { title: "Sensibilité", rows: [
         { id: "padLookX", label: "Sensibilité horizontale", type: "slider", def: 5, min: 1, max: 10, step: 1, format: (v) => String(v),
           desc: "Vitesse de rotation horizontale au stick droit." },
@@ -353,7 +358,7 @@
       const tab = tabs[tabIndex];
       const code = `RGL-${tab.id.slice(0, 3).toUpperCase()}-${String(rowIndex + 1).padStart(2, "0")}`;
       const visual = tab.id === "manette"
-        ? padSvg(row.type === "keys" ? row.keys : row.type === "bind" ? [values[row.id]] : ({ padLookX: ["RS"], padLookY: ["RS"], padInvertY: ["RS"], padDeadL: ["LS"], padDeadR: ["RS"], padTrigger: ["LT", "RT"], padVibration: [] })[row.id])
+        ? padSvg(row.type === "keys" ? row.keys : row.type === "bind" ? [values[row.id]] : ({ padLookX: ["RS"], padLookY: ["RS"], padInvertY: ["RS"], padDeadL: ["LS"], padDeadR: ["RS"], padTrigger: ["LT", "RT"], padVibration: [], padModel: [] })[row.id])
         : `<div class="rg-emblem">${ICONS[tab.icon || tab.id] || ICONS.partie}</div>`;
       const state = row.id ? (same(values[row.id], row.def) ? "<span class='rg-tag'>PAR DÉFAUT</span>" : "<span class='rg-tag rg-tag--mod'>MODIFIÉ</span>") : "";
       $(".rg-info").innerHTML = `
@@ -380,6 +385,7 @@
       save(values);
       renderList();
       if (opts.onChange) opts.onChange(row.id, value, values);
+      if (row.id === "padModel") dispatchEvent(new CustomEvent("lastrefuge-padmodel", { detail: value }));
       flashSaved();
     }
     function flashSaved() {
