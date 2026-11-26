@@ -89,7 +89,7 @@ Les modèles du détenu sont **générés par le code**, ce qui permet toutes le
 
 ### Crédits des cartes
 
-- "Zombie Town" (https://skfb.ly/ozw8L) by Atlas125 is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+- "Zombie Town" (https://skfb.ly/ozw8L) by Atlas125 is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/). Modifications : textures de pierre, d'asphalte, de béton et de tôle ajoutées au modèle. Les images sont aussi disponibles dans `docs/assets/zombie-map/textures/`.
 - [Post-Apocalyptic City](https://sketchfab.com/3d-models/post-apocalyptic-city-2b9c7e8688ab454485bdab5d1432fec4), par golukumar — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 Les fichiers du Sas 07 partagent la même portée : `escape-room.js` les lit dans l’ordre de sa liste `FICHIERS` et les exécute comme un seul script. Pour ajouter du code au jeu, créez un fichier dans `docs/js/escape-room/Sas-07/` et ajoutez-le à cette liste.
