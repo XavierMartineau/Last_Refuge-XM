@@ -377,16 +377,16 @@
 }
 
 .page-info .hub-button--primary {
-  border-color: #d58b57;
-  color: #1b1814;
-  background: #d58b57;
+  border-color: #e1a071;
+  color: #16120f;
+  background: #e1a071;
   transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
 
 .page-info .hub-button--primary:hover,
 .page-info .hub-button--primary:focus-visible {
   transform: translateY(-2px);
-  background: #e3a06b;
+  background: #efb78d;
   box-shadow: 0 8px 24px rgba(160, 96, 52, .3);
 }
 

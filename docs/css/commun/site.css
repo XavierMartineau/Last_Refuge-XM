@@ -1162,10 +1162,10 @@ body.page-redesign::before {
 
 .page-redesign .action-button--primary {
   min-height: 54px;
-  border: 1px solid #d58b57;
+  border: 1px solid #e1a071;
   clip-path: none;
-  color: #1a1714;
-  background: #d58b57;
+  color: #16120f;
+  background: #e1a071;
   box-shadow: 0 8px 24px rgba(139, 76, 43, .2);
 }
 
@@ -1175,20 +1175,27 @@ body.page-redesign::before {
 }
 
 .page-redesign .action-button--primary:hover {
-  background: #e3a06b;
+  border-color: #efb78d;
+  background: #efb78d;
 }
 
 .page-redesign .action-button--secondary,
 .page-redesign .action-button--quiet {
-  border: 1px solid var(--line-strong);
+  border: 1px solid #a1a48f;
   border-radius: 3px;
-  color: var(--text);
-  background: var(--panel);
+  color: #f5f2e6;
+  background: #30352b;
 }
 
 .page-redesign .action-button--secondary:hover,
 .page-redesign .action-button--quiet:hover {
-  border-color: var(--brass);
+  border-color: #e1a071;
+}
+
+:root[data-contrast="high"] .page-redesign .action-button--secondary,
+:root[data-contrast="high"] .page-redesign .action-button--quiet {
+  border-color: var(--line-strong);
+  color: var(--text);
 }
 
 .page-redesign .device-notice__panel {
@@ -1350,10 +1357,17 @@ body.page-redesign::before {
 .page-redesign .home-dev-button,
 .page-redesign .hub-creator__back,
 .page-redesign .dev-mode-button {
-  border-color: var(--line-strong);
+  border-color: #a1a48f;
   border-radius: 3px;
+  color: #f5f2e6;
+  background: #30352b;
+}
+
+:root[data-contrast="high"] .page-redesign .home-dev-button,
+:root[data-contrast="high"] .page-redesign .hub-creator__back,
+:root[data-contrast="high"] .page-redesign .dev-mode-button {
+  border-color: var(--line-strong);
   color: var(--text);
-  background: var(--panel);
 }
 
 .page-redesign .home-dev-button:hover,
@@ -1394,14 +1408,14 @@ body.page-redesign::before {
 }
 
 .page-redesign .hub-button--primary {
-  border: 1px solid #d58b57;
-  color: #1b1814;
-  background: #d58b57;
+  border: 1px solid #e1a071;
+  color: #16120f;
+  background: #e1a071;
 }
 
 .page-redesign .hub-button--primary:hover,
 .page-redesign .hub-button--primary:focus-visible {
-  background: #e3a06b;
+  background: #efb78d;
   box-shadow: 0 8px 24px rgba(160, 96, 52, .3);
 }
 .page-redesign .hub-card__number,
