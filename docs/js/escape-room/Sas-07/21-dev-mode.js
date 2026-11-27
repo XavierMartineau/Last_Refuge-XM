@@ -329,10 +329,6 @@ const DEV = (function () {
 } // moins de reflets éblouissants sur les métaux
 window.prepareSas07 = async (progress) => {
   modalOpen = true;
-  await MapScenes.preload(progress);
-  progress('Chargement des modèles et animations des infectés…');
-  await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
-  await ZombieAssets.loadZombies();
   progress('Préparation des matériaux et du rendu 3D…');
   await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
   applyRig(0);

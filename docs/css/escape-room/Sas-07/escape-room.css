@@ -3,6 +3,9 @@
 html,body{margin:0;height:100%;background:var(--ink);color:var(--txt);font:500 18px "Barlow Condensed","Arial Narrow",sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
 #app{position:fixed;inset:0}
 #app canvas{display:block;width:100%;height:100%;touch-action:none}
+#game-crash-notice{position:fixed;z-index:10001;top:16px;left:50%;transform:translateX(-50%);width:min(520px,90vw);padding:14px;background:#1b1b19;border:1px solid #f2b705;color:#fff;text-align:center}
+#game-crash-notice[hidden],#game-crash-download[hidden]{display:none}
+#game-crash-notice p{margin:0 0 8px}#game-crash-download{color:#ffd23f}
 #game-loading{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:radial-gradient(ellipse at center,#1d2419,#080b08 72%);color:#e4e1cf}
 #game-loading[hidden]{display:none}
 .game-loading__panel{width:min(520px,100%);box-sizing:border-box;padding:28px;border:1px solid #6b5a3a;background:#0a0c0af2;box-shadow:0 20px 70px #000b}

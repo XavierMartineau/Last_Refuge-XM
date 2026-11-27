@@ -162,9 +162,15 @@
       const codes = { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" };
       for (const d of Object.keys(dirs)) held(d, dirs[d], now, () => (l.spatial && l.spatial() ? spatial(d, l.scope && l.scope()) : tap(codes[d])));
       if (pressed(B.A)) {
-        const el = document.activeElement;
-        if (l.spatial && l.spatial() && el && el !== document.body) el.click();
-        else tap("Enter");
+        if (l.spatial && l.spatial()) {
+          const scope = l.scope && l.scope();
+          let el = document.activeElement;
+          if (!el || el === document.body || (scope && !scope.contains(el))) {
+            spatial("down", scope);
+            el = document.activeElement;
+          }
+          if (el && el !== document.body) el.click();
+        } else tap("Enter");
       }
       if (pressed(B.B)) { if (l.onBack && l.spatial && l.spatial() && (l.onBackInDialog || !document.querySelector("dialog[open]"))) l.onBack(); else tap("Escape"); }
       if (pressed(B.LB)) tap("KeyQ");

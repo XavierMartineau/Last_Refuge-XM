@@ -149,6 +149,7 @@ window.startSas07();
 document.documentElement.dataset.ready = '1';
 } catch (error) {
   console.error('Chargement du jeu impossible :', error);
+  window.reportGameCrash(error, 'Chargement du jeu');
   progress('Chargement impossible : ' + error.message + '. Vérifiez la connexion et réessayez.');
   document.getElementById('game-load-retry').hidden = false;
 }

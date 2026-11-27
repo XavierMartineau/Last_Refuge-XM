@@ -6,6 +6,9 @@
    ════════════════════════════════════════════════════════════════ */
 const app = document.getElementById('app');
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.domElement.addEventListener('webglcontextlost', () => {
+  window.reportGameCrash(new Error('Le navigateur a perdu le contexte graphique WebGL ; la cause exacte est inconnue.'), 'Rendu graphique');
+});
 const TOUCH =
   CONFIG.device.touch === 'auto'
     ? (typeof matchMedia === 'function' && matchMedia('(pointer:coarse)').matches) ||

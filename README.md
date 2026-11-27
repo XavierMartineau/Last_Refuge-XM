@@ -17,7 +17,7 @@ three.js est chargé depuis le CDN jsDelivr (connexion Internet requise).
 3. `docs/html/info/info.html` — plan d’évasion en 3 étapes verrouillées :
    - **01 Fiche d’écrou** : créateur 3D intégré ; son dernier bouton « Trouver sa salle d’évasion » débloque l’étape 02 ;
    - **02 Salle d’évasion** : ouvre `docs/html/choix-salle/choix-salle.html` (catalogue classé par difficulté, nombre de salles et durée, avec description et rapport de situation) ;
-   - **03 Lancement** : débloquée quand une salle est choisie, prépare le bunker, les deux cartes, leurs collisions et les infectés avant de lancer le jeu dans toute la fenêtre du navigateur. Le chargement initial utilise davantage de mémoire et de données ; certaines étapes des cartes restent préparées au moment du transfert.
+   - **03 Lancement** : débloquée quand une salle est choisie, prépare le bunker avant de lancer le jeu dans toute la fenêtre du navigateur. Les cartes et leurs collisions sont chargées à l’entrée ; les infectés sont chargés à l’arrivée dans Zombie Town.
 4. `docs/html/escape-room/Sas-07/escape-room.html` — escape room 3D « Sas 07 » (12 salles).
 
 Autres pages : `docs/html/createur-personnage/createur-personnage.html` (créateur seul), `docs/html/options/options.html` (réglages, bouton ✕ qui ramène à la page d’origine), `docs/html/dev/dev.html` (poste de garde / DEV), `404.html`.
@@ -38,6 +38,7 @@ Le menu des réglages met la partie en pause : le temps, les animations, les com
 
 **Options → Affichage → Mode PC peu puissant** adapte la résolution et réduit la distance d’affichage, le relief et la rugosité des textures du bunker, les lumières et la fréquence des caméras de surveillance ; il désactive les ombres, le halo et le contour 3D en jeu. La sélection des objets reste visible ; désactiver ce mode rétablit les réglages graphiques précédents.
 Le compteur **FPS** s’affiche dès le lancement ; le bouton **FPS** en jeu ou **Échap → Partie → Compteur FPS** permet de le masquer temporairement.
+En cas d’erreur non gérée, d’échec de chargement ou de perte du contexte WebGL, le jeu tente de télécharger localement `crash.txt` avec les détails disponibles ; un lien permet de le télécharger si le navigateur bloque l’opération automatique. Vérifiez son contenu avant de le partager. Un arrêt complet du navigateur ou de la console ne permet pas de produire ce rapport.
 Le moteur demande au navigateur un GPU haute performance et réutilise les géométries identiques du bunker. Le choix du GPU reste toutefois contrôlé par le navigateur et le système.
 
 Les menus proposent une ambiance sonore générée en direct. Si le navigateur bloque la lecture automatique, elle démarre à la première interaction. **Options → Audio → Ambiance des menus** permet de la couper ; les volumes général et musique s’appliquent également.

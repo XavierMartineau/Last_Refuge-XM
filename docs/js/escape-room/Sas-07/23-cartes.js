@@ -37,8 +37,9 @@ const MapScenes = (() => {
     definition.portals.forEach((p) => { p.x *= mapScale; p.z *= mapScale; });
   }
   const loader = new GLTFLoader();
-  const preloaded = new Map();
   const down = new THREE.Vector3(0, -1, 0);
+  const floorRay = new THREE.Ray(new THREE.Vector3(), down);
+  const collisionCapsule = new Capsule(new THREE.Vector3(), new THREE.Vector3(), 0.3);
   const api = {
     active: null,
     height: () => ground,
@@ -47,35 +48,16 @@ const MapScenes = (() => {
   };
   let current = null, ground = 0, busy = false;
 
-  api.preload = async (progress) => {
-    for (const [id, definition] of Object.entries(definitions)) {
-      if (preloaded.has(id)) continue;
-      progress('Téléchargement de ' + definition.name + '…');
-      const gltf = await loader.loadAsync(new URL(definition.file, window.zombieMapBase).href, (event) => {
-        const loaded = (event.loaded / 1048576).toFixed(1);
-        const total = event.total > 0 ? (event.total / 1048576).toFixed(1) : null;
-        progress('Téléchargement de ' + definition.name + ' : ' + loaded +
-          (total ? ' / ' + total : '') + ' Mo', event.loaded, event.total);
-      });
-      progress('Préparation des collisions : ' + definition.name + '…');
-      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
-      gltf.scene.scale.multiplyScalar(mapScale);
-      const octree = new Octree().fromGraphNode(gltf.scene);
-      preloaded.set(id, { gltf, octree });
-    }
-  };
-
   function floorAt(octree, x, z, from) {
-    const hit = octree.rayIntersect(new THREE.Ray(new THREE.Vector3(x, from, z), down));
+    floorRay.origin.set(x, from, z);
+    const hit = octree.rayIntersect(floorRay);
     return hit && hit.distance <= 2 * mapScale ? hit.position.y : null;
   }
   function clearAt(octree, x, z, y, radius = 0.3, scale = 1) {
-    const capsule = new Capsule(
-      new THREE.Vector3(x, y + radius + 0.1 * scale, z),
-      new THREE.Vector3(x, y + 1.3 * scale, z),
-      radius
-    );
-    const hit = octree.capsuleIntersect(capsule);
+    collisionCapsule.start.set(x, y + radius + 0.1 * scale, z);
+    collisionCapsule.end.set(x, y + 1.3 * scale, z);
+    collisionCapsule.radius = radius;
+    const hit = octree.capsuleIntersect(collisionCapsule);
     return !hit || hit.depth < 0.04;
   }
   function pointHeight(map, x, z, previous) {
@@ -853,24 +835,17 @@ const MapScenes = (() => {
     let map;
     try {
       const definition = definitions[id];
-      let prepared = preloaded.get(id);
-      if (prepared) {
-        preloaded.delete(id);
-        progress('Installation de la carte préchargée…');
-      } else {
-        progress('Téléchargement de la carte…');
-        await nextFrame();
-        const gltf = await loader.loadAsync(new URL(definition.file, window.zombieMapBase).href, (event) => {
-          const loaded = (event.loaded / 1048576).toFixed(1);
-          const total = event.total > 0 ? (event.total / 1048576).toFixed(1) : null;
-          progress('Téléchargement : ' + loaded + (total ? ' / ' + total : '') + ' Mo', event.loaded, event.total);
-        });
-        progress('Construction des collisions…');
-        await nextFrame();
-        gltf.scene.scale.multiplyScalar(mapScale);
-        prepared = { gltf, octree: new Octree().fromGraphNode(gltf.scene) };
-      }
-      const { gltf, octree } = prepared;
+      progress('Téléchargement de la carte…');
+      await nextFrame();
+      const gltf = await loader.loadAsync(new URL(definition.file, window.zombieMapBase).href, (event) => {
+        const loaded = (event.loaded / 1048576).toFixed(1);
+        const total = event.total > 0 ? (event.total / 1048576).toFixed(1) : null;
+        progress('Téléchargement : ' + loaded + (total ? ' / ' + total : '') + ' Mo', event.loaded, event.total);
+      });
+      progress('Construction des collisions…');
+      await nextFrame();
+      gltf.scene.scale.multiplyScalar(mapScale);
+      const octree = new Octree().fromGraphNode(gltf.scene);
       const group = new THREE.Group();
       group.position.z = offset;
       group.add(gltf.scene);
@@ -957,6 +932,7 @@ const MapScenes = (() => {
     } catch (error) {
       disposeMap(map);
       console.error('Chargement de la carte impossible :', error);
+      window.reportGameCrash(error, 'Chargement de la carte : ' + definitions[id].name);
       say('Impossible de charger la carte. Réessayez depuis le passage.', 7000);
     } finally {
       overlay.remove();

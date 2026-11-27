@@ -9,22 +9,27 @@
 <link rel="icon" href="../../../assets/svg/identite/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Caveat:wght@500;700&family=Special+Elite&family=Rock+Salt&family=Stardos+Stencil:wght@400;700&family=VT323&display=swap">
 <link rel="stylesheet" href="../../../css/commun/reglages.css">
-<link rel="stylesheet" href="../../../css/escape-room/Sas-07/escape-room.css?v=20261126j">
+<link rel="stylesheet" href="../../../css/escape-room/Sas-07/escape-room.css?v=20261126k">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script src="../../../js/commun/preferences.js"></script>
 <script src="../../../js/commun/reglages.js?v=20261126d"></script>
-<script src="../../../js/commun/manette-menus.js"></script>
-<script type="module" src="../../../js/escape-room/Sas-07/escape-room.js?v=20261126n" onerror="document.getElementById('game-load-status').textContent='Chargement impossible. Vérifiez la connexion puis rechargez la page.';document.getElementById('game-load-retry').hidden=false"></script>
+<script src="../../../js/commun/manette-menus.js?v=20261126a"></script>
+<script src="../../../js/escape-room/Sas-07/rapport-crash.js?v=20261126a"></script>
+<script type="module" src="../../../js/escape-room/Sas-07/escape-room.js?v=20261126o" onerror="document.getElementById('game-load-status').textContent='Chargement impossible. Vérifiez la connexion puis rechargez la page.';document.getElementById('game-load-retry').hidden=false;window.reportGameCrash(new Error('Impossible de charger le moteur 3D ou une de ses dépendances.'),'Chargement du moteur')"></script>
 </head>
 <body>
+<div id="game-crash-notice" role="alert" hidden>
+  <p>Une erreur a été détectée. Si le téléchargement automatique est bloqué, utilisez ce lien :</p>
+  <a id="game-crash-download" download="crash.txt" hidden>Télécharger le rapport</a>
+</div>
 <div id="game-loading" role="status" aria-live="polite">
   <div class="game-loading__panel">
     <small>LAST REFUGE · SAS 07</small>
     <h1>Préparation de l’évasion</h1>
     <p id="game-load-status">Chargement du moteur 3D…</p>
     <progress id="game-load-progress" aria-label="Progression de l’étape en cours"></progress>
-    <p class="game-loading__hint">Les cartes, les infectés et les textures sont préparés avant le début de la partie.</p>
+    <p class="game-loading__hint">Le bunker et ses textures sont préparés avant le début de la partie. Les cartes seront chargées à leur entrée.</p>
     <button id="game-load-retry" type="button" onclick="location.reload()" hidden>Réessayer</button>
   </div>
 </div>
