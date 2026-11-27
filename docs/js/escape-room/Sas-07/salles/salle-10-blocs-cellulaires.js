@@ -1,11 +1,18 @@
 /* LAST REFUGE · XM — Escape room « Sas 07 » · Salle 10 : blocs cellulaires.
    Fichier chargé dans l’ordre par escape-room.js : il partage la portée globale des autres fichiers. */
 'use strict';
-shell(-242, { south: false, w: 90, d: 40, h: 5 });
-wallWithDoor(-262, 120, 9.6);
-const _r10 = scene.children.length; // mur mitoyen avec le complexe (plus haut)
+/* Couloir central (x ±5) bordé de 2 × 4 cellules (x 5 → 15). Énigme : note de l’entrée → code gravé
+   dans la cellule O1 (ouverte) → tiroir du garde → clé de cellule → cellule O3 → couchette → clé du bloc. */
+shell(-242, { south: false, w: 30, d: 40, h: 5 });
+wallWithDoor(-262, 120, 9.6); // mur mitoyen avec le complexe (plus haut)
 const doorBlock = makeDoor('door_block', 0, -261.85, 'Examiner la porte du bloc');
 [-226, -236, -246, -256].forEach((z) => addNeon(10, 0, z, 4, 4.8));
+{
+  const L = new THREE.PointLight(0xff3a20, 0, 9, 2); // gyrophare du poste de garde
+  L.position.set(0, 3.6, -258);
+  scene.add(L);
+  neon.lights.push({ l: L, room: 10, base: 12 });
+}
 const CELLS = [
   [-228, -235],
   [-235, -242],
@@ -85,6 +92,9 @@ CELLS.forEach(([za, zb], i) => {
   const zc = (za + zb) / 2;
   gates['gate_W' + i] = makeGate(-1, zc, 'gate_W' + i, 'Examiner la cellule', i < 2);
   gates['gate_E' + i] = makeGate(1, zc, 'gate_E' + i, 'Examiner la cellule', false);
+  // plaques numérotées au-dessus des grilles, lisibles depuis le couloir
+  plane(1.1, 0.42, sign(['O' + (i + 1)], '#d8d2bd', '#15171a'), -4.86, 3.55, zc, scene, Math.PI / 2);
+  plane(1.1, 0.42, sign(['E' + (i + 1)], '#d8d2bd', '#15171a'), 4.86, 3.55, zc, scene, -Math.PI / 2);
 });
 // poste de garde (au fond) : bureau, tiroir à code, panneau
 desk(-2.5, -259.3, 2.6, 0);
@@ -151,5 +161,4 @@ function openInner(o) {
   if (i >= 0) EXTRA_COLLIDERS.splice(i, 1);
 }
 
-widenRoom(_r10, { room: 10, hw: 15, thr: 10.5, zs: [-222, -262], y: 4.6, fill: 18 });
 /* ───────── PIÈCE 11 : COMPLEXE À ÉTAGES (40×50×9,6 m) — escalier, mezzanine, 3 pièces fermées ───────── */

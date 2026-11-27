@@ -75,5 +75,4 @@ function bars(list) {
   scene.add(im);
 }
 
-widenRoom(_r9, { room: 9, hw: 25, thr: 5, zs: [-172, -222], y: 8.6, fill: 42, kinds: ['sand', 'tarp', 'stretcher', 'workbench'] });
 /* ───────── PIÈCE 10 : BLOC CELLULAIRE (30×40×5 m) ───────── */

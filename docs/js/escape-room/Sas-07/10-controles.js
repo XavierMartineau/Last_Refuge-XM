@@ -204,10 +204,7 @@ room1Colliders.forEach((c) => COLLIDERS.push(c));
   [-12, -22, 6, 3],
   [-22, -32, 6, 3],
   [-32, -72, 20, 5],
-  [-72, -102, 20, 5],
-  [-102, -132, 15, 4],
-  [-132, -172, 25, 5],
-  [-172, -222, 25, 5]
+  [-72, -102, 20, 5]
 ].forEach(([za, zb, hw, thr]) =>
   [COLLIDERS, EXTRA_COLLIDERS].forEach((arr) =>
     arr.forEach((c) => {
@@ -223,21 +220,7 @@ room1Colliders.forEach((c) => COLLIDERS.push(c));
       }
     })
   )
-); // salles agrandies : collisions suivent les objets déplacés
-[[-222, -262, 15, 10.5]].forEach(([za, zb, hw, thr]) =>
-  EXTRA_COLLIDERS.forEach((c) => {
-    if (c.length !== 4) return;
-    const cz = (c[2] + c[3]) / 2;
-    if (cz <= za && cz > zb) {
-      const cx = (c[0] + c[1]) / 2;
-      if (Math.abs(cx) > hw - thr) {
-        const s = Math.sign(cx) * 2 * hw;
-        c[0] += s;
-        c[1] += s;
-      }
-    }
-  })
-); // prison : les collisions des cellules suivent
+); // salles agrandies : collisions suivent les objets déplacés (les salles 7 à 10 sont construites à leur taille réelle)
 fillCols.forEach((c) => EXTRA_COLLIDERS.push(c));
 const WALLS = [
   [-4, () => State.door1],
@@ -265,11 +248,11 @@ function blocked(x, z) {
             : z > -102
               ? 59.9
               : z > -132
-                ? 44.9
+                ? 19.9
                 : z > -222
-                  ? 74.9
+                  ? 24.9
                   : z > -262
-                    ? 44.9
+                    ? 14.9
                     : z > -312
                       ? 59.9
                       : 74.9;

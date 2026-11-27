@@ -135,6 +135,7 @@ const INVD = [
   ['Clé de cellule', '🗝️', 'Ouvre une cellule du bloc.'],
   ['Clé du bloc cellulaire', '🗝️', 'Ouvre la porte du bloc cellulaire.'],
   ['Pied-de-biche', '🔧', 'Force une porte ou un panneau bloqué.'],
+  ['Manivelle', '⚙️', 'S’emboîte sur l’axe du treuil du silo.'],
   ['Clé du poste de contrôle', '🗝️', 'Accès au poste de contrôle.'],
   ['Batterie', '🔋', 'À brancher sur le générateur du sas.'],
   ['Bidon d’essence', '⛽', 'À verser dans le réservoir du générateur.'],

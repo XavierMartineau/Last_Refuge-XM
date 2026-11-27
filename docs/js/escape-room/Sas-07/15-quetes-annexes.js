@@ -235,20 +235,20 @@ const QZ = {
     [-76, -98]
   ],
   7: [
-    [-30, 30],
+    [-17, 10.5],
     [-106, -128]
   ],
   8: [
-    [-55, 55],
+    [-22, 13],
     [-136, -168]
   ],
   9: [
-    [-55, 55],
+    [-22, 22],
     [-176, -218]
   ],
   10: [
-    [-28, 28],
-    [-226, -256]
+    [-4, 4],
+    [-226, -257]
   ],
   11: [
     [-2, 45],
@@ -392,10 +392,16 @@ function qTarget(q) {
       sp = rm === 1 ? 2.5 : 5;
     const pt = () => {
       let x, z;
-      for (let k = 0; k < 80; k++) {
+      // jamais dans un meuble, un mur ou une cellule fermée (marge de 0,6 m)
+      const free = (px, pz) =>
+        pz > -32 ||
+        ![...COLLIDERS, ...EXTRA_COLLIDERS].some(
+          (c) => c.length === 4 && px > c[0] - 0.6 && px < c[1] + 0.6 && pz > c[2] - 0.6 && pz < c[3] + 0.6
+        );
+      for (let k = 0; k < 160; k++) {
         x = zn[0][0] + rnd() * (zn[0][1] - zn[0][0]);
         z = zn[1][0] + rnd() * (zn[1][1] - zn[1][0]);
-        if (pts.every((p) => Math.hypot(p[0] - x, p[1] - z) > sp)) break;
+        if (free(x, z) && (z > -32 || Math.abs(x) > 1.2) && pts.every((p) => Math.hypot(p[0] - x, p[1] - z) > sp)) break;
       }
       pts.push([x, z]);
       return { x, z };

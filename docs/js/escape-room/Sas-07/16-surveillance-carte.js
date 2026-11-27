@@ -50,10 +50,10 @@ const CCTV = (function () {
     4: 17.9,
     5: 59.9,
     6: 59.9,
-    7: 44.9,
-    8: 74.9,
-    9: 74.9,
-    10: 44.9,
+    7: 19.9,
+    8: 24.9,
+    9: 24.9,
+    10: 14.9,
     11: 59.9
   };
   const ZR = {
@@ -1203,6 +1203,7 @@ R('keypad_ware', async (o) => {
   release();
 });
 R('key_01', (o) => {
+  if (!State.keyLowered) return say('La clé pend sous la passerelle, hors de portée. Le treuil du mur ouest doit pouvoir la descendre.', 5000);
   State.key = true;
   hideObj(o);
   SND.play('paper');
@@ -1214,16 +1215,30 @@ R('key_01', (o) => {
 });
 [1, 2, 3].forEach((n) =>
   R('relay_' + n, (o) => {
-    if (o.userData.done) return say(M.relayDone);
-    o.userData.done = true;
-    State.relays++;
+    if (CMD.busy) return;
+    if (State.power8 || o.userData.done) return say(M.relayDone);
     SND.play('lever');
     const a = o.userData.arm,
       f = a.rotation.x;
     tween(0.4, (k) => {
       a.rotation.x = f + (-0.7 - f) * k;
     });
+    if (CMD.order[State.relays] !== n) {
+      // mauvais ordre : la procédure entière se réarme
+      o.userData.done = true;
+      CMD.busy = true;
+      CMD.draw();
+      gameTimeout(() => {
+        SND.play('error');
+        CMD.reset();
+        CMD.busy = false;
+      }, 550);
+      return say(M.relayWrong, 5000);
+    }
+    o.userData.done = true;
+    State.relays++;
     o.userData.led.material = glow(0x30ff70, 3);
+    CMD.draw();
     if (State.relays >= 3) {
       State.power8 = true;
       gameTimeout(() => {
@@ -1233,11 +1248,13 @@ R('key_01', (o) => {
       doorCmd.userData.led.material = glow(0x30ff70, 3);
       doorCmd.userData.hint = Hn.door_cmd_unlocked;
       say(M.relaysOk, 7000);
+      CMD.draw();
       setObjective(TEXTS.objectives.openCmd);
     } else say(fmt(M.relay, { n: State.relays }));
   })
 );
 R('key_02', (o) => {
+  if (!State.keyCabinet) return say('La clé est enfermée dans l’armoire.', 3000);
   State.key2 = true;
   hideObj(o);
   SND.play('paper');
@@ -1287,12 +1304,12 @@ R('drawer_guard', async (o) => {
   release();
 });
 R('bunk', (o) => {
-  if (!State.keyCell && !State.cell3seen) {
+  if (State.key4) return say(M.bunkDone);
+  if (!gates.gate_W2.userData.opened) {
     SND.play('click');
     State.cell3seen = true;
     return say(M.bunkNo);
   }
-  if (State.key4) return say(M.bunkDone);
   State.key4 = true;
   SND.play('key');
   renderInv();

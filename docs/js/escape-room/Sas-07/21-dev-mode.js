@@ -7,7 +7,7 @@
 const DEV = (function () {
   const CODE = 'popol',
     HINT = 'nom du chat';
-  const S = { unlocked: false, open: false, sec: { 1: true } };
+  const S = { unlocked: false, open: false, paused: false, sec: { 1: true } };
   try {
     S.unlocked = sessionStorage.getItem('devUnlocked') === '1';
   } catch (e) {}
@@ -26,8 +26,8 @@ const DEV = (function () {
     },
     3: { card: true },
     5: { fuses: 2 },
-    7: { key: true },
-    9: { key2: true, keyCell: true },
+    7: { crank: true },
+    9: { key2: true, keyCabinet: true, keyCell: true },
     10: { crowbar: true, keyCtrl: true, key4: true }
   };
   const MECH = {
@@ -59,9 +59,12 @@ const DEV = (function () {
     4: { power4: true, brk: [1, 1, 1, 1] },
     5: { power5: true, fuses: 2, fusesIn: 2 },
     6: { wareCode: true },
-    7: { key: true, wareLight: true },
-    8: { power8: true, relays: 4 },
-    9: { key2: true, keyCell: true },
+    7: { key: true, wareLight: true, crank: true, boothOpen: true, keyLowered: true },
+    8: () => {
+      Object.assign(State, { power8: true, relays: 3, cmdRead: true });
+      CMD.draw();
+    },
+    9: { key2: true, keyCabinet: true, boardRead: true },
     10: { crowbar: true, keyCtrl: true, barDone: true, bureauOpen: true, key4: true },
     11: { breaker: true }
   };
@@ -72,10 +75,10 @@ const DEV = (function () {
     'Distribution électrique',
     'Hangar principal',
     'Hangar sud',
-    'Entrepôt',
+    'Silo',
     'Salle de commandement',
-    'Quartiers',
-    'Blocs cellulaires',
+    'Aire d’évacuation',
+    'Bloc cellulaire',
     'Ligne de coupure',
     'Post-Apocalyptic City'
   ];
@@ -209,7 +212,25 @@ const DEV = (function () {
       e.addEventListener(ev, (x) => x.stopPropagation(), { passive: true })
     )
   );
+  /* Pause : tant que le panneau ou la saisie du code est ouvert, le temps, les infectés et les
+     contrôles sont figés (la scène reste affichée pour voir l’effet des téléportations). */
+  function updatePause() {
+    const want = (S.open && S.unlocked) || c.classList.contains('on');
+    if (want === S.paused) return;
+    S.paused = want;
+    if (want) {
+      modalOpen = true;
+      keysDown.clear();
+      mouseAim = padAim = false;
+      if (document.pointerLockElement) document.exitPointerLock();
+      SND.pause();
+    } else {
+      modalOpen = document.getElementById('menu').classList.contains('on');
+      if (!modalOpen) SND.resume();
+    }
+  }
   function paint() {
+    updatePause();
     b.classList.toggle('on', S.open);
     b.textContent = S.unlocked
       ? S.open
@@ -300,22 +321,37 @@ const DEV = (function () {
       paint();
     } else {
       c.classList.add('on');
+      updatePause();
       setTimeout(() => document.getElementById('devi').focus(), 30);
     }
   });
   document.getElementById('devok').addEventListener('click', tryCode);
-  document.getElementById('devno').addEventListener('click', () => c.classList.remove('on', 'bad'));
+  document.getElementById('devno').addEventListener('click', () => {
+    c.classList.remove('on', 'bad');
+    updatePause();
+  });
   document.getElementById('devi').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') tryCode();
-    else if (e.key === 'Escape') c.classList.remove('on', 'bad');
+    else if (e.key === 'Escape') {
+      c.classList.remove('on', 'bad');
+      updatePause();
+    }
   });
+  // Échap ferme le panneau du dev mode (et relance la partie) au lieu d’ouvrir le menu
+  addEventListener('keydown', (e) => {
+    if (e.code !== 'Escape' || !S.open || !S.unlocked || c.classList.contains('on')) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    S.open = false;
+    paint();
+  }, true);
   {
     const iv = setInterval(() => {
       if (S.open && S.unlocked) paint();
     }, 1500);
     if (iv && iv.unref) iv.unref();
   } // garde le panneau synchronisé avec la salle courante
-  return { S, A, complete };
+  return { S, A, complete, paused: () => S.paused };
 })();
 {
   const seen = new Set();

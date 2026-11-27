@@ -53,6 +53,15 @@ function loop() {
     fpsElapsed = 0;
     return;
   }
+  // dev mode ouvert : partie en pause, mais la scène reste dessinée (téléportations visibles)
+  if (DEV.paused()) {
+    clock.elapsedTime -= delta;
+    applyRig(clock.elapsedTime);
+    avatarFrame(0, clock.elapsedTime);
+    renderGame();
+    updateFps(delta);
+    return;
+  }
   const dt = Math.min(delta, 0.05),
     t = clock.elapsedTime;
   gameTimersFrame(delta);

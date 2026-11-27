@@ -391,19 +391,19 @@ egg(
   'egg_jm',
   'Lire la gravure',
   '« Jean-Marc était ici. » Gravé très profondément. Il a dû vraiment s’ennuyer.',
-  8,
-  -235,
+  -8.2,
+  -230.6,
   stele(['JEAN-MARC', 'ÉTAIT ICI'], '#6b6f66', '#1a1a18'),
-  0.2
+  Math.PI / 2
 );
 egg(
   'egg_dessert',
   'Lire la gravure',
   '« Jour 214 : on ne m’a toujours pas servi de dessert. » Le détenu a ensuite ajouté : « Je veux voir le directeur. »',
-  -8,
-  -250,
+  -8.2,
+  -237.6,
   stele(['JOUR 214', 'PAS DE', 'DESSERT'], '#6b6f66', '#1a1a18'),
-  -0.2
+  Math.PI / 2
 );
 // salle 11 : complexe
 egg(

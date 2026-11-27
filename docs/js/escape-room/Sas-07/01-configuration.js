@@ -63,6 +63,8 @@ const CONFIG = {
   wareCode: ['3', '0', '7', '1'], // entrepôt : un chiffre sur chacune des 4 affiches (allées 1 à 4) = code du digicode
   safeCode: '5294', // coffre de la pièce 3 = numéros des lits de la rangée EST (de l’entrée vers le fond)
   townCode: '4827',
+  siloCode: '628', // cabine du silo : niveaux des cuves A, B, C
+  convoyCode: '734', // armoire à clés : n° de convoi BRAVO, CHARLIE, ALPHA (ordre de départ)
   breakers: [1, 0, 1, 1], // pièce 4 : position des 4 disjoncteurs (1 = ON) — même motif peint sur le mur
   light: {
     ambient: 0.05, // lumière ambiante (très faible : on est dans le noir)
@@ -202,16 +204,16 @@ const TEXTS = {
     room6:
       'Entrepôt : lisez les 4 affiches des allées (1 à 4) et composez le code au digicode, près de la porte du fond.',
     openWare: 'Le digicode est validé. Ouvrez la porte du fond.',
-    room7: 'Silo : trouvez la clé, sur l’établi, pour ouvrir la porte de sortie.',
+    room7: 'Silo : la clé pend sous la passerelle. Descendez-la avec le treuil du mur ouest.',
     exitEnd: 'Vous avez la clé. Ouvrez la porte du silo.',
     room8:
-      'Salle de commandement : abaissez les 3 relais (ouest, est et nord) pour rétablir l’alimentation principale.',
+      'Salle de commandement : abaissez les 3 relais dans l’ordre de la procédure (table de situation).',
     openCmd: 'Alimentation principale rétablie. Ouvrez la porte du fond.',
-    room9: 'Aire d’évacuation : trouvez la clé du convoi sur un véhicule.',
+    room9: 'Aire d’évacuation : ouvrez l’armoire à clés. Le code dépend de l’ordre de départ du convoi.',
     exitFinal2: 'Vous avez la clé du convoi. Ouvrez la grande porte de sortie.',
     room10:
       'Bloc cellulaire : lisez la note de l’entrée, trouvez le code gravé dans une cellule et ouvrez le tiroir du garde, au fond.',
-    openCell: 'Vous avez la clé de cellule. Ouvrez la cellule du fond (côté ouest) et fouillez sa couchette.',
+    openCell: 'Vous avez la clé de cellule. Ouvrez la cellule O3 (côté ouest) et fouillez sa couchette.',
     exitBlock: 'Vous avez la clé du bloc. Ouvrez la porte du fond.',
     room11:
       'Complexe : montez l’escalier, lisez la note de la mezzanine, puis trouvez le moyen d’ouvrir les pièces du rez-de-chaussée.',
@@ -381,16 +383,17 @@ const TEXTS = {
     wareLocked: 'Verrouillée. Un digicode est fixé au mur à côté.',
     wareOpen: 'La porte s’ouvre sur un silo vertigineux.',
     keyTaken: 'Vous prenez la clé du silo.',
-    endLocked: 'Verrouillée. Il faut la clé du silo.',
+    endLocked: 'Verrouillée. Il faut la clé du silo, suspendue sous la passerelle.',
     endOpen: 'La porte s’ouvre sur une immense salle de commandement plongée dans le noir.',
     relay: 'Vous abaissez le relais. ({n}/3)',
     relayDone: 'Ce relais est déjà abaissé.',
+    relayWrong: 'Clac ! Mauvais ordre : tous les relais se réarment. Relisez la procédure sur la table de situation.',
     relaysOk:
       'Un grondement sourd : l’alimentation principale revient. Les néons s’allument et la porte du fond se déverrouille.',
-    cmdLocked: 'Verrouillée. L’alimentation principale est coupée : il faut abaisser les 3 relais.',
+    cmdLocked: 'Verrouillée. L’alimentation principale est coupée : il faut abaisser les 3 relais dans le bon ordre.',
     cmdOpen: 'La porte s’ouvre sur une aire d’évacuation remplie de véhicules.',
     key2Taken: 'Vous prenez la clé du convoi.',
-    exit2Locked: 'Verrouillée. Il faut la clé du convoi.',
+    exit2Locked: 'Verrouillée. Il faut la clé du convoi, rangée dans l’armoire à clés.',
     exit2Open2:
       'La grande porte s’ouvre sur un bloc cellulaire glacial : des barreaux à perte de vue, et des cellules plongées dans l’ombre.',
     zDead: 'Vous êtes tombé… Vous vous réveillez à l’entrée de Zombie Town. Le décompte est conservé.',
@@ -405,7 +408,7 @@ const TEXTS = {
     drawerTitle: 'TIROIR DU GARDE (3 CHIFFRES)',
     drawerBad: 'Le cadenas ne cède pas.',
     drawerOk: 'Le tiroir s’ouvre : une clé de cellule est restée au fond.',
-    bunkNo: 'Une couchette défoncée, taillée de coups de couteau. Rien d’utile pour l’instant.',
+    bunkNo: 'La couchette de la cellule O3 est hors d’atteinte derrière les barreaux. Il faut d’abord ouvrir la grille.',
     bunkDone: 'Il n’y a plus rien sous cette couchette.',
     bunkOk: 'Vous fouillez la couchette… Une clé est scotchée sous le sommier : la clé du bloc cellulaire.',
     blockLocked: 'Verrouillée. Il faut la clé du bloc cellulaire.',
