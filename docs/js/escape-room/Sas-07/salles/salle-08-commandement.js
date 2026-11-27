@@ -63,202 +63,383 @@ PROPS.deskset = (x, z) => {
 const wallDec = (x, y, z, ry, n) => decal(bloodDecal(n), 3, 2.2, x, y, z, scene, ry);
 
 
-/* ── Pièce 8 : salle de commandement (50 × 40 × 10 m) ──
-   Énigme : la table de situation donne l’ordre de redémarrage (BLEU → ROUGE → VERT) ; chaque relais
-   porte un voyant de couleur. Un relais abaissé dans le mauvais ordre réarme toute la procédure.
-   Les écrans muraux affichent en direct l’état des relais. */
+/* ── Pièce 8 : salle de commandement (50 × 40 × 10 m) — poste de commandement à double clé ──
+   Énigme : écouter la radio de la cabine (chiffres en boucle) → ouvrir le coffre du commandant (mur est)
+   → prendre la clé du commandant ; récupérer la clé de l’officier sur son corps (cabine radio) →
+   insérer chaque clé dans sa console (ouest / est, 28 m d’écart) → les tourner toutes les deux en
+   moins de 20 secondes : il faut courir de l’une à l’autre. */
 shell(-152, { south: false, w: 50, d: 40, h: 10 });
 wallWithDoor(-172, 50, 10);
 const doorCmd = makeDoor('door_cmd', 0, -171.85, 'Examiner la porte du fond');
-[-16, -6, 6, 16].forEach((x) => [-138, -148, -158, -167].forEach((z) => addNeon(8, x, z, 4, 9.6)));
+CONFIG.cmdCode = CONFIG.cmdCode || '3915';
+Object.assign(State, { cdtKey: false, offKey: false, cmdIn: {}, cmdTurn: {}, cmdTimer: 0, radioHeard: false, cmdSafe: false });
+[-14, 0, 14].forEach((x) => [-140, -154, -166].forEach((z) => addNeon(8, x, z, 4, 9.6)));
+/* architecture : deux ailes surélevées (postes de tir) desservies par des escaliers, allée centrale
+   au niveau du sol jusqu’à la porte, balustrade courbe autour de la table de situation */
+const WING_Y = 0.8;
+platform(-24.9, -4, -171.85, -155, WING_Y, { open: [['s', -16, -12]], skip: ['n', 'w'] });
+platform(4, 24.9, -171.85, -155, WING_Y, { open: [['s', 12, 16]], skip: ['n', 'e'] });
+stairs(-16, -12, -155, -152.6, 0, WING_Y, '-z');
+stairs(12, 16, -155, -152.6, 0, WING_Y, '-z');
+curveWall(0, -148, 4.6, Math.PI * 1.08, Math.PI * 1.92, 1.1, { mat: mats.dark, thick: 0.15 });
 {
-  const L = new THREE.PointLight(0x7fd0ff, 0, 18, 2); // halo bleu du mur d’écrans
-  L.position.set(0, 5, -167);
+  const L = new THREE.PointLight(0xff3020, 0, 20, 2); // gyrophare rouge du poste de tir
+  L.position.set(0, 7, -160);
   scene.add(L);
-  neon.lights.push({ l: L, room: 8, base: 40 });
+  neon.lights.push({ l: L, room: 8, base: 25 });
 }
-const CMD = { order: [3, 1, 2], relays: {}, screens: [] };
-const RELAY_INFO = {
-  1: { name: 'OUEST', col: 'ROUGE', hex: 0xff3a2a },
-  2: { name: 'EST', col: 'VERT', hex: 0x30ff60 },
-  3: { name: 'NORD', col: 'BLEU', hex: 0x3a7cff }
-};
+const CMD_WINDOW = 20; // ≈ 42 m entre les consoles (escaliers compris) : faisable en courant
 
-/* mur d’écrans (nord) : état des relais en direct */
-[-15, 0, 15].forEach((x) => {
+/* ── mur d’écrans (nord) ── */
+const cmdScreens = [-15, 0, 15].map((x) => {
   box(9.4, 4.6, 0.2, mats.dark, x, 6.3, -171.75);
   const sc = makeScreen(9, 4.2);
   sc.mesh.position.set(x, 6.3, -171.6);
   scene.add(sc.mesh);
-  CMD.screens.push(sc);
+  return sc;
 });
-CMD.draw = () => {
-  const st = (n) => (CMD.relays[n] && CMD.relays[n].userData.done ? 'BAS' : 'HAUT');
-  const ok = State.power8;
-  const col = ok ? '#7fe9ff' : '#ff6a5a';
-  CMD.screens[0].draw(['RELAIS OUEST', '> VOYANT ROUGE', '> POSITION : ' + st(1)], col);
-  CMD.screens[1].draw(
-    [
-      'ALIMENTATION',
-      ok ? '> EN LIGNE' : '> HORS LIGNE',
-      '> PROCÉDURE : ' + (ok ? 'OK' : State.relays + ' / 3'),
-      ok ? '> PORTE : OUVERTE' : '> PORTE : VERROUILLÉE'
-    ],
+function cmdDraw() {
+  const ok = State.power8,
+    col = ok ? '#7fe9ff' : State.cmdTimer > 0 ? '#ffd070' : '#ff6a5a';
+  const st = (s, who) => (State.cmdTurn[s] ? 'TOURNÉE' : State.cmdIn[s] ? 'INSÉRÉE' : 'ABSENTE') + ' (' + who + ')';
+  cmdScreens[0].draw(['CONSOLE OUEST', '> CLÉ ' + st('W', 'CDT')], col);
+  cmdScreens[1].draw(
+    ok
+      ? ['ALIMENTATION', '> PRINCIPALE : EN LIGNE', '> PORTE : DÉVERROUILLÉE']
+      : State.cmdTimer > 0
+        ? ['DOUBLE AUTORISATION', '> EN ATTENTE…', '> ' + State.cmdTimer + ' s']
+        : ['DOUBLE AUTORISATION', '> 2 CLÉS REQUISES', '> TOURNER EN < ' + CMD_WINDOW + ' s'],
     col
   );
-  CMD.screens[2].draw(['RELAIS EST · NORD', '> EST (VERT) : ' + st(2), '> NORD (BLEU) : ' + st(3)], col);
-};
-
-/* table de situation (centre) : l’ordre de redémarrage */
-{
-  const g = new THREE.Group();
-  g.position.set(0, 0, -146);
-  scene.add(g);
-  box(7, 0.12, 3.4, mats.dark, 0, 0.92, 0, g);
-  box(6.2, 0.85, 2.6, mats.lockerA, 0, 0.43, 0, g);
-  const sf = new Surface(512)
-    .base('#16261c', 0.7, 0.5)
-    .lines(64, 'rgba(120,220,160,.18)')
-    .blob(120, 300, 70, '200,50,40', 0.35)
-    .blob(390, 330, 80, '60,140,220', 0.3);
-  sf.write('SECTEUR 7 · REDÉMARRAGE', 256, 60, 'bold 34px Courier New', 'rgba(200,240,210,.9)');
-  sf.write('1 · RELAIS BLEU', 256, 170, 'bold 44px Courier New', 'rgba(110,170,255,.95)');
-  sf.write('2 · RELAIS ROUGE', 256, 250, 'bold 44px Courier New', 'rgba(255,110,90,.95)');
-  sf.write('3 · RELAIS VERT', 256, 330, 'bold 44px Courier New', 'rgba(110,255,150,.95)');
-  sf.write('ERREUR = TOUT SE RÉARME', 256, 440, 'bold 30px Courier New', 'rgba(255,220,120,.85)');
-  const mat = pbr(sf, { bump: 0.3 });
-  mat.emissive.setHex(0xffffff);
-  mat.emissiveMap = mat.map;
-  mat.emissiveIntensity = 0.35;
-  plane(6.6, 3.1, mat, 0, 0.985, 0, g, 0, -Math.PI / 2);
-  hitBox(7, 0.4, 3.4, 0, 1, 0, g);
-  interactive(g, 'cmd_table', 'Lire la table de situation', 'inspect', { focusDist: 3.2 });
-  Actions.register('cmd_table', async (o) => {
-    SND.play('paper');
-    await focusOn(o);
-    State.cmdRead = true;
-    say('Procédure de redémarrage : relais BLEU, puis ROUGE, puis VERT. En dessous : « Une erreur et tout se réarme. »', 8000);
-    setObjective(objectiveNow());
-  });
-  pushC(0, -146, 3.7, 1.9);
+  cmdScreens[2].draw(['CONSOLE EST', '> CLÉ ' + st('E', 'OFF')], col);
 }
 
-/* deux rangées de pupitres face au mur d’écrans, allée centrale libre */
-[-156, -162].forEach((z) =>
-  [-19.5, -15, -10.5, -6, 6, 10.5, 15, 19.5].forEach((x, i) => {
+/* ── table de situation ronde (centre) ── */
+{
+  const g = new THREE.Group();
+  g.position.set(0, 0, -148);
+  scene.add(g);
+  cyl(3, 0.85, mats.dark, 0, 0.43, 0, g, 40);
+  cyl(3.15, 0.08, mats.steel, 0, 0.9, 0, g, 40);
+  const map = canvasMat(512, 512, (x) => {
+    x.fillStyle = '#071510';
+    x.fillRect(0, 0, 512, 512);
+    x.strokeStyle = 'rgba(90,220,150,.35)';
+    x.lineWidth = 2;
+    for (let r = 60; r < 260; r += 60) {
+      x.beginPath();
+      x.arc(256, 256, r, 0, Math.PI * 2);
+      x.stroke();
+    }
+    for (let a = 0; a < 12; a++) {
+      x.beginPath();
+      x.moveTo(256, 256);
+      x.lineTo(256 + Math.cos(a / 1.91) * 250, 256 + Math.sin(a / 1.91) * 250);
+      x.stroke();
+    }
+    x.fillStyle = 'rgba(255,70,50,.9)';
+    [[180, 140], [330, 210], [300, 360], [150, 320], [380, 120]].forEach(([px, py]) => {
+      x.beginPath();
+      x.arc(px, py, 9, 0, Math.PI * 2);
+      x.fill();
+    });
+    x.fillStyle = 'rgba(200,255,220,.9)';
+    x.font = 'bold 30px monospace';
+    x.textAlign = 'center';
+    x.fillText('SECTEUR 7 — PERDU', 256, 470);
+  }, 0.6);
+  const top = new THREE.Mesh(new THREE.CircleGeometry(2.95, 40), map);
+  top.rotation.x = -Math.PI / 2;
+  top.position.y = 0.945;
+  g.add(top);
+  hitBox(6, 0.5, 6, 0, 0.9, 0, g);
+  interactive(g, 'cmd_table', 'Examiner la table de situation', 'inspect', { focusDist: 4 });
+  Actions.register('cmd_table', () => {
+    SND.play('click');
+    say('Des points rouges partout sur la carte du secteur. Une note épinglée : « Coupure générale. Redémarrage = double autorisation : commandant + officier de garde. »', 8000);
+  });
+  pushC(0, -148, 3.2, 3.2);
+}
+
+/* ── consoles à clé (ouest = commandant, est = officier) ── */
+const consoles = {};
+[['W', -14, 'CLÉ COMMANDANT', 'cdtKey'], ['E', 14, 'CLÉ OFFICIER', 'offKey']].forEach(([side, x, label, flag]) => {
+  const g = new THREE.Group();
+  g.position.set(x, WING_Y, -161);
+  scene.add(g);
+  box(3, 1.0, 1.1, mats.dark, 0, 0.5, 0, g);
+  const top = box(3.1, 0.06, 1.2, mats.steel, 0, 1.03, 0.05, g);
+  top.rotation.x = -0.2;
+  box(3, 1.4, 0.15, mats.dark, 0, 1.7, -0.5, g);
+  const sc = makeScreen(1.2, 0.7);
+  sc.draw(['ARMEMENT', '> ' + side], '#ff6a5a');
+  sc.mesh.position.set(-0.8, 1.75, -0.42);
+  g.add(sc.mesh);
+  for (let i = 0; i < 8; i++) {
+    const m = glow(i % 3 ? 0x30ff70 : 0xffb347, 2);
+    box(0.06, 0.06, 0.02, m, 0.4 + (i % 4) * 0.2, 1.9 - Math.floor(i / 4) * 0.2, -0.42, g);
+    blinkers.push({ m, s: 2 + i * 0.6, p: i + x });
+  }
+  const lock = new THREE.Group(); // serrure + clé
+  lock.position.set(0.7, 1.12, 0.1);
+  lock.rotation.x = -0.2;
+  g.add(lock);
+  cyl(0.11, 0.08, mats.steel, 0, 0, 0, lock, 20);
+  const cover = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.03, 0.34), new THREE.MeshStandardMaterial({ color: 0xb02a1a, roughness: 0.5 }));
+  cover.position.set(0, 0.17, -0.12);
+  cover.rotation.x = -1.2;
+  lock.add(cover);
+  const key = new THREE.Group();
+  key.position.y = 0.05;
+  key.visible = false;
+  lock.add(key);
+  box(0.03, 0.14, 0.015, mats.steel, 0, 0.07, 0, key);
+  box(0.12, 0.08, 0.02, glow(side === 'W' ? 0xffb020 : 0x9fe8ff, 1.4), 0, 0.18, 0, key);
+  const led = box(0.12, 0.05, 0.02, glow(0xff2a1a, 3), -0.1, 1.15, 0.45, g);
+  plane(1.4, 0.35, sign([label], '#b48a22', '#15171a'), 0, 0.72, 0.56, g);
+  hitBox(3.1, 1.4, 1.3, 0, 0.8, 0.1, g);
+  interactive(g, 'cmd_console_' + side, 'Console ' + (side === 'W' ? 'ouest' : 'est') + ' : ' + label.toLowerCase(), 'use', { focusDist: 2.4 });
+  consoles[side] = { g, key, led, flag, label };
+  pushC(x, -161, 1.6, 0.7);
+});
+function cmdReset() {
+  State.cmdTurn = {};
+  State.cmdTimer = 0;
+  Object.values(consoles).forEach((c) => {
+    c.led.material = glow(0xff2a1a, 3);
+    tween(0.3, (k) => (c.key.rotation.y = (-Math.PI / 2) * (1 - k)));
+  });
+  cmdDraw();
+}
+function cmdTick(token) {
+  if (State.power8 || State.cmdToken !== token) return;
+  State.cmdTimer--;
+  if (State.cmdTimer <= 0) {
+    SND.play('error');
+    say('Délai dépassé : la console se désarme. Il faut tourner les deux clés en moins de ' + CMD_WINDOW + ' secondes.', 5500);
+    cmdReset();
+    return;
+  }
+  SND.play('click');
+  cmdDraw();
+  gameTimeout(() => cmdTick(token), 1000);
+}
+['W', 'E'].forEach((side) =>
+  Actions.register('cmd_console_' + side, () => {
+    const c = consoles[side],
+      other = side === 'W' ? 'E' : 'W';
+    if (State.power8) return say('L’alimentation principale est rétablie.', 2500);
+    if (!State.cmdIn[side]) {
+      if (!State[c.flag]) {
+        SND.play('locked');
+        return say('Une serrure vide sous un cache rouge. Étiquette : « ' + c.label + ' ».', 4000);
+      }
+      State.cmdIn[side] = true;
+      c.key.visible = true;
+      SND.play('key');
+      renderInv();
+      cmdDraw();
+      setObjective(objectiveNow());
+      return say('Vous insérez la ' + c.label.toLowerCase() + '.' + (State.cmdIn[other] ? ' Les deux clés sont en place : tournez-les en moins de ' + CMD_WINDOW + ' secondes.' : ''), 5000);
+    }
+    if (!State.cmdIn[other]) return say('La clé est insérée, mais l’autre console est encore vide.', 3500);
+    if (State.cmdTurn[side]) return say('Cette clé est déjà tournée. Vite, l’autre console !', 2500);
+    State.cmdTurn[side] = true;
+    SND.play('lever');
+    c.led.material = glow(0x30ff70, 3);
+    tween(0.3, (k) => (c.key.rotation.y = (-Math.PI / 2) * k));
+    if (State.cmdTurn[other]) {
+      State.power8 = true;
+      State.cmdTimer = 0;
+      gameTimeout(() => {
+        SND.play('success');
+        SND.play('genstart');
+      }, 350);
+      unlockDoor(doorCmd, TEXTS.hints.door_cmd_unlocked);
+      cmdDraw();
+      setObjective(objectiveNow());
+      return say('Double autorisation acceptée. Un grondement : l’alimentation principale revient et la porte du fond se déverrouille.', 7000);
+    }
+    State.cmdTimer = CMD_WINDOW;
+    State.cmdToken = (State.cmdToken || 0) + 1;
+    const token = State.cmdToken;
+    gameTimeout(() => cmdTick(token), 1000);
+    cmdDraw();
+    say('Clé tournée. Compte à rebours : ' + CMD_WINDOW + ' secondes pour tourner l’autre clé !', 4000);
+  })
+);
+
+/* ── cabine radio (angle nord-ouest) : radio en boucle + officier mort ── */
+wallX(-24.9, -15.5, -141, 3.2, -19);
+innerDoor('cmd_radio_door', -19, -141, 'x', 'Ouvrir la porte des transmissions');
+wallZ(-15.5, -141, -132.15, 3.2);
+box(9.5, 0.15, 9, mats.dark, -20.2, 3.27, -136.6);
+addNeon(8, -20.2, -136.6, 2.4, 3.1);
+plane(1.8, 0.45, sign(['TRANSMISSIONS'], '#2b2e2a', '#e8e2c8'), -19, 2.9, -141.14, scene, Math.PI);
+{
+  const g = new THREE.Group();
+  g.position.set(-22.8, 0, -137);
+  g.rotation.y = Math.PI / 2;
+  scene.add(g);
+  box(2.4, 0.06, 0.9, mats.wood, 0, 0.8, 0, g);
+  [-1.1, 1.1].forEach((dx) => box(0.08, 0.8, 0.8, mats.dark, dx, 0.4, 0, g));
+  const radio = new THREE.Group();
+  radio.position.set(-0.4, 0.83, -0.15);
+  g.add(radio);
+  box(0.9, 0.45, 0.4, mats.dark, 0, 0.23, 0, radio);
+  box(0.5, 0.15, 0.02, glow(0xffb347, 1.2), -0.12, 0.32, 0.21, radio);
+  [0.2, 0.33].forEach((x) => cyl(0.05, 0.04, mats.steel, x, 0.22, 0.21, radio, 12).rotation.x = Math.PI / 2);
+  box(0.02, 0.6, 0.02, mats.steel, 0.38, 0.75, -0.1, radio);
+  hitBox(1, 0.6, 0.5, 0, 0.25, 0, radio);
+  interactive(radio, 'cmd_radio', 'Écouter la radio', 'inspect', { focusDist: 1.4 });
+  pushC(-22.8, -137, 0.5, 1.2);
+}
+const officer = (() => {
+  // l’officier, effondré contre le mur sud de la cabine ; sa clé pend à sa ceinture
+  const g = new THREE.Group();
+  g.position.set(-18, 0, -133);
+  g.rotation.y = Math.PI;
+  scene.add(g);
+  const uni = new THREE.MeshStandardMaterial({ color: 0x3b4630, roughness: 0.9 });
+  const skin = new THREE.MeshStandardMaterial({ color: 0x6d6a5a, roughness: 0.8 });
+  box(0.5, 0.65, 0.3, uni, 0, 0.55, 0.05, g).rotation.x = -0.25;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 10), skin);
+  head.position.set(0.05, 0.98, 0.0);
+  g.add(head);
+  [-0.13, 0.13].forEach((x) => box(0.16, 0.15, 0.8, uni, x, 0.1, 0.5, g));
+  box(0.4, 0.08, 0.08, mats.dark, 0, 0.3, 0.2, g);
+  decal(bloodDecal(4), 1.6, 1.6, -18, 0.015, -133.8, scene, 0, -Math.PI / 2);
+  pushC(-18, -133.4, 0.45, 0.6);
+  return g;
+})();
+const offKeyObj = keyItem(-18.1, 0.32, -133.75, 'cmd_off_key', 'Prendre la clé de l’officier');
+offKeyObj.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.01), glow(0x9fe8ff, 1.4)));
+
+/* ── coffre mural du commandant (mur est) ── */
+const cdtSafe = (() => {
+  const g = new THREE.Group();
+  g.position.set(24.78, 1.4, -150);
+  g.rotation.y = -Math.PI / 2;
+  scene.add(g);
+  box(0.9, 0.9, 0.4, mats.dark, 0, 0, -0.2, g);
+  plane(0.78, 0.78, new THREE.MeshBasicMaterial({ color: 0x050605 }), 0, 0, 0.002, g);
+  const pv = new THREE.Group();
+  pv.position.set(-0.45, 0, 0.02);
+  g.add(pv);
+  box(0.9, 0.9, 0.06, mats.steel, 0.45, 0, 0, pv);
+  const dial = cyl(0.12, 0.05, mats.dark, 0.45, 0.05, 0.05, pv, 24);
+  dial.rotation.x = Math.PI / 2;
+  box(0.2, 0.03, 0.03, mats.steel, 0.75, -0.12, 0.05, pv);
+  const led = box(0.05, 0.05, 0.02, glow(0xff2a1a, 3), 0.45, 0.3, 0.04, pv);
+  plane(1.3, 0.5, sign(['CDT VAUTRIN'], '#2b2e2a', '#e8e2c8'), 0, 0.85, -0.01, g);
+  const hb = hitBox(1, 1, 0.3, 0, 0, 0.12, g);
+  interactive(g, 'cmd_safe', 'Ouvrir le coffre du commandant', 'keypad', { focusDist: 1.4, pv, led, hb });
+  pushC(24.5, -150, 0.4, 0.6);
+  return g;
+})();
+const cdtKeyObj = keyItem(24.62, 1.3, -150.1, 'cmd_cdt_key', 'Prendre la clé du commandant', Math.PI / 2);
+cdtKeyObj.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.01), glow(0xffb020, 1.4)));
+hideObj(cdtKeyObj);
+
+Actions.register('cmd_radio', async (o) => {
+  SND.play('radio');
+  await focusOn(o);
+  State.radioHeard = true;
+  say('Grésillements, puis une voix monocorde, en boucle : « …ici Vautrin… mon coffre… trois… neuf… un… cinq… je répète… trois… neuf… un… cinq… »', 9000);
+  setObjective(objectiveNow());
+});
+Actions.register('cmd_off_key', (o) => {
+  State.offKey = true;
+  hideObj(o);
+  SND.play('key');
+  renderInv();
+  say('Vous détachez la clé de la ceinture de l’officier. Étiquette : « OFFICIER DE GARDE ».', 5000);
+  setObjective(objectiveNow());
+});
+Actions.register('cmd_safe', async (o) => {
+  const u = o.userData;
+  if (State.cmdSafe) return say('Le coffre est ouvert.', 2500);
+  await focusOn(o);
+  if (await askCode('COFFRE DU COMMANDANT', 4, CONFIG.cmdCode, { note: ['INDICE', 'La radio de la cabine répète un message'] })) {
+    State.cmdSafe = true;
+    u.led.material = glow(0x30ff70, 3);
+    u.hb.raycast = () => {};
+    SND.play('unlock');
+    tween(0.9, (k) => (u.pv.rotation.y = -1.8 * k));
+    showObj(cdtKeyObj);
+    say('Le coffre s’ouvre : à l’intérieur, la clé du commandant.', 4500);
+    setObjective(objectiveNow());
+  } else say('Le coffre reste fermé.', 3000);
+  release();
+});
+Actions.register('cmd_cdt_key', (o) => {
+  State.cdtKey = true;
+  hideObj(o);
+  SND.play('key');
+  renderInv();
+  say('La clé du commandant. Étiquette : « CONSOLE OUEST ».', 4500);
+  setObjective(objectiveNow());
+});
+
+ROOM_OBJ[8] = () =>
+  State.power8
+    ? 'Alimentation rétablie. Ouvrez la porte du fond.'
+    : State.cmdIn.W && State.cmdIn.E
+      ? 'Tournez les deux clés (consoles ouest et est) en moins de ' + CMD_WINDOW + ' secondes.'
+      : 'Double autorisation : trouvez la clé du commandant et celle de l’officier, puis insérez-les dans les consoles.';
+ROOM_GOALS[8] = () => [
+  ['Écouter la radio de la cabine des transmissions', State.radioHeard || State.cmdSafe],
+  ['Ouvrir le coffre du commandant (mur est)', State.cmdSafe],
+  ['Prendre la clé du commandant', State.cdtKey],
+  ['Prendre la clé de l’officier (cabine des transmissions)', State.offKey],
+  ['Insérer les deux clés dans les consoles', !!(State.cmdIn.W && State.cmdIn.E)],
+  ['Tourner les deux clés en moins de ' + CMD_WINDOW + ' s', State.power8]
+];
+ROOM_INV.push(
+  () => State.cdtKey && !State.cmdIn.W && 'Clé du commandant',
+  () => State.offKey && !State.cmdIn.E && 'Clé de l’officier'
+);
+ROOM_DEV[8] = () => {
+  Object.assign(State, { cdtKey: true, offKey: true, cmdSafe: true, radioHeard: true, power8: true, cmdIn: { W: true, E: true }, cmdTurn: { W: true, E: true } });
+  hideObj(cdtKeyObj);
+  hideObj(offKeyObj);
+  Object.values(consoles).forEach((c) => {
+    c.key.visible = true;
+    c.key.rotation.y = -Math.PI / 2;
+    c.led.material = glow(0x30ff70, 3);
+  });
+  unlockDoor(doorCmd, TEXTS.hints.door_cmd_unlocked);
+  cmdDraw();
+};
+cmdDraw();
+
+/* ── décor : postes d’opérateurs, baies, cartes murales ── */
+[-144, -149.5].forEach((z) =>
+  [-21, -16.5, -11, 11, 16.5].forEach((x, i) => {
     desk(x, z, 2.6, 0);
-    if (i % 3 === 1) return; // chaises (quelques-unes manquent)
+    if (i % 3 === 1) return;
     box(0.5, 0.06, 0.5, mats.cloth, x, 0.5, z + 0.95);
     box(0.5, 0.55, 0.06, mats.cloth, x, 0.8, z + 1.2);
     cyl(0.04, 0.45, mats.steel, x, 0.24, z + 0.95, scene, 8);
   })
 );
-
-/* bureau vitré du commandant (angle sud-est) */
-{
-  const x0 = 15, z0 = -132.15, z1 = -141;
-  wallX(x0, 24.9, z1, 3.2, 20);
-  const zc = (z0 + z1) / 2, len = z0 - z1;
-  box(0.14, 0.6, len, mats.dark, x0, 0.3, zc); // allège
-  box(0.14, 0.3, len, mats.dark, x0, 3.05, zc); // linteau
-  [z0 - 0.05, zc, z1 + 0.05].forEach((z) => box(0.14, 3.2, 0.12, mats.dark, x0, 1.6, z)); // montants
-  plane(len, 2.3, mats.glass, x0, 1.75, zc, scene, -Math.PI / 2).castShadow = false;
-  EXTRA_COLLIDERS.push([x0 - 0.15, x0 + 0.15, z1, z0]);
-  box(2.6, 0.08, 1.2, mats.wood, 21, 0.8, -137.5);
-  [-1.1, 1.1].forEach((dx) => box(0.08, 0.8, 1, mats.dark, 21 + dx, 0.4, -137.5));
-  pushC(21, -137.5, 1.4, 0.7);
-  plane(0.9, 1.2, sign(['CDT', 'VAUTRIN'], '#2b2e2a', '#e8e2c8'), 24.85, 1.9, -137.5, scene, -Math.PI / 2);
-  const n = plane(
-    0.3,
-    0.4,
-    paperTex2(['Si le courant saute,', 'suivre la procédure', 'de la table.', 'Pas d’improvisation.', '— Cdt Vautrin']),
-    21,
-    0.845,
-    -137.4,
-    scene,
-    0,
-    -Math.PI / 2
-  );
-  interactive(n, 'note_cmd', 'Lire la note du commandant', 'inspect', { focusDist: 0.8 });
-  Actions.register('note_cmd', async (o) => {
-    SND.play('paper');
-    await focusOn(o);
-    say('« Si le courant saute : suivez la procédure inscrite sur la table de situation. Pas d’improvisation. — Cdt Vautrin »', 7000);
-  });
-}
-
-/* trois relais (ouest, est, nord) avec voyant de couleur */
-function makeRelay(i, x, y, z, ry) {
-  const info = RELAY_INFO[i];
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = ry;
-  scene.add(g);
-  box(0.8, 1.1, 0.16, mats.dark, 0, 0, 0, g);
-  box(0.7, 1.0, 0.02, mats.steel, 0, 0, 0.09, g);
-  const frame = glow(info.hex, 1.2);
-  [0.58, -0.58].forEach((fy) => box(0.84, 0.05, 0.05, frame, 0, fy, 0.1, g));
-  const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.11, 14, 10), glow(info.hex, 3));
-  lamp.position.set(0, 0.9, 0.05);
-  g.add(lamp);
-  box(0.3, 0.06, 0.18, mats.dark, 0, 0.78, 0.05, g);
-  const arm = new THREE.Group();
-  arm.position.set(0, 0.05, 0.12);
-  arm.rotation.x = 0.7;
-  g.add(arm);
-  cyl(0.02, 0.45, mats.steel, 0, 0.22, 0, arm, 8);
-  const kn = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), mats.rubber);
-  kn.position.set(0, 0.46, 0);
-  arm.add(kn);
-  const led = box(0.1, 0.05, 0.02, glow(0xff2a1a, 3), 0, -0.4, 0.1, g);
-  plane(0.7, 0.3, sign([info.name]), 0, -0.85, 0.09, g);
-  hitBox(0.9, 1.3, 0.4, 0, 0, 0.1, g);
-  interactive(g, 'relay_' + i, 'Abaisser le relais ' + info.col.toLowerCase(), 'lever', {
-    arm,
-    led,
-    idx: i - 1,
-    focusDist: 1.6
-  });
-  CMD.relays[i] = g;
-  return g;
-}
-makeRelay(1, -24.8, 1.5, -145, Math.PI / 2);
-makeRelay(2, 24.8, 1.5, -160, -Math.PI / 2);
-makeRelay(3, -8, 1.5, -171.65, 0);
-CMD.reset = () => {
-  Object.values(CMD.relays).forEach((g) => {
-    const u = g.userData,
-      a = u.arm,
-      f = a.rotation.x;
-    u.done = false;
-    u.led.material = glow(0xff2a1a, 3);
-    tween(0.35, (k) => {
-      a.rotation.x = f + (0.7 - f) * k;
-    });
-  });
-  State.relays = 0;
-  CMD.draw();
-};
-CMD.draw();
-
-/* baies serveurs le long des murs */
-[-150, -151, -152, -153].forEach((z) => rack(-24, z, Math.PI / 2));
-[-145, -146, -147, -148].forEach((z) => rack(24, z, -Math.PI / 2));
-[-14.4, -12, 12, 14.4].forEach((x) => rack(x, -170.9, 0));
-/* décor : caisses de munitions vides, sacs, sang */
-PROPS.crates(-21, -135.5);
-PROPS.sand(-11, -134.8);
-PROPS.tarp(-21.5, -166);
-PROPS.drum(10, -134.8);
-[
-  [-10, -140],
-  [12, -151],
-  [-15, -168],
-  [-3, -158]
-].forEach(([x, z], i) => decal(bloodDecal(3 + (i % 3)), 3, 3, x, 0.015, z, scene, 0, -Math.PI / 2));
-wallDec(-24.85, 2.2, -160, Math.PI / 2, 5);
-wallDec(24.85, 2.6, -152, -Math.PI / 2, 4);
+[-166, -167, -168, -169].forEach((z) => {
+  rack(-24, z, Math.PI / 2).position.y = WING_Y;
+  rack(24, z, -Math.PI / 2).position.y = WING_Y;
+});
+[[-24.85, -158, Math.PI / 2, ['ZONE NORD', 'PERDUE']], [-24.85, -147, Math.PI / 2, ['BUNKER 07', 'PLAN']]].forEach(([x, z, ry, l]) =>
+  plane(3, 2, sign(l, '#c9bc99', '#2a2418'), x, 2.6, z, scene, ry)
+);
+PROPS.crates(8, -134.8);
+PROPS.sand(-8.5, -134.8);
+PROPS.tarp(21, -136);
+PROPS.drum(2.6, -169.5);
+[[-10, -142], [12, -147], [0, -166], [-2, -158]].forEach(([x, z], i) =>
+  decal(bloodDecal(3 + (i % 3)), 3, 3, x, 0.015, z, scene, 0, -Math.PI / 2)
+);
+wallDec(24.85, 2.6, -160, -Math.PI / 2, 4);
 cable(V3(-24.6, 9, -134), V3(-24.6, 8.5, -170), 1.2, 0.035);
+cable(V3(-14, 1.8, -161.6), V3(14, 1.8, -161.6), 0.9, 0.04);
 cable(V3(-15, 9.2, -171.5), V3(15, 9.2, -171.5), 0.6, 0.03);
-beacon(-24, 8, -138, () => !State.power8);
+beacon(-24, 8, -150, () => !State.power8);
 beacon(24, 8, -168, () => !State.power8);

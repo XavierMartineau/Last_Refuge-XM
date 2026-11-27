@@ -26,34 +26,7 @@ function subGoals() {
   return subGoals0(rr).concat(questLines(rr));
 }
 function subGoals0(rr) {
-  if (rr === 7)
-    return [
-      ['Rallumer l’éclairage (interrupteur général, mur d’entrée côté est)', State.wareLight],
-      ['Lire les jauges des cuves A, B et C (mur du fond)', !!(State.gaugeA && State.gaugeB && State.gaugeC) || State.boothOpen],
-      ['Ouvrir le cadenas de la cabine du contremaître', State.boothOpen],
-      ['Prendre la manivelle sur l’établi', State.crank],
-      ['Descendre la clé avec le treuil (mur ouest)', State.keyLowered],
-      ['Prendre la clé du silo', State.key]
-    ];
-  if (rr === 8)
-    return [
-      ['Lire la procédure sur la table de situation', !!State.cmdRead || State.power8],
-      ['Abaisser les relais dans l’ordre : ' + (State.power8 ? 3 : State.relays) + ' / 3', State.power8]
-    ];
-  if (rr === 9)
-    return [
-      ['Lire le tableau de départ (mur ouest)', !!State.boardRead || State.keyCabinet],
-      ['Relever les numéros des jeeps ALPHA, BRAVO, CHARLIE', !!(State.vehA && State.vehB && State.vehC) || State.keyCabinet],
-      ['Ouvrir l’armoire à clés (mur est)', State.keyCabinet],
-      ['Prendre la clé du convoi', State.key2]
-    ];
-  if (rr === 10)
-    return [
-      ['Trouver le code gravé dans une cellule ouverte', State.keyCell],
-      ['Ouvrir le tiroir du garde (au fond)', State.keyCell],
-      ['Ouvrir la cellule O3', !!(gates.gate_W2 && gates.gate_W2.userData.opened)],
-      ['Fouiller la couchette de la cellule O3', State.key4]
-    ];
+  if (ROOM_GOALS[rr]) return ROOM_GOALS[rr](); // salles 7 à 10
   if (rr !== 1) return [];
   if (!State.power)
     return [

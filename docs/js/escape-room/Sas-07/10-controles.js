@@ -293,10 +293,7 @@ function objectiveNow() {
   if (r === 4) return State.power4 ? O.exitFinal : O.room4;
   if (r === 5) return State.power5 ? O.openHangar : O.room5;
   if (r === 6) return State.wareCode ? O.openWare : O.room6;
-  if (r === 7) return State.key ? O.exitEnd : O.room7;
-  if (r === 8) return State.power8 ? O.openCmd : O.room8;
-  if (r === 9) return State.key2 ? O.exitFinal2 : O.room9;
-  if (r === 10) return State.key4 ? O.exitBlock : State.keyCell ? O.openCell : O.room10;
+  if (ROOM_OBJ[r]) return ROOM_OBJ[r](); // salles 7 à 10 : objectifs définis dans leur fichier
   if (r === 11)
     return State.breaker
       ? O.exitComplex

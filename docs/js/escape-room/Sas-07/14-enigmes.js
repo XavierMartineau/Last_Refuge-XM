@@ -335,7 +335,7 @@ egg(
   'Ramasser la pièce',
   'Une pièce d’un franc. Vous la lancez : face. Vous la relancez : face. Elle est pipée. Tout est pipé ici.',
   6,
-  -115,
+  -110,
   B.coin,
   0
 );
@@ -343,8 +343,8 @@ egg(
   'egg_silo',
   'Lire la pancarte',
   '« SILO 7 — NE PAS REGARDER EN BAS ». Évidemment, vous regardez en bas. Rien. Juste le vide qui vous regarde aussi.',
-  -8,
-  -125,
+  -7,
+  -127,
   stele(['NE PAS', 'REGARDER', 'EN BAS'], '#b83a22', '#f2e8d0'),
   -0.1
 );
@@ -353,8 +353,8 @@ egg(
   'egg_console',
   'Examiner la console',
   'Une console portable : « GAME OVER — niveau 8 atteint ». Quelqu’un a battu le record du bunker. Respect.',
-  10,
-  -150,
+  6.5,
+  -139,
   B.console,
   0.4
 );
@@ -362,8 +362,8 @@ egg(
   'egg_meeting',
   'Lire le tableau',
   '« Réunion de 15 h : comment éviter l’apocalypse. » En dessous : « Points abordés : aucun. Buffet : oui. »',
-  -12,
-  -160,
+  -8,
+  -138,
   stele(['RÉUNION', '15 H', 'BUFFET: OUI'], '#c9bc99', '#2a2418'),
   0.2
 );
@@ -372,8 +372,8 @@ egg(
   'egg_sticker',
   'Lire l’autocollant',
   'Sur le pare-chocs d’une jeep : « Mon autre voiture est un char. » Au moins, il avait de l’humour.',
-  12,
-  -190,
+  -17.4,
+  -205.5,
   stele(['MON AUTRE', 'VOITURE', 'EST UN CHAR'], '#6b7a3a', '#f2ecd0'),
   -0.2
 );
@@ -381,8 +381,8 @@ egg(
   'egg_usb',
   'Ramasser la clé USB',
   'Une clé USB étiquetée « photos_vacances_FINAL_v2 ». Vous la branchez mentalement. Trop de risques.',
-  -12,
-  -205,
+  6,
+  -210,
   B.usb,
   0.7
 );
@@ -391,8 +391,8 @@ egg(
   'egg_jm',
   'Lire la gravure',
   '« Jean-Marc était ici. » Gravé très profondément. Il a dû vraiment s’ennuyer.',
-  -8.2,
-  -230.6,
+  -11,
+  -227.6,
   stele(['JEAN-MARC', 'ÉTAIT ICI'], '#6b6f66', '#1a1a18'),
   Math.PI / 2
 );
@@ -400,10 +400,10 @@ egg(
   'egg_dessert',
   'Lire la gravure',
   '« Jour 214 : on ne m’a toujours pas servi de dessert. » Le détenu a ensuite ajouté : « Je veux voir le directeur. »',
-  -8.2,
-  -237.6,
+  6.5,
+  -256,
   stele(['JOUR 214', 'PAS DE', 'DESSERT'], '#6b6f66', '#1a1a18'),
-  Math.PI / 2
+  -Math.PI / 2
 );
 // salle 11 : complexe
 egg(

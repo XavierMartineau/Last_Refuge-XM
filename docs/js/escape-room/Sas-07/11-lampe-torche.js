@@ -92,7 +92,7 @@ function renderInv() {
     it = [
       State.card && TEXTS.ui.items.card,
       State.fuses > 0 && TEXTS.ui.items.fuse + ' ×' + State.fuses,
-      State.crank && !State.keyLowered && 'Manivelle',
+      ...ROOM_INV.map((f) => f()),
       State.key && TEXTS.ui.items.key,
       State.key2 && TEXTS.ui.items.key2,
       State.keyCell && !State.key4 && TEXTS.ui.items.cellkey,

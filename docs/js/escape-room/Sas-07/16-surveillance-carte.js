@@ -13,8 +13,8 @@ const CCTV = (function () {
       { name: 'CELLULES · COULOIR', pos: [0, 4.5, -224.5], yaw: 0, tilt: -0.12, pan: false },
       {
         name: 'CELLULES · MOBILE',
-        pos: [0, 4.5, -245.5],
-        yaw: 0,
+        pos: [3.25, 2.9, -240], // fixée sur la vitre est de la tour de garde
+        yaw: -1.13,
         tilt: -0.1,
         pan: true,
         range: 1.9,
@@ -1202,122 +1202,7 @@ R('keypad_ware', async (o) => {
   } else say(M.wareBad);
   release();
 });
-R('key_01', (o) => {
-  if (!State.keyLowered) return say('La clé pend sous la passerelle, hors de portée. Le treuil du mur ouest doit pouvoir la descendre.', 5000);
-  State.key = true;
-  hideObj(o);
-  SND.play('paper');
-  renderInv();
-  say(M.keyTaken);
-  doorEnd.userData.led.material = glow(0x30ff70, 3);
-  doorEnd.userData.hint = Hn.door_end_unlocked;
-  setObjective(TEXTS.objectives.exitEnd);
-});
-[1, 2, 3].forEach((n) =>
-  R('relay_' + n, (o) => {
-    if (CMD.busy) return;
-    if (State.power8 || o.userData.done) return say(M.relayDone);
-    SND.play('lever');
-    const a = o.userData.arm,
-      f = a.rotation.x;
-    tween(0.4, (k) => {
-      a.rotation.x = f + (-0.7 - f) * k;
-    });
-    if (CMD.order[State.relays] !== n) {
-      // mauvais ordre : la procédure entière se réarme
-      o.userData.done = true;
-      CMD.busy = true;
-      CMD.draw();
-      gameTimeout(() => {
-        SND.play('error');
-        CMD.reset();
-        CMD.busy = false;
-      }, 550);
-      return say(M.relayWrong, 5000);
-    }
-    o.userData.done = true;
-    State.relays++;
-    o.userData.led.material = glow(0x30ff70, 3);
-    CMD.draw();
-    if (State.relays >= 3) {
-      State.power8 = true;
-      gameTimeout(() => {
-        SND.play('success');
-        SND.play('genstart');
-      }, 350);
-      doorCmd.userData.led.material = glow(0x30ff70, 3);
-      doorCmd.userData.hint = Hn.door_cmd_unlocked;
-      say(M.relaysOk, 7000);
-      CMD.draw();
-      setObjective(TEXTS.objectives.openCmd);
-    } else say(fmt(M.relay, { n: State.relays }));
-  })
-);
-R('key_02', (o) => {
-  if (!State.keyCabinet) return say('La clé est enfermée dans l’armoire.', 3000);
-  State.key2 = true;
-  hideObj(o);
-  SND.play('paper');
-  renderInv();
-  say(M.key2Taken);
-  doorExit2.userData.led.material = glow(0x30ff70, 3);
-  doorExit2.userData.hint = Hn.door_exit2_unlocked;
-  setObjective(TEXTS.objectives.exitFinal2);
-});
-// ── Bloc cellulaire (salle 10) ──
-['W0', 'W1', 'W2', 'W3', 'E0', 'E1', 'E2', 'E3'].forEach((n) =>
-  R('gate_' + n, (o) => {
-    if (o.userData.opened) return say(M.cellAlready);
-    if (n === 'W2') {
-      if (!State.keyCell) {
-        SND.play('locked');
-        return say(M.cellLocked);
-      }
-      openGate(o);
-      return say(M.cellOpenNow);
-    }
-    SND.play('locked');
-    say(n === 'W3' ? M.cellRust : M.cellLocked);
-  })
-);
-R('note_cells', async (o) => {
-  SND.play('paper');
-  await focusOn(o);
-  say(M.cellNote, 7000);
-});
-R('scratch_code', async (o) => {
-  SND.play('paper');
-  await focusOn(o);
-  say(fmt(M.scratch, { d: CONFIG.drawerCode.split('').join(' ') }), 8000);
-});
-R('drawer_guard', async (o) => {
-  if (State.keyCell) return say(M.drawerEmpty);
-  await focusOn(o);
-  if (await askCode(M.drawerTitle, 3, CONFIG.drawerCode)) {
-    State.keyCell = true;
-    SND.play('success');
-    gameTimeout(() => SND.play('key'), 300);
-    renderInv();
-    say(M.drawerOk, 6000);
-    setObjective(objectiveNow());
-  } else say(M.drawerBad);
-  release();
-});
-R('bunk', (o) => {
-  if (State.key4) return say(M.bunkDone);
-  if (!gates.gate_W2.userData.opened) {
-    SND.play('click');
-    State.cell3seen = true;
-    return say(M.bunkNo);
-  }
-  State.key4 = true;
-  SND.play('key');
-  renderInv();
-  say(M.bunkOk, 6000);
-  doorBlock.userData.led.material = glow(0x30ff70, 3);
-  doorBlock.userData.hint = Hn.door_block_unlocked;
-  setObjective(objectiveNow());
-});
+// Salles 7 à 10 : leur logique est définie dans leur propre fichier (salles/salle-07 … salle-10).
 // ── Complexe à étages (salle 11) ──
 R('note_stairs', async (o) => {
   SND.play('paper');

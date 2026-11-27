@@ -84,7 +84,8 @@ function neonPoolUpdate(rr, dt) {
     lit = k > 0.6,
     col = lit ? 0xcfe4ff : 0xa9adb1;
   ambNeon.color.setHex(lit ? 0xaec8ff : 0x9a9ea3);
-  ambNeon.intensity = (rr >= 5 ? 0.55 : 0.42) * k * CONFIG.light.neonPower;
+  const dim = rr >= 7 && rr <= 10; // salles 7 à 10 : ambiance plus sombre
+  ambNeon.intensity = (dim ? 0.16 : rr >= 5 ? 0.55 : 0.42) * k * CONFIG.light.neonPower;
   const list = _npCache[rr] || (_npCache[rr] = neon.tubes.filter((o) => o.room === rr));
   const changedRoom = rr !== _npRoom;
   if (changedRoom || _npF++ % 6 === 0) {
@@ -136,7 +137,7 @@ function neonPoolUpdate(rr, dt) {
     p.L.position.z += (p.tz - p.L.position.z) * f;
     p.L.color.setHex(col);
     const y = Math.max(2.5, p.ty + 0.35);
-    p.L.intensity = p.ti * k * y * y * (rr >= 5 ? 3.1 : 1.2) * CONFIG.light.neonPower * (rr === 12 ? 0.4 : 1);
+    p.L.intensity = p.ti * k * y * y * (dim ? 1.5 : rr >= 5 ? 3.1 : 1.2) * CONFIG.light.neonPower * (rr === 12 ? 0.4 : 1);
   });
 }
 const blinkers = [],

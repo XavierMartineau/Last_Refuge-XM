@@ -235,20 +235,20 @@ const QZ = {
     [-76, -98]
   ],
   7: [
-    [-17, 10.5],
-    [-106, -128]
+    [-17, 13],
+    [-104, -130]
   ],
   8: [
-    [-22, 13],
-    [-136, -168]
+    [-22, 22],
+    [-134, -153]
   ],
   9: [
-    [-22, 22],
-    [-176, -218]
+    [-22, 12],
+    [-181, -216]
   ],
   10: [
-    [-4, 4],
-    [-226, -257]
+    [-8.5, 8.5],
+    [-224, -260]
   ],
   11: [
     [-2, 45],
@@ -395,9 +395,10 @@ function qTarget(q) {
       // jamais dans un meuble, un mur ou une cellule fermée (marge de 0,6 m)
       const free = (px, pz) =>
         pz > -32 ||
+        (floorAt(px, pz) === null && // jamais sur une plateforme ou un escalier (objet enterré)
         ![...COLLIDERS, ...EXTRA_COLLIDERS].some(
           (c) => c.length === 4 && px > c[0] - 0.6 && px < c[1] + 0.6 && pz > c[2] - 0.6 && pz < c[3] + 0.6
-        );
+        ));
       for (let k = 0; k < 160; k++) {
         x = zn[0][0] + rnd() * (zn[0][1] - zn[0][0]);
         z = zn[1][0] + rnd() * (zn[1][1] - zn[1][0]);

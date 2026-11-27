@@ -156,7 +156,7 @@ function loop() {
     bloom.strength = rr === 12 ? 0.12 : 0.34;
     bigLights.forEach((L, i) => {
       L.position.set(rig.pos.x * 0.7, rr === 12 ? hh - 2 : hh, rig.pos.z + (i - 1) * 13);
-      L.intensity = kk * hh * hh * (i === 1 ? 2 : 1.2) * (rr === 12 ? 0.65 : 1);
+      L.intensity = kk * hh * hh * (i === 1 ? 2 : 1.2) * (rr === 12 ? 0.65 : rr >= 7 && rr <= 10 ? 0.35 : 1);
     });
     neonPoolUpdate(rr, dt);
   }

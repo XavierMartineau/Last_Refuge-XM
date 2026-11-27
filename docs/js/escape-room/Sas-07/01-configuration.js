@@ -63,8 +63,7 @@ const CONFIG = {
   wareCode: ['3', '0', '7', '1'], // entrepôt : un chiffre sur chacune des 4 affiches (allées 1 à 4) = code du digicode
   safeCode: '5294', // coffre de la pièce 3 = numéros des lits de la rangée EST (de l’entrée vers le fond)
   townCode: '4827',
-  siloCode: '628', // cabine du silo : niveaux des cuves A, B, C
-  convoyCode: '734', // armoire à clés : n° de convoi BRAVO, CHARLIE, ALPHA (ordre de départ)
+  cmdCode: '3915', // coffre du commandant (salle 8) : répété par la radio des transmissions
   breakers: [1, 0, 1, 1], // pièce 4 : position des 4 disjoncteurs (1 = ON) — même motif peint sur le mur
   light: {
     ambient: 0.05, // lumière ambiante (très faible : on est dans le noir)
