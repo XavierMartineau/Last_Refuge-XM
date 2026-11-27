@@ -33,22 +33,31 @@ const noRay = (o) => {
   o.raycast = () => {};
   return o;
 };
+const primitiveGeometries = new Map();
+function primitiveGeometry(key, create) {
+  let geometry = primitiveGeometries.get(key);
+  if (!geometry) {
+    geometry = create();
+    primitiveGeometries.set(key, geometry);
+  }
+  return geometry;
+}
 const box = (w, h, d, m, x = 0, y = 0, z = 0, p = scene) => {
-  const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+  const o = new THREE.Mesh(primitiveGeometry(`box:${w}:${h}:${d}`, () => new THREE.BoxGeometry(w, h, d)), m);
   o.position.set(x, y, z);
   o.castShadow = o.receiveShadow = true;
   p.add(o);
   return o;
 };
 const cyl = (r, h, m, x = 0, y = 0, z = 0, p = scene, seg = 20) => {
-  const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m);
+  const o = new THREE.Mesh(primitiveGeometry(`cyl:${r}:${h}:${seg}`, () => new THREE.CylinderGeometry(r, r, h, seg)), m);
   o.position.set(x, y, z);
   o.castShadow = o.receiveShadow = true;
   p.add(o);
   return o;
 };
 const plane = (w, h, m, x, y, z, p = scene, ry = 0, rx = 0) => {
-  const o = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m);
+  const o = new THREE.Mesh(primitiveGeometry(`plane:${w}:${h}`, () => new THREE.PlaneGeometry(w, h)), m);
   o.position.set(x, y, z);
   o.rotation.set(rx, ry, 0);
   o.receiveShadow = true;

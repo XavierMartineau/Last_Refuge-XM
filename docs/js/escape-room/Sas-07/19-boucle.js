@@ -6,52 +6,8 @@
    ════════════════════════════════════════════════════════════════ */
 const clock = new THREE.Clock();
 const fpsToggle = document.getElementById('fps-toggle'),
-  fpsValue = document.getElementById('fps-value'),
-  lagMessage = document.getElementById('lag-diagnostic');
+  fpsValue = document.getElementById('fps-value');
 let fpsFrames = 0, fpsElapsed = 0, fpsSkip = true;
-const lagDiagnostic = {
-  frames: 0, elapsed: 0, skip: true,
-  controls: 0, map: 0, world: 0, cctv: 0, render: 0
-};
-function resetLagDiagnostic() {
-  lagDiagnostic.frames = 0;
-  lagDiagnostic.elapsed = 0;
-  lagDiagnostic.skip = true;
-  lagDiagnostic.controls = lagDiagnostic.map = lagDiagnostic.world = lagDiagnostic.cctv = lagDiagnostic.render = 0;
-}
-function recordLagDiagnostic(delta, controls, map, world, cctv, render) {
-  if (document.hidden) {
-    resetLagDiagnostic();
-    return;
-  }
-  if (lagDiagnostic.skip) {
-    lagDiagnostic.skip = false;
-    return;
-  }
-  lagDiagnostic.frames++;
-  lagDiagnostic.elapsed += delta;
-  lagDiagnostic.controls += controls;
-  lagDiagnostic.map += map;
-  lagDiagnostic.world += world;
-  lagDiagnostic.cctv += cctv;
-  lagDiagnostic.render += render;
-  if (lagDiagnostic.elapsed < 5) return;
-  const fps = lagDiagnostic.frames / lagDiagnostic.elapsed;
-  if (fps < 45) {
-    const stages = [
-      ['commandes et personnage', lagDiagnostic.controls],
-      ['carte et combat', lagDiagnostic.map],
-      ['monde, lumières et son', lagDiagnostic.world],
-      ['caméras et sélection', lagDiagnostic.cctv],
-      ['rendu côté CPU', lagDiagnostic.render]
-    ];
-    const slowest = stages.reduce((a, b) => b[1] > a[1] ? b : a);
-    lagMessage.textContent = 'Ralentissement possible : ' + slowest[0] + ' (opération CPU la plus coûteuse).';
-    lagMessage.hidden = false;
-  } else lagMessage.hidden = true;
-  resetLagDiagnostic();
-  lagDiagnostic.skip = false;
-}
 fpsToggle.addEventListener('click', () => {
   const enabled = fpsToggle.getAttribute('aria-pressed') !== 'true';
   fpsToggle.setAttribute('aria-pressed', String(enabled));
@@ -65,8 +21,6 @@ document.addEventListener('visibilitychange', () => {
   fpsFrames = 0;
   fpsElapsed = 0;
   fpsSkip = true;
-  lagMessage.hidden = true;
-  resetLagDiagnostic();
 });
 function updateFps(delta) {
   if (fpsValue.hidden || document.hidden) {
@@ -93,13 +47,10 @@ function loop() {
     clock.elapsedTime -= delta;
     fpsFrames = 0;
     fpsElapsed = 0;
-    lagMessage.hidden = true;
-    resetLagDiagnostic();
     return;
   }
   const dt = Math.min(delta, 0.05),
-    t = clock.elapsedTime,
-    diagnosticStart = performance.now();
+    t = clock.elapsedTime;
   gameTimersFrame(delta);
   renderer.shadowMap.needsUpdate = (loop.f = (loop.f || 0) + 1) % 2 === 0;
   for (const w of tweens) {
@@ -115,11 +66,9 @@ function loop() {
   updateAim(dt);
   applyRig(t);
   avatarFrame(dt, t);
-  const diagnosticControlsEnd = performance.now();
   MapScenes.animate(t);
   combatFrame(dt, t);
   if (State.armed && (down('fire') || (aimedMouseShot && isAiming()))) fire();
-  const diagnosticMapEnd = performance.now();
   updateFlash(dt, t);
   // néons : éteints tant que le courant n’est pas rétabli (levier → pièces 1-2, générateur → pièces 3-4), avec des étincelles rares
   for (const r of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
@@ -245,7 +194,6 @@ function loop() {
   });
   SND.update(t, dt);
   perfTick();
-  const diagnosticWorldEnd = performance.now();
   try {
     CCTV.track(dt, t);
     CCTV.frame(dt, t);
@@ -262,11 +210,7 @@ function loop() {
     if (bk && bk.style.display !== sh) bk.style.display = sh;
     document.body.classList.toggle('zoom', sh === 'block');
   }
-  const diagnosticCctvEnd = performance.now();
   renderGame();
-  const diagnosticRenderEnd = performance.now();
-  recordLagDiagnostic(delta, diagnosticControlsEnd - diagnosticStart, diagnosticMapEnd - diagnosticControlsEnd,
-    diagnosticWorldEnd - diagnosticMapEnd, diagnosticCctvEnd - diagnosticWorldEnd, diagnosticRenderEnd - diagnosticCctvEnd);
   updateFps(delta);
 }
 /* ── Audit des zones de clic : une zone invisible plus grande que l'objet qu'elle protège est réduite à sa taille réelle (+ marge) ── */
