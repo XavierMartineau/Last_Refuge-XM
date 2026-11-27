@@ -195,30 +195,61 @@ function applyRig(t) {
       cy = Math.cos(rig.yaw),
       cp = Math.cos(rig.pitch),
       sp = Math.sin(rig.pitch);
-    const hx = rig.pos.x + cy * AV.shoulder,
-      hz = rig.pos.z - sy * AV.shoulder,
-      hy = rig.pos.y + 0.18; // point visé : tête, légèrement à droite
+    const hy = rig.pos.y + 0.18; // point visé : tête, légèrement à droite
     const dtc = Math.min(0.1, Math.max(0, t - (AV.lt || t)));
     AV.lt = t;
     const rh = MapScenes.active ? Infinity :
       ([0, 3.4, 3.4, 3.4, 3.4, 6.5, 4.8, 10, 9.6, 8.6, 4.6, 9.6, 8.6][roomOf(rig.pos.z)] || 3.4),
       fl = rig.pos.y - 1.6 + rig.dip;
+    const onMap = MapScenes.active && rig.pos.z < -900;
+    const pathBlocked = onMap ? MapScenes.cameraWallBlocked : camCollide;
     let k = 1;
-    for (; k > 0.1; k -= 0.05) {
-      const ex = hx + sy * cp * AV.dist * k,
-        ez = hz + cy * cp * AV.dist * k;
+    for (let step = 1; step <= 12; step++) {
+      const part = step / 12,
+        ex = rig.pos.x + (cy * AV.shoulder + sy * cp * AV.dist) * part,
+        ez = rig.pos.z + (-sy * AV.shoulder + cy * cp * AV.dist) * part;
       if (
-        !camCollide(ex, ez) &&
-        !camCollide(ex + cy * 0.25, ez - sy * 0.25) &&
-        !camCollide(ex - cy * 0.25, ez + sy * 0.25)
-      )
+        pathBlocked(ex, ez) ||
+        pathBlocked(ex + cy * 0.2, ez - sy * 0.2) ||
+        pathBlocked(ex - cy * 0.2, ez + sy * 0.2)
+      ) {
+        k = Math.max(0, part - 0.1);
         break;
-    } // recule seulement si la place est libre (marge de 25 cm)
+      }
+    }
+    if (onMap) {
+      for (; k > 0; k = Math.max(0, k - 0.05)) {
+        const x = rig.pos.x + (cy * AV.shoulder + sy * cp * AV.dist) * k,
+          z = rig.pos.z + (-sy * AV.shoulder + cy * cp * AV.dist) * k;
+        if (!camCollide(x, z) && !camCollide(x + cy * 0.2, z - sy * 0.2) &&
+          !camCollide(x - cy * 0.2, z + sy * 0.2)) break;
+      }
+      const start = rig.pos.clone(),
+        end = new THREE.Vector3(
+          rig.pos.x + (cy * AV.shoulder + sy * cp * AV.dist) * k,
+          hy - sp * AV.dist * k,
+          rig.pos.z + (-sy * AV.shoulder + cy * cp * AV.dist) * k
+        ),
+        direction = end.clone().sub(start),
+        distance = direction.length();
+      if (distance > 0) {
+        direction.normalize();
+        const rayStartK = k;
+        for (const side of [-0.2, 0, 0.2]) {
+          const origin = start.clone().add(new THREE.Vector3(cy * side, 0, -sy * side));
+          const hit = MapScenes.obstruction(new THREE.Ray(origin, direction), distance);
+          if (hit) k = Math.min(k, rayStartK * Math.max(0, (hit.distance - 0.2) / distance));
+        }
+      }
+    }
     AV.k = AV.k === undefined ? k : k < AV.k ? k : AV.k + (k - AV.k) * Math.min(1, dtc * 3); // se rapproche vite d'un mur, revient doucement
-    const d = AV.dist * AV.k;
+    const d = AV.dist * AV.k,
+      hx = rig.pos.x + cy * AV.shoulder * AV.k,
+      hz = rig.pos.z - sy * AV.shoulder * AV.k,
+      ceiling = MapScenes.active ? MapScenes.cameraCeiling(hx + sy * cp * d, hz + cy * cp * d) : rh;
     camera.position.set(
       hx + sy * cp * d,
-      Math.min(Math.max(hy - sp * d, fl + 0.35), rh - 0.25),
+      Math.min(Math.max(hy - sp * d, fl + 0.35), ceiling - 0.25),
       hz + cy * cp * d
     );
     if (hasMagnifyingOptic() && aimBlend > 0)

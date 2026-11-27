@@ -100,6 +100,10 @@ const MapScenes = (() => {
   };
   api.safe = (x, z, padding = 0) => api.active === 'town' &&
     Math.hypot(x - current.entry[0], z - offset - current.entry[1]) < 8 + padding;
+  api.cameraCeiling = (x, z) => api.active === 'town' &&
+    Math.abs(x - current.entry[0]) < 5 && Math.abs(z - offset - current.entry[1]) < 5
+    ? 0.7 * mapScale + 7 : Infinity;
+  api.cameraWallBlocked = (x, z) => api.active === 'town' && cageBlocked(current, x, z - offset);
   api.townMove = (x, z) => {
     if (api.active !== 'town' || api.safe(x, z, 0.4)) return false;
     const b = current.definition.bounds, localZ = z - offset;

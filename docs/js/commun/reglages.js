@@ -579,8 +579,15 @@
     });
     // glisser sur une barre
     let dragRow = null;
-    root.addEventListener("pointerdown", (e) => { const s = e.target.closest("[data-slider]"); if (s) dragRow = s; });
+    root.addEventListener("pointerdown", (e) => {
+      const s = e.target.closest("[data-slider]");
+      if (s && e.button === 0) {
+        e.preventDefault();
+        dragRow = s;
+      }
+    });
     addEventListener("pointerup", () => { dragRow = null; });
+    addEventListener("pointercancel", () => { dragRow = null; });
     root.addEventListener("pointermove", (e) => {
       if (!dragRow || !(e.buttons & 1)) return;
       const i = +dragRow.dataset.slider, row = rowsOfTab()[i];

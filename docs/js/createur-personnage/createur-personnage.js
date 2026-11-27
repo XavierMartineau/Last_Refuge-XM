@@ -92,7 +92,7 @@ const dome = new THREE.Mesh(
 );
 dome.position.y = 2;
 scene.add(dome);
-function paintBackdrop(bi, pi) {
+function backdropCanvas(bi, pi) {
   const [c0, c1] = D.BGP[bi] || D.BGP[0],
     cv = document.createElement('canvas');
   cv.width = 1024;
@@ -160,6 +160,11 @@ function paintBackdrop(bi, pi) {
   vg.addColorStop(1, 'rgba(0,0,0,.55)');
   x.fillStyle = vg;
   x.fillRect(0, 0, 1024, 512);
+  return cv;
+}
+function paintBackdrop(bi, pi) {
+  const cv = backdropCanvas(bi, pi),
+    [, c1] = D.BGP[bi] || D.BGP[0];
   const t = new THREE.CanvasTexture(cv);
   t.colorSpace = THREE.SRGBColorSpace;
   if (dome.material.map) dome.material.map.dispose();
@@ -174,10 +179,7 @@ function paintBackdrop(bi, pi) {
 const nameSprite = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthTest: false }));
 nameSprite.renderOrder = 10;
 scene.add(nameSprite);
-function paintName(st) {
-  const txt = st.name || '';
-  nameSprite.visible = !!txt;
-  if (!txt) return;
+function nameCanvas(st, txt) {
   const cv = document.createElement('canvas'),
     x = cv.getContext('2d');
   cv.width = 1024;
@@ -223,6 +225,13 @@ function paintName(st) {
   }
   x.fillStyle = col;
   x.fillText(txt, cx, cy);
+  return cv;
+}
+function paintName(st) {
+  const txt = st.name || '';
+  nameSprite.visible = !!txt;
+  if (!txt) return;
+  const cv = nameCanvas(st, txt);
   const t = new THREE.CanvasTexture(cv);
   t.colorSpace = THREE.SRGBColorSpace;
   if (nameSprite.material.map) nameSprite.material.map.dispose();
@@ -445,17 +454,27 @@ function renderStats() {
     (st.mag ? row('Capacité', st.mag, Math.sqrt(st.mag / 200), ' coups') : '');
 }
 /* ── fenêtre de choix : grille d’options, l’aperçu 3D se met à jour en direct ── */
-let galKey = null;
+const GALLERY_SHOTS = {
+  species: 'full', face: 'face', eyes: 'face', brows: 'face', nose: 'face', mouth: 'face',
+  hair: 'face', beard: 'face', glasses: 'face', headwear: 'face', extra: 'face',
+  specialHead: 'face', specialFace: 'face', outfit: 'bust', camo: 'bust', gear: 'bust',
+  specialBack: 'back', backpack: 'back', pants: 'legs', boots: 'feet', gloves: 'arm', arms: 'arm'
+};
+let galKey = null, galleryGeneration = 0;
 function openGallery(k) {
   galKey = k;
+  const generation = ++galleryGeneration;
   WCTX.w = state.weapon;
   const reg = REGS(state.gender),
     dlg = $('gallery-dialog');
   $('gallery-title').textContent = labelOf(k);
+  dlg.querySelector('.gh').textContent = ['brows', 'eyes', 'nose', 'mouth'].includes(k)
+    ? 'Aperçus sans coiffure ni accessoires pour mieux voir les traits. Vos choix restent inchangés.'
+    : 'Choisissez une option : le détenu 3D se met à jour en direct (vous pouvez le faire tourner derrière).';
   $('gallery-options').innerHTML = [...Array(reg[k]).keys()]
     .map(
       (i) =>
-        `<button type="button" class="opt" data-i="${i}" aria-pressed="${state[k] === i}">${swatchOf(k, i)}<span>${choiceName(k, i, state.gender)}</span></button>`
+        `<button type="button" class="opt${GALLERY_SHOTS[k] ? ' opt--visual' : ''}" data-i="${i}" aria-pressed="${state[k] === i}">${GALLERY_SHOTS[k] ? '<span class="opt-preview" aria-hidden="true"><img class="thumb" alt="" hidden><span>Aperçu…</span></span>' : swatchOf(k, i)}<span>${choiceName(k, i, state.gender)}</span></button>`
     )
     .join('');
   $('gallery-options')
@@ -469,41 +488,18 @@ function openGallery(k) {
             .forEach((o) => o.setAttribute('aria-pressed', +o.dataset.i === state[k]));
         })
     );
-  shot(
-    {
-      eyes: 'face',
-      hair: 'face',
-      beard: 'face',
-      mouth: 'face',
-      nose: 'face',
-      glasses: 'face',
-      brows: 'face',
-      headwear: 'face',
-      extra: 'face',
-      specialHead: 'face',
-      specialFace: 'face',
-      outfit: 'bust',
-      outfitColor: 'bust',
-      camo: 'bust',
-      gear: 'bust',
-      specialBack: 'back',
-      backpack: 'back',
-      pants: 'legs',
-      pantsColor: 'legs',
-      boots: 'feet',
-      bootsColor: 'feet',
-      gloves: 'arm',
-      glovesColor: 'arm',
-      arms: 'arm'
-    }[k] || (k[0] === 'w' ? 'weapon' : 'full')
-  );
+  shot(GALLERY_SHOTS[k] || {
+    outfitColor: 'bust', pantsColor: 'legs', bootsColor: 'feet', glovesColor: 'arm'
+  }[k] || (k[0] === 'w' ? 'weapon' : 'full'));
   dlg.showModal();
+  if (GALLERY_SHOTS[k]) renderGalleryPreviews(k, { ...state }, generation);
   const selected = $('gallery-options').querySelector('[aria-pressed="true"]');
   if (selected) selected.focus();
   if (embedded) window.parent.postMessage({ type: 'afterlock-creator-modal', open: true }, '*');
 }
 $('gallery-close').onclick = () => $('gallery-dialog').close();
 $('gallery-dialog').addEventListener('close', () => {
+  galleryGeneration++;
   if (embedded) window.parent.postMessage({ type: 'afterlock-creator-modal', open: false }, '*');
   galKey = null;
   shot('full');
@@ -912,6 +908,73 @@ function optThumb(k, i) {
   }
   thumbCache.set(key, url);
   return url;
+}
+function renderGalleryPreviews(k, base, generation) {
+  const buttons = [...$('gallery-options').querySelectorAll('.opt--visual')];
+  const previewCamera = new THREE.PerspectiveCamera(32, 1, 0.02, 60);
+  let index = 0;
+  function next() {
+    if (generation !== galleryGeneration || !$('gallery-dialog').open || index >= buttons.length) return;
+    const button = buttons[index++], i = +button.dataset.i;
+    const previewState = { ...base, [k]: i };
+    if (['brows', 'eyes', 'nose', 'mouth'].includes(k))
+      Object.assign(previewState, { hair: 0, glasses: 0, headwear: 0, extra: 0, beard: 0, specialFace: 0 });
+    if (k === 'species' && D.PRESETS[i]) {
+      const reg = REGS(base.gender);
+      for (const [key, value] of Object.entries(D.PRESETS[i]))
+        if (key in reg && value < reg[key]) previewState[key] = value;
+    }
+    let model;
+    const viewport = renderer.getViewport(new THREE.Vector4());
+    const scissor = renderer.getScissor(new THREE.Vector4());
+    const scissorTest = renderer.getScissorTest();
+    const shadows = renderer.shadowMap.enabled;
+    const weaponVisible = wItem && wItem.grp.visible;
+    try {
+      model = buildCharacter(previewState);
+      if (wItem) wItem.grp.visible = false;
+      armScene.add(model);
+      const width = Math.min(240, renderer.domElement.width);
+      const height = Math.min(150, renderer.domElement.height);
+      const pixelRatio = renderer.getPixelRatio();
+      const framing = GALLERY_SHOTS[k] === 'face' && ['brows', 'eyes', 'nose', 'mouth'].includes(k)
+        ? { p: [0, 1.635, 0.6], t: [0, 1.635, 0] }
+        : SHOTS[GALLERY_SHOTS[k]];
+      previewCamera.position.set(...framing.p);
+      previewCamera.lookAt(...framing.t);
+      previewCamera.aspect = width / height;
+      previewCamera.updateProjectionMatrix();
+      renderer.shadowMap.enabled = false;
+      renderer.setScissorTest(true);
+      renderer.setViewport(0, 0, width / pixelRatio, height / pixelRatio);
+      renderer.setScissor(0, 0, width / pixelRatio, height / pixelRatio);
+      renderer.render(armScene, previewCamera);
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(renderer.domElement, 0, renderer.domElement.height - height,
+        width, height, 0, 0, width, height);
+      const image = button.querySelector('img');
+      image.src = canvas.toDataURL('image/jpeg', 0.85);
+      image.hidden = false;
+      button.querySelector('.opt-preview span').remove();
+    } catch (error) {
+      console.error('Impossible de créer l’aperçu :', k, i, error);
+      button.querySelector('.opt-preview span').textContent = 'Aperçu indisponible';
+    } finally {
+      if (model) {
+        armScene.remove(model);
+        model.userData.dispose();
+      }
+      if (wItem) wItem.grp.visible = weaponVisible;
+      renderer.shadowMap.enabled = shadows;
+      renderer.setViewport(viewport);
+      renderer.setScissor(scissor);
+      renderer.setScissorTest(scissorTest);
+    }
+    requestAnimationFrame(next);
+  }
+  requestAnimationFrame(next);
 }
 const wLab = document.createElement('div');
 wLab.className = 'weapon-label';
