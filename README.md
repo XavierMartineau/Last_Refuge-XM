@@ -5,11 +5,8 @@ Escape room de survie dans un **pénitencier militaire tombé aux mains des infe
 ## Lancer le projet
 
 Les pages 3D (créateur, escape room) utilisent des modules JavaScript et chargent des données JSON : ouvrez le projet avec un **serveur HTTP local**, pas en `file://`.
-
-```bash
-python -m http.server 8000
-# puis http://localhost:8000/index.html
-```
+Ouvrer ou cliquer sur le lien suivant pour accéder au projet :
+[Accéder au projet](https://xaviermartineau.github.io/Last_Refuge-XM/)
 
 three.js est chargé depuis le CDN jsDelivr (connexion Internet requise).
 
