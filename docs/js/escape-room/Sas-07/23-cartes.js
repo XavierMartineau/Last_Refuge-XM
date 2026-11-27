@@ -10,7 +10,7 @@ const MapScenes = (() => {
       entry: [15, -25],
       returnPoint: [24, 25],
       portals: [
-        { x: 15, z: -27, label: 'RETOUR AU COMPLEXE', target: 'complex' },
+        { x: 12, z: -27, label: 'RETOUR AU COMPLEXE', target: 'complex' },
         { x: 25, z: 25, label: 'VERS ZOMBIE TOWN', target: 'town' }
       ]
     },
@@ -20,7 +20,7 @@ const MapScenes = (() => {
       bounds: [-53, 56, -14, 14],
       entry: [-45, 0],
       portals: [
-        { x: -47, z: 0, label: 'RETOUR À LA VILLE', target: 'city' },
+        { x: -47, z: 4, label: 'RETOUR À LA VILLE', target: 'city' },
         { x: 25, z: 0, label: 'FIN DE L’EXPLORATION', target: 'end' }
       ]
     }
@@ -234,7 +234,7 @@ const MapScenes = (() => {
       ground = y;
       scene.add(group);
       rig.pos.set(start[0], y + 1.6, start[1] + offset);
-      rig.yaw = id === 'town' ? Math.PI / 2 : 0;
+      rig.yaw = id === 'town' ? -Math.PI / 2 : returning ? 0 : Math.PI;
       rig.pitch = 0;
       rig.vy = rig.vp = 0;
       setObjective(objectiveNow());
