@@ -355,7 +355,7 @@ function combatFrame(dt, t) {
     hurtT = Math.max(0, hurtT - dt);
     hurt.style.opacity = hurtT * 1.6;
   }
-  if (State.armed && !State.zDone && roomOf(rig.pos.z) === 12 && !State.doorExit) {
+  if (State.armed && !State.zDone && !MapScenes.active && roomOf(rig.pos.z) === 12 && !State.doorExit) {
     State.spawnT = (State.spawnT || 0) - dt;
     const aliveN = zRoots.filter((z) => z.userData.state === 'walk').length;
     const index = waveIndex();

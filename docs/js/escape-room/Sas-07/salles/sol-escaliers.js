@@ -6,6 +6,7 @@ const PLAT = { x0: -60, x1: -3.6, z0: -312, z1: -275.2, y: 4.8 },
   STAIR = { x0: -6, x1: -3.6, za: -268, zb: -275.2 },
   ARENA_STAIR = { x0: 5, x1: 9, za: -320, zb: -326, end: -329, steps: 6, rise: 0.25 };
 function GH(x, z) {
+  if (typeof MapScenes !== 'undefined' && MapScenes.active && z < -900) return MapScenes.height();
   if (x <= PLAT.x1 && x >= PLAT.x0 && z <= PLAT.z1 && z >= PLAT.z0) return PLAT.y;
   if (x >= STAIR.x0 && x <= STAIR.x1 && z <= STAIR.za && z > STAIR.zb)
     return (PLAT.y * (STAIR.za - z)) / (STAIR.za - STAIR.zb);

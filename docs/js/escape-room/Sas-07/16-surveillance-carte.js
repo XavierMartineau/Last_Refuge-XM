@@ -93,6 +93,10 @@ const CCTV = (function () {
       )
       .slice(0, 22);
   function drawMap(g, W, H, big) {
+    if (MapScenes.active && rig.pos.z < -900) {
+      MapScenes.drawMap(g, W, H);
+      return;
+    }
     const r = roomOf(rig.pos.z),
       hw = HW[r],
       zr = ZR[r],

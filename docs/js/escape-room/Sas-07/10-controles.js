@@ -247,6 +247,7 @@ const WALLS = [
   [-362, () => State.zDone]
 ]; // murs mitoyens : passage seulement par la porte ouverte
 function blocked(x, z) {
+  if (MapScenes.active && rig.pos.z < -900) return MapScenes.blocked(x, z);
   const r = CONTROLS.walk.radius,
     hw =
       z > -3.8
@@ -278,6 +279,10 @@ function blocked(x, z) {
 function objectiveNow() {
   const O = TEXTS.objectives,
     r = roomOf(rig.pos.z);
+  if (MapScenes.active && rig.pos.z < -900)
+    return MapScenes.active === 'city'
+      ? 'Explorez la ville et trouvez le passage vers Zombie Town.'
+      : 'Explorez Zombie Town et trouvez la sortie.';
   if (r === 1)
     return State.termOk
       ? O.openDoor

@@ -11,6 +11,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Octree } from 'three/addons/math/Octree.js';
+import { Capsule } from 'three/addons/math/Capsule.js';
 import * as CL from '../../../assets/creation-personnage/personnage_armes.js';
 import * as ZombieAssets from '../../../assets/zombie/zombie.js';
 
@@ -24,6 +27,10 @@ Object.assign(window, {
   ShaderPass,
   RoomEnvironment,
   RoundedBoxGeometry,
+  GLTFLoader,
+  Octree,
+  Capsule,
+  zombieMapBase: new URL('../../../assets/zombie-map/', import.meta.url).href,
   CL,
   ZombieAssets
 });
@@ -72,6 +79,7 @@ export const FICHIERS = [
   '14-enigmes.js',
   '15-quetes-annexes.js',
   '16-surveillance-carte.js',
+  '23-cartes.js',
   '17-personnage-joueur.js',
   '18-post-traitement.js',
   '19-boucle.js',
