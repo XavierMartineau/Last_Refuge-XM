@@ -184,6 +184,7 @@ function avatarFrame(dt, t) {
   o.rotation.y = rig.yaw + Math.PI;
   o.userData.setWalk && o.userData.setWalk(walkD * 4.2, AV.amt);
   o.userData.setPitch && o.userData.setPitch(-rig.pitch * 0.7);
+  o.userData.setCrouch && o.userData.setCrouch(rig.dip / (1.6 - CONTROLS.walk.crouchEye));
   o.userData.update && o.userData.update(t);
 }
 function applyRig(t) {

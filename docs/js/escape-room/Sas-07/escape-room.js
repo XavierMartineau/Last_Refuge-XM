@@ -14,7 +14,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Octree } from 'three/addons/math/Octree.js';
 import { Capsule } from 'three/addons/math/Capsule.js';
-import * as CL from '../../../assets/creation-personnage/personnage_armes.js';
+import * as CL from '../../../assets/creation-personnage/personnage_armes.js?v=20261126l';
 import * as ZombieAssets from '../../../assets/zombie/zombie.js';
 
 Object.assign(window, {

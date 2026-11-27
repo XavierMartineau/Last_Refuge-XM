@@ -1,7 +1,7 @@
 /* LAST REFUGE · XM — Pantalons (9 modèles) et jambes.
    Module extrait de createur-personnage-3d+armes.html (partagé par le créateur et l’escape room). */
 import * as THREE from 'three';
-import { buildFoot } from '../bottes/bottes.js';
+import { buildFoot } from '../bottes/bottes.js?v=20261126l';
 import { D } from '../donnees/donnees.js';
 import { fab } from '../materiaux/materiaux.js';
 import { box, cyl, ell, grp, lerp, mat, mk, sh, th } from '../outils/outils-3d.js';
@@ -61,8 +61,8 @@ function buildLegs(C) {
       box(0.1, 0.06, 0.012, dk, 0, -0.12, 0.075, lg);
     }
     if (pt.cuff) cyl(0.056, 0.056, 0.03, dk, 0, -0.385, 0, kn, 14);
-    C.legs.push({ lg, kn, side });
-    buildFoot(C, kn, side);
+    const foot = buildFoot(C, kn, side);
+    C.legs.push({ lg, kn, foot, side });
   }
 }
 

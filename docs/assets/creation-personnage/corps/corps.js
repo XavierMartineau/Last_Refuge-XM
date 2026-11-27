@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { buildHand } from '../gants/gants.js';
 import { cyl, ell, grp, lerp, mk } from '../outils/outils-3d.js';
-import { buildLegs } from '../pantalons/pantalons.js';
+import { buildLegs } from '../pantalons/pantalons.js?v=20261126l';
 
 function buildBody(C) {
   const { fem, body } = C,

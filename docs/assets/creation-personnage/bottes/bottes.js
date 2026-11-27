@@ -33,7 +33,7 @@ function buildFoot(C, kn, side) {
     box(0.1, 0.008, 0.02, up, 0, -0.012, 0.03, fg);
     box(0.1, 0.008, 0.02, up, 0, -0.01, 0.1, fg);
     box(0.07, 0.04, 0.012, up, 0, -0.03, -0.075, fg);
-    return;
+    return fg;
   }
   ell(0.052, 0.043, 0.135, up, 0, -0.03, 0.05, fg);
   ell(0.05, 0.037, 0.06, bt.toe ? metal('#8a8d88', 0.35) : up, 0, -0.038, 0.145, fg);
@@ -58,6 +58,7 @@ function buildFoot(C, kn, side) {
   }
   if (bt.fur) cyl(0.079, 0.079, 0.05, mat('#d8d4c8', { roughness: 1 }), 0, sh2 - 0.015, 0, fg, 16);
   if (!bt.thin) ell(0.05, 0.012, 0.05, mat(sh(col, -0.3), { roughness: 0.8 }), 0, -0.05, -0.07, fg);
+  return fg;
 }
 
 export { BOOTCOL, BT, buildFoot };

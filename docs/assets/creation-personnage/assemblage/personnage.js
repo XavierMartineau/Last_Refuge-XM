@@ -5,7 +5,7 @@ import { buildWeapon } from '../armes/prise-en-main.js';
 import { beard } from '../barbes/barbes.js';
 import { armWear } from '../bras/details-bras.js';
 import { hair } from '../cheveux/cheveux.js';
-import { buildBody } from '../corps/corps.js';
+import { buildBody } from '../corps/corps.js?v=20261126l';
 import { headwear } from '../couvre-chefs/couvre-chefs.js';
 import { extras } from '../details-visage/details-visage.js';
 import { D } from '../donnees/donnees.js';
@@ -82,10 +82,14 @@ function buildCharacter(raw, opt = {}) {
   // respiration + léger balancement de la tête
   C.walk = { phase: 0, amt: 0 };
   C.pitch = 0;
+  C.crouch = 0;
   C.anim.push((t) => {
     const w = C.walk,
-      sw = Math.sin(w.phase);
-    body.position.y = Math.sin(t * 1.6) * 0.003 + Math.abs(Math.cos(w.phase)) * 0.015 * w.amt;
+      sw = Math.sin(w.phase),
+      crouchAngle = 1.3 * C.crouch;
+    body.position.y = Math.sin(t * 1.6) * 0.003 +
+      Math.abs(Math.cos(w.phase)) * 0.015 * w.amt * (1 - C.crouch) -
+      0.85 * (1 - Math.cos(crouchAngle));
     head.rotation.y = Math.sin(t * 0.5) * 0.08 * (1 - w.amt);
     head.rotation.x = Math.sin(t * 0.7) * 0.02 + C.pitch;
     C.arms.forEach((a) => {
@@ -94,8 +98,9 @@ function buildCharacter(raw, opt = {}) {
       a.eg.rotation.x = -0.14 - w.amt * Math.max(0, a.side * sw) * 0.5;
     });
     (C.legs || []).forEach((l) => {
-      l.lg.rotation.x = l.side * sw * 0.6 * w.amt;
-      l.kn.rotation.x = Math.max(0, l.side * Math.cos(w.phase)) * 0.8 * w.amt;
+      l.lg.rotation.x = -crouchAngle + l.side * sw * (0.6 - 0.45 * C.crouch) * w.amt;
+      l.kn.rotation.x = 2 * crouchAngle + Math.max(0, l.side * Math.cos(w.phase)) * 0.8 * w.amt * (1 - C.crouch);
+      l.foot.rotation.x = -(l.lg.rotation.x + l.kn.rotation.x) * C.crouch;
     });
   });
   root.userData.setWalk = (p, a) => {
@@ -104,6 +109,9 @@ function buildCharacter(raw, opt = {}) {
   };
   root.userData.setPitch = (p) => {
     C.pitch = p;
+  };
+  root.userData.setCrouch = (amount) => {
+    C.crouch = THREE.MathUtils.clamp(amount, 0, 1);
   };
   let torch, ammunition;
   const heldPosition = C.weapon && C.weapon.position.clone();
