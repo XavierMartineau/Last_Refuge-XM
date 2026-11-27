@@ -67,7 +67,7 @@
         { id: "shadows", label: "Ombres", type: "choice", def: true, options: [[false, "Non"], [true, "Oui"]], scope: "jeu",
           desc: "Ombres portées en temps réel. Désactivez-les si le jeu manque de fluidité (pris en compte au prochain lancement)." },
         { id: "lowEnd", label: "Mode PC peu puissant", type: "choice", def: false, options: [[false, "Non"], [true, "Oui"]], scope: "jeu",
-          desc: "Réduit fortement la résolution, le nombre de lumières et les mises à jour des caméras ; désactive ombres, halo et contour 3D. Les réglages précédents sont rétablis à la désactivation." }
+          desc: "Réduit fortement et adapte la résolution, la distance d’affichage, les lumières et les caméras ; désactive ombres, halo et contour 3D. Les réglages précédents sont rétablis à la désactivation." }
       ]}
     ]},
     { id: "audio", label: "Audio", sections: [

@@ -257,7 +257,7 @@ function setLowEndMode(enabled) {
     perf.beforeLowEnd = {
       s: perf.s, cut: perf.cut, flashShadow: flash.castShadow,
       shadows: renderer.shadowMap.enabled, bloom: bloom.enabled, outline: outline.enabled,
-      lights: reducedLights.map((light) => [light, light.visible])
+      lights: reducedLights.map((light) => [light, light.visible]), cameraFar: camera.far
     };
     perf.lowEnd = true;
     perf.s = Math.min(perf.s, 0.5);
@@ -266,6 +266,7 @@ function setLowEndMode(enabled) {
     bloom.enabled = false;
     outline.enabled = false;
     reducedLights.forEach((light) => { light.visible = false; });
+    camera.far = Math.min(camera.far, 100);
   } else {
     const previous = perf.beforeLowEnd;
     perf.lowEnd = false;
@@ -277,8 +278,10 @@ function setLowEndMode(enabled) {
     bloom.enabled = previous.bloom;
     outline.enabled = previous.outline;
     previous.lights.forEach(([light, visible]) => { light.visible = visible; });
+    camera.far = previous.cameraFar;
     perf.beforeLowEnd = null;
   }
+  camera.updateProjectionMatrix();
   scene.traverse((object) => {
     if (object.material) [].concat(object.material).forEach((material) => { material.needsUpdate = true; });
   });
@@ -305,7 +308,7 @@ function perfTick() {
   const now = performance.now(),
     d = now - perf.last;
   perf.last = now;
-  if (perf.lowEnd || document.hidden || d > 400 || modalOpen) return;
+  if (document.hidden || d > 400 || modalOpen) return;
   perf.acc += d;
   perf.n++;
   perf.cool -= d;
@@ -315,7 +318,15 @@ function perfTick() {
     perf.acc = 0;
     perf.n = 0;
     if (perf.cool <= 0) {
-      if (avg > 21) {
+      if (perf.lowEnd) {
+        if (avg > 33 && perf.s > 0.35) {
+          perf.s = Math.max(0.35, perf.s - 0.05);
+          perfApply();
+        } else if (avg < 19 && perf.s < 0.5) {
+          perf.s = Math.min(0.5, perf.s + 0.05);
+          perfApply();
+        }
+      } else if (avg > 21) {
         if (!perf.outlineCut && outline.enabled) {
           outline.enabled = false;
           perf.outlineCut = true;
