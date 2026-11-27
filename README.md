@@ -34,17 +34,15 @@ Dans le créateur, la croix ou le stick gauche navigue entre les choix, A valide
 
 Si le jeu ralentit, le contour lumineux des objets peut être temporairement désactivé avant de réduire la résolution ; le cadre de sélection reste visible.
 
+L’accueil propose une ambiance sonore générée en direct, démarrée à la première interaction avec la page. Le bouton de l’accueil ou **Options → Audio → Ambiance de l’accueil** permet de la couper ; les volumes général et musique s’appliquent également.
+
 Les réglages d’accessibilité proposent une correction ou une simulation des couleurs et une intensité ajustable. Les planches proposées sont des repères visuels, pas un test médical. Les coiffures longues se balancent pendant les mouvements du personnage ; cet effet est réduit avec la préférence de réduction des animations.
 
 Le HUD affiche le portrait et le nom du détenu, avec la police, la couleur et le style choisis, ainsi que sa vie sur 100. Une attaque d’infecté inflige 5 PV avant la réduction accordée par l’équipement renforcé.
 
 En première personne, les mains et l'arme équipée reprennent l'apparence et les accessoires du personnage. Le compteur en bas à droite indique les balles restantes dans le chargeur et sa capacité, y compris pendant le rechargement ; les armes blanches sont indiquées séparément.
 
-Dans l’arène, les 13 infectés arrivent en six vagues successives de 1, 1, 2, 2, 3 et 4. Leurs PV valent respectivement 3, 4, 5, 6, 7 et 8 fois les dégâts effectifs de l’arme équipée, accessoires compris. Leur vitesse augmente aussi à chaque vague et dépend des dégâts, de la cadence et du type d’arme : les infectés sont plus lents face aux armes de mêlée. Changer d’arme rééquilibre les infectés encore vivants en conservant leur proportion de vie.
-
-Les trois modèles animés d'infectés sont chargés à l'équipement de l'arme et partagent leurs ressources ; leurs collisions de tir utilisent des volumes simplifiés. Le blob n'a pas de zone de tête.
-
-L'entrée de l'arène comprend une zone sûre délimitée : les infectés ne peuvent pas y entrer ni blesser le joueur, et aucune arme ne peut y être utilisée. Deux trousses à usage unique restaurent progressivement jusqu'à 100 PV à raison de 10 PV par seconde ; deux boîtes à usage unique remplissent instantanément le chargeur. Le rechargement normal reste gratuit et illimité. Les ressources se ramassent avec la commande de prise habituelle et restent disponibles si elles ne sont pas utiles. L'arène comprend des marches praticables, des postes thématiques et des néons moins éblouissants ; plusieurs autres salles ont également reçu des décors adaptés à leur fonction.
+Après la ligne de coupure, la porte principale mène à **Post-Apocalyptic City**, puis un téléporteur conduit à **Zombie Town**. Les deux cartes sont agrandies quatre fois et chargées à l’arrivée, avec un écran de chargement ; leurs passages permettent aussi de revenir en arrière. Cette étape permet d’explorer les cartes sans infectés ni énigmes supplémentaires. L’ancienne arène et son combat restent dans le code, mais ne font pas partie de ce parcours d’exploration.
 
 ## Ajouter une escape room
 

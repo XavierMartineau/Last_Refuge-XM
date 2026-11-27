@@ -1,7 +1,8 @@
 /* LAST REFUGE · XM — Cartes de fin : chargement à la demande et exploration. */
 'use strict';
 const MapScenes = (() => {
-  const offset = -1000;
+  const offset = -2000;
+  const mapScale = 4;
   const definitions = {
     city: {
       file: 'post-apocalyptic_city.glb',
@@ -25,6 +26,12 @@ const MapScenes = (() => {
       ]
     }
   };
+  for (const definition of Object.values(definitions)) {
+    definition.bounds = definition.bounds.map((value) => value * mapScale);
+    definition.entry = definition.entry.map((value) => value * mapScale);
+    if (definition.returnPoint) definition.returnPoint = definition.returnPoint.map((value) => value * mapScale);
+    definition.portals.forEach((p) => { p.x *= mapScale; p.z *= mapScale; });
+  }
   const loader = new GLTFLoader();
   const down = new THREE.Vector3(0, -1, 0);
   const api = { active: null, height: () => ground };
@@ -32,7 +39,7 @@ const MapScenes = (() => {
 
   function floorAt(octree, x, z, from) {
     const hit = octree.rayIntersect(new THREE.Ray(new THREE.Vector3(x, from, z), down));
-    return hit && hit.distance <= 2 ? hit.position.y : null;
+    return hit && hit.distance <= 2 * mapScale ? hit.position.y : null;
   }
   function clearAt(octree, x, z, y) {
     const capsule = new Capsule(
@@ -44,7 +51,7 @@ const MapScenes = (() => {
     return !hit || hit.depth < 0.04;
   }
   function pointHeight(map, x, z, previous) {
-    if (map.id === 'town') return 0.7;
+    if (map.id === 'town') return 0.7 * mapScale;
     return floorAt(map.octree, x, z, previous + 0.65);
   }
   api.blocked = (x, z) => {
@@ -73,15 +80,27 @@ const MapScenes = (() => {
     map.octree.clear();
   }
   function portal(map, info) {
-    const y = map.id === 'town' ? 0.7 : floorAt(map.octree, info.x, info.z, 1.3);
+    const y = map.id === 'town' ? 0.7 * mapScale : floorAt(map.octree, info.x, info.z, 1.3 * mapScale);
     if (y === null || !clearAt(map.octree, info.x, info.z, y))
       throw new Error('Passage inaccessible : ' + info.label);
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(1.3, 2.2, 0.3),
-      new THREE.MeshStandardMaterial({ color: 0x13443e, emissive: 0x1fcdb3, emissiveIntensity: 0.7 })
-    );
-    mesh.position.set(info.x, y + 1.1, info.z);
+    const mesh = new THREE.Group();
+    mesh.position.set(info.x, y, info.z);
+    if (map.id === 'town') mesh.rotation.y = Math.PI / 2;
     interactive(mesh, 'map_' + info.target, info.label, 'use');
+    const metal = new THREE.MeshStandardMaterial({ color: 0x252d2c, metalness: 0.65, roughness: 0.5 });
+    const glow = new THREE.MeshStandardMaterial({ color: 0x31c8b1, emissive: 0x17a894, emissiveIntensity: 1.2 });
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.3, 0.2, 32), metal);
+    base.position.y = 0.1;
+    mesh.add(base);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.09, 10, 48), glow);
+    ring.position.y = 1.35;
+    mesh.add(ring);
+    const field = new THREE.Mesh(
+      new THREE.CircleGeometry(0.9, 48),
+      new THREE.MeshBasicMaterial({ color: 0x4fe7d2, transparent: true, opacity: 0.2, depthWrite: false, side: THREE.DoubleSide })
+    );
+    field.position.y = 1.35;
+    mesh.add(field);
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 96;
@@ -95,7 +114,7 @@ const MapScenes = (() => {
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: true }));
-    label.position.set(0, 1.45, 0);
+    label.position.set(0, 2.9, 0);
     label.scale.set(4, 0.75, 1);
     label.raycast = () => {};
     mesh.add(label);
@@ -111,6 +130,7 @@ const MapScenes = (() => {
         disposeMap(current);
         current = null;
         api.active = null;
+        scene.fog.density = 0.04;
         rig.pos.set(0, 1.6, -309.6);
         rig.yaw = Math.PI;
         rig.pitch = 0;
@@ -121,17 +141,18 @@ const MapScenes = (() => {
     });
   }
   function makePlan(map) {
-    const b = map.definition.bounds, canvas = document.createElement('canvas');
-    canvas.width = b[1] - b[0] + 1;
-    canvas.height = b[3] - b[2] + 1;
+    const b = map.definition.bounds, canvas = document.createElement('canvas'), step = 2;
+    canvas.width = Math.floor((b[1] - b[0]) / step) + 1;
+    canvas.height = Math.floor((b[3] - b[2]) / step) + 1;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#0c1b11';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#6f8e79';
-    for (let z = b[2]; z <= b[3]; z++) {
-      for (let x = b[0]; x <= b[1]; x++) {
-        const y = map.id === 'town' ? 0.7 : floorAt(map.octree, x, z, 1.3);
-        if (y === null || !clearAt(map.octree, x, z, y)) ctx.fillRect(x - b[0], z - b[2], 1, 1);
+    for (let z = b[2]; z <= b[3]; z += step) {
+      for (let x = b[0]; x <= b[1]; x += step) {
+        const y = map.id === 'town' ? 0.7 * mapScale : floorAt(map.octree, x, z, 1.3 * mapScale);
+        if (y === null || !clearAt(map.octree, x, z, y))
+          ctx.fillRect((x - b[0]) / step, (z - b[2]) / step, 1, 1);
       }
     }
     return canvas;
@@ -146,7 +167,7 @@ const MapScenes = (() => {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(current.plan, left, y0, current.plan.width * scale, current.plan.height * scale);
     ctx.imageSmoothingEnabled = true;
-    const point = (x, z) => [left + (x - b[0]) * scale, y0 + (z - b[2]) * scale];
+    const point = (x, z) => [left + ((x - b[0]) / 2) * scale, y0 + ((z - b[2]) / 2) * scale];
     current.definition.portals.forEach((p) => {
       const [x, y] = point(p.x, p.z);
       ctx.fillStyle = '#22d3ee';
@@ -177,6 +198,7 @@ const MapScenes = (() => {
       await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
       const definition = definitions[id];
       const gltf = await loader.loadAsync(new URL(definition.file, window.zombieMapBase).href);
+      gltf.scene.scale.multiplyScalar(mapScale);
       const octree = new Octree().fromGraphNode(gltf.scene);
       const group = new THREE.Group();
       group.position.z = offset;
@@ -203,35 +225,36 @@ const MapScenes = (() => {
       group.add(proxy);
       if (id === 'city') {
         const roof = new THREE.Mesh(
-          new THREE.BoxGeometry(72, 0.3, 66),
+          new THREE.BoxGeometry(72 * mapScale, 0.3, 66 * mapScale),
           new THREE.MeshStandardMaterial({ color: 0x303636, roughness: 1 })
         );
-        roof.position.set(-2, 18, 0);
+        roof.position.set(-2 * mapScale, 18 * mapScale, 0);
         group.add(roof);
         for (const x of [-20, 20]) for (const z of [-20, 20]) {
-          const light = new THREE.PointLight(0xcfe8ff, 220, 38, 2);
-          light.position.set(x, 15, z);
+          const light = new THREE.PointLight(0xcfe8ff, 220 * mapScale * mapScale, 38 * mapScale, 2);
+          light.position.set(x * mapScale, 15 * mapScale, z * mapScale);
           group.add(light);
         }
       } else {
         const floor = new THREE.Mesh(
-          new THREE.PlaneGeometry(110, 30),
+          new THREE.PlaneGeometry(110 * mapScale, 30 * mapScale),
           new THREE.MeshStandardMaterial({ color: 0x373a38, roughness: 1 })
         );
         floor.rotation.x = -Math.PI / 2;
-        floor.position.set(1.5, 0.66, 0);
+        floor.position.set(1.5 * mapScale, 0.66 * mapScale, 0);
         floor.raycast = () => {};
         group.add(floor);
       }
       definition.portals.forEach((p) => portal(map, p));
       map.plan = makePlan(map);
       const start = returning && definition.returnPoint ? definition.returnPoint : definition.entry;
-      const y = id === 'town' ? 0.7 : floorAt(octree, start[0], start[1], 1.3);
+      const y = id === 'town' ? 0.7 * mapScale : floorAt(octree, start[0], start[1], 1.3 * mapScale);
       if (y === null || !clearAt(octree, start[0], start[1], y)) throw new Error('Point d’entrée inaccessible.');
       disposeMap(current);
       current = map;
       api.active = id;
       ground = y;
+      scene.fog.density = 0.01;
       scene.add(group);
       rig.pos.set(start[0], y + 1.6, start[1] + offset);
       rig.yaw = id === 'town' ? -Math.PI / 2 : returning ? 0 : Math.PI;
