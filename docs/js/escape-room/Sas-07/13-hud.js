@@ -26,7 +26,6 @@ function subGoals() {
   return subGoals0(rr).concat(questLines(rr));
 }
 function subGoals0(rr) {
-  if (ROOM_GOALS[rr]) return ROOM_GOALS[rr](); // salles 7 à 10
   if (rr !== 1) return [];
   if (!State.power)
     return [

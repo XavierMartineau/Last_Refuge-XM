@@ -92,11 +92,6 @@ function renderInv() {
     it = [
       State.card && TEXTS.ui.items.card,
       State.fuses > 0 && TEXTS.ui.items.fuse + ' ×' + State.fuses,
-      ...ROOM_INV.map((f) => f()),
-      State.key && TEXTS.ui.items.key,
-      State.key2 && TEXTS.ui.items.key2,
-      State.keyCell && !State.key4 && TEXTS.ui.items.cellkey,
-      State.key4 && TEXTS.ui.items.key4,
       State.crowbar && !State.barDone && TEXTS.ui.items.crowbar,
       State.keyCtrl && !State.breaker && TEXTS.ui.items.keyctrl,
       State.battery && 'Batterie',

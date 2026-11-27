@@ -106,74 +106,6 @@ const QDATA = {
       'Le chariot tousse, démarre, puis cale. Mais pendant quelques secondes, il a vécu.'
     ]
   },
-  7: {
-    f: [
-      'Corde épaisse',
-      'Anneau rouillé',
-      'Vous nouez la corde à l’anneau. Descendre n’est plus une folie, juste une mauvaise idée.',
-      'cable'
-    ],
-    c: [
-      'Fragment de carte',
-      'La carte reconstituée montre des galeries sous le silo, marquées d’une croix rouge : « Ne pas fouiller. »'
-    ],
-    r: [
-      'Sirène du silo',
-      ['Pile 9 V', 'Haut-parleur'],
-      'La sirène hoquette un son plaintif, puis se tait. Très loin en bas, quelque chose a répondu.'
-    ]
-  },
-  8: {
-    f: [
-      'Dossier confidentiel',
-      'Classeur verrouillé',
-      'Le classeur s’ouvre : « Projet LAZARE — résultats : concluants. Conséquences : voir fenêtre. »',
-      'paper'
-    ],
-    c: [
-      'Carte stratégique',
-      'La carte du front, entière : des cercles rouges partout. Une seule zone verte, le bunker. Annotation : « Sacrifiée. »'
-    ],
-    r: [
-      'Téléphone rouge',
-      ['Combiné', 'Cordon torsadé'],
-      'Le téléphone sonne dans le vide. Quelqu’un décroche… puis raccroche. Il ne reste que le bip.'
-    ]
-  },
-  9: {
-    f: [
-      'Bidon de carburant',
-      'Jeep à sec',
-      'La jeep rugit une seconde, puis cale. Le tableau de bord affiche : 13 km avant la panne.',
-      'bottle'
-    ],
-    c: [
-      'Clé de camion',
-      'Le trousseau complet : sur chaque clé une étiquette, « Camion 1 : retour impossible », « Camion 2 : retour impossible »…'
-    ],
-    r: [
-      'Gyrophare',
-      ['Ampoule', 'Câble secteur'],
-      'Le gyrophare tourne et éclaire un instant la vaste aire d’évacuation… et tout ce que vous ne vouliez pas voir.'
-    ]
-  },
-  10: {
-    f: [
-      'Cuillère affûtée',
-      'Mur écaillé',
-      'Vous grattez : derrière le plâtre, un minuscule tunnel, bouché de l’autre côté depuis longtemps.',
-      'tool'
-    ],
-    c: [
-      'Gravure de détenu',
-      'Les gravures forment un décompte : « 214 jours. Pas de dessert. Jean-Marc, si tu lis ça : j’ai pris ta couverture. »'
-    ],
-    r: [
-      'Interphone des cellules',
-      ['Micro', 'Câble de masse'],
-      'L’interphone grésille : « Cellule 3, silence ! » puis un rire creux. Quelqu’un s’amuse encore.'
-    ]
-  },
   11: {
     f: [
       'Pièce de monnaie',
@@ -233,22 +165,6 @@ const QZ = {
   6: [
     [-45, 45],
     [-76, -98]
-  ],
-  7: [
-    [-17, 13],
-    [-104, -130]
-  ],
-  8: [
-    [-22, 22],
-    [-134, -153]
-  ],
-  9: [
-    [-22, 12],
-    [-181, -216]
-  ],
-  10: [
-    [-8.5, 8.5],
-    [-224, -260]
   ],
   11: [
     [-2, 45],
@@ -385,6 +301,7 @@ function qTarget(q) {
 }
 (function buildQuests() {
   for (let rm = 1; rm <= 12; rm++) {
+    if (!QDATA[rm]) continue; // salles 7 à 10 supprimées : pas de quêtes annexes
     const D = QDATA[rm],
       zn = QZ[rm],
       rnd = qrng(rm * 977 + 13),
@@ -395,10 +312,9 @@ function qTarget(q) {
       // jamais dans un meuble, un mur ou une cellule fermée (marge de 0,6 m)
       const free = (px, pz) =>
         pz > -32 ||
-        (floorAt(px, pz) === null && // jamais sur une plateforme ou un escalier (objet enterré)
         ![...COLLIDERS, ...EXTRA_COLLIDERS].some(
           (c) => c.length === 4 && px > c[0] - 0.6 && px < c[1] + 0.6 && pz > c[2] - 0.6 && pz < c[3] + 0.6
-        ));
+        );
       for (let k = 0; k < 160; k++) {
         x = zn[0][0] + rnd() * (zn[0][1] - zn[0][0]);
         z = zn[1][0] + rnd() * (zn[1][1] - zn[1][0]);
@@ -826,45 +742,6 @@ const ROOM1_DECOR_START = scene.children.length;
 })();
 genG.userData.focusPt = () => genG.localToWorld(new THREE.Vector3(0.55, 0.6, 0)); // cible décalée : le générateur apparaît à gauche, la fiche reste à droite
 genG.userData.focusFn = (c) => c.clone().add(new THREE.Vector3(0, 0.45, 2.7)); // caméra plus reculée : tout le générateur est visible
-/* ── Entrepôt (salle 7) : plongé dans le noir tant que l’interrupteur général n’est pas actionné ── */
-State.wareLight = false;
-(function wareSwitch() {
-  const g = new THREE.Group();
-  g.position.set(7.5, 1.35, -102.16);
-  g.rotation.y = Math.PI;
-  scene.add(g);
-  box(0.22, 0.32, 0.05, mats.dark, 0, 0, 0, g);
-  const arm = box(0.04, 0.12, 0.04, glow(0xd8d8d0, 0.4), 0, 0.02, 0.04, g);
-  arm.rotation.x = 0.5;
-  const led = box(0.035, 0.035, 0.02, glow(0xff2a1a, 3), 0, -0.11, 0.03, g);
-  plane(0.2, 0.07, sign(['GÉNÉRAL'], '#b48a22', '#15171a'), 0, 0.2, 0.026, g, 0);
-  hitBox(0.4, 0.5, 0.3, 0, 0, 0.06, g);
-  interactive(g, 'switch_ware', 'Actionner l’interrupteur général', 'use', { focusDist: 1.1, led, arm });
-  R('switch_ware', async (o) => {
-    if (State.wareLight) return say('L’entrepôt est déjà éclairé.', 2500);
-    State.wareLight = true;
-    SND.play('lever');
-    gameTimeout(() => SND.play('power'), 300);
-    tween(0.3, (k) => {
-      o.userData.arm.rotation.x = 0.5 - 1.0 * k;
-    });
-    o.userData.led.material = glow(0x30ff70, 3);
-    o.userData.hint = 'Interrupteur général (allumé)';
-    say(
-      'Un claquement sec : les néons de l’entrepôt s’allument un à un. Vous pouvez éteindre la lampe de poche.',
-      6000
-    );
-    setObjective(objectiveNow());
-  });
-})();
-{
-  const _o = objectiveNow;
-  objectiveNow = function () {
-    return State.room === 7 && !State.wareLight
-      ? 'Entrepôt plongé dans le noir : trouvez l’interrupteur général (mur de la porte, côté est) avec la lampe de poche.'
-      : _o();
-  };
-}
 /* ── Carnet de mission (objet à ramasser, posé sur une table près du point de départ) ── */
 const BOOK = (function () {
   const NAMES = [

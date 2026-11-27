@@ -26,10 +26,7 @@ const DEV = (function () {
     },
     3: { card: true },
     5: { fuses: 2 },
-    7: { siloWheel: true },
-    8: { cdtKey: true, offKey: true },
-    9: { scalpel: true },
-    10: { guardBadge: true, crowbar: true, keyCtrl: true }
+    10: { crowbar: true, keyCtrl: true }
   };
   const MECH = {
     1: () => {
@@ -60,13 +57,7 @@ const DEV = (function () {
     4: { power4: true, brk: [1, 1, 1, 1] },
     5: { power5: true, fuses: 2, fusesIn: 2 },
     6: { wareCode: true },
-    7: () => ROOM_DEV[7](),
-    8: () => ROOM_DEV[8](),
-    9: () => ROOM_DEV[9](),
-    10: () => {
-      ROOM_DEV[10]();
-      Object.assign(State, { crowbar: true, keyCtrl: true, barDone: true, bureauOpen: true });
-    },
+    10: { crowbar: true, keyCtrl: true, barDone: true, bureauOpen: true }, // objets du complexe (salle 11)
     11: { breaker: true }
   };
   const NAMES = [

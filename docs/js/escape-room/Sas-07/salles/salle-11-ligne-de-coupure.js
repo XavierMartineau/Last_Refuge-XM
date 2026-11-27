@@ -1,6 +1,32 @@
 /* LAST REFUGE · XM — Escape room « Sas 07 » · Salle 11 : ligne de coupure.
    Fichier chargé dans l’ordre par escape-room.js : il partage la portée globale des autres fichiers. */
 'use strict';
+/* bureau avec écran (utilisé dans le complexe) */
+const desk = (x, z, w = 2.4, ry = 0) => {
+  const g = new THREE.Group();
+  g.position.set(x, 0, z);
+  g.rotation.y = ry;
+  scene.add(g);
+  box(w, 0.06, 1, mats.wood, 0, 0.78, 0, g);
+  [-1, 1].forEach((dx) => box(0.08, 0.78, 0.8, mats.dark, dx * (w / 2 - 0.08), 0.39, 0, g));
+  box(0.7, 0.4, 0.05, mats.dark, 0, 1.05, -0.25, g);
+  const sc = makeScreen(0.64, 0.34);
+  sc.draw(['> LIAISON', '  PERDUE', '> CODE 7-7'], '#ff6a5a');
+  sc.mesh.position.set(0, 1.05, -0.222);
+  g.add(sc.mesh);
+  pushC(x, z, ry ? 0.6 : w / 2 + 0.1, ry ? w / 2 + 0.1 : 0.6);
+  return g;
+};
+/* portes intérieures du complexe (bureau, dépôt, poste de contrôle) */
+let doorCtrl = null;
+function openInner(o) {
+  const u = o.userData;
+  u.opened = true;
+  SND.play('door');
+  openDoorAnim(o, 1.2);
+  const i = EXTRA_COLLIDERS.indexOf(u.col);
+  if (i >= 0) EXTRA_COLLIDERS.splice(i, 1);
+}
 shell(-287, { south: false, w: 120, d: 50, h: 9.6 });
 wallWithDoor(-312, 120, 9.6);
 const doorExit3 = makeDoor('door_exit3', 0, -311.85, 'Examiner la porte principale');

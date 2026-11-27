@@ -774,10 +774,10 @@ const SND = (() => {
         !State.power4,
         !State.power5,
         !State.wareCode,
-        !State.key,
-        !State.power8,
-        !State.key2,
-        !State.key4,
+        false, // salles 7 à 10 : zone provisoire
+        false,
+        false,
+        false,
         !State.breaker,
         !State.zDone
       ][State.room - 1];

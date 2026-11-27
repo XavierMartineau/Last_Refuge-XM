@@ -85,7 +85,7 @@ function loop() {
   updateFlash(dt, t);
   // néons : éteints tant que le courant n’est pas rétabli (levier → pièces 1-2, générateur → pièces 3-4), avec des étincelles rares
   for (const r of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
-    const on = r === 1 ? State.power : r === 7 ? State.wareLight : true; // salle 1 : levier ; salle 7 (entrepôt) : interrupteur à trouver ; les autres : toujours alimentées
+    const on = r === 1 ? State.power : true; // salle 1 : levier ; les autres : toujours alimentées
     if (on && !neon.was[r]) {
       neon.was[r] = true;
       neon.sw[r] = t;
@@ -156,7 +156,7 @@ function loop() {
     bloom.strength = rr === 12 ? 0.12 : 0.34;
     bigLights.forEach((L, i) => {
       L.position.set(rig.pos.x * 0.7, rr === 12 ? hh - 2 : hh, rig.pos.z + (i - 1) * 13);
-      L.intensity = kk * hh * hh * (i === 1 ? 2 : 1.2) * (rr === 12 ? 0.65 : rr >= 7 && rr <= 10 ? 0.35 : 1);
+      L.intensity = kk * hh * hh * (i === 1 ? 2 : 1.2) * (rr === 12 ? 0.65 : 1);
     });
     neonPoolUpdate(rr, dt);
   }
@@ -176,10 +176,10 @@ function loop() {
           !State.power4,
           !State.power5,
           !State.wareCode,
-          !State.key,
-          !State.power8,
-          !State.key2,
-          !State.key4,
+          false, // salles 7 à 10 : zone provisoire
+          false,
+          false,
+          false,
           !State.breaker,
           !State.zDone
         ][State.room - 1],

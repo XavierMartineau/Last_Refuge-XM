@@ -927,24 +927,6 @@ const DOORS = [
     locked: M.wareLocked,
     open: M.wareOpen
   },
-  { id: 'door_end', z: -132, flag: 'doorEnd', ok: () => State.key, locked: M.endLocked, open: M.endOpen },
-  { id: 'door_cmd', z: -172, flag: 'doorCmd', ok: () => State.power8, locked: M.cmdLocked, open: M.cmdOpen },
-  {
-    id: 'door_exit2',
-    z: -222,
-    flag: 'doorExit2',
-    ok: () => State.key2,
-    locked: M.exit2Locked,
-    open: M.exit2Open2
-  },
-  {
-    id: 'door_block',
-    z: -262,
-    flag: 'doorBlock',
-    ok: () => State.key4,
-    locked: M.blockLocked,
-    open: M.blockOpen
-  },
   {
     id: 'door_exit3',
     z: -312,

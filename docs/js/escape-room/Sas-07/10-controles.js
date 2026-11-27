@@ -229,10 +229,10 @@ const WALLS = [
   [-32, () => State.doorFinal],
   [-72, () => State.doorHangar],
   [-102, () => State.doorWare],
-  [-132, () => State.doorEnd],
-  [-172, () => State.doorCmd],
-  [-222, () => State.doorExit2],
-  [-262, () => State.doorBlock],
+  [NaN, () => true], // salles 7 à 10 supprimées : pas de mur mitoyen dans le couloir provisoire
+  [NaN, () => true],
+  [NaN, () => true],
+  [-262, () => true], // mur sud du complexe : passage toujours ouvert
   [-312, () => State.doorExit3]
 ]; // murs mitoyens : passage seulement par la porte ouverte
 function blocked(x, z) {
@@ -248,11 +248,11 @@ function blocked(x, z) {
             : z > -102
               ? 59.9
               : z > -132
-                ? 19.9
+                ? 3.9
                 : z > -222
-                  ? 24.9
+                  ? 3.9
                   : z > -262
-                    ? 14.9
+                    ? 3.9
                     : z > -312
                       ? 59.9
                       : 74.9;
@@ -293,7 +293,7 @@ function objectiveNow() {
   if (r === 4) return State.power4 ? O.exitFinal : O.room4;
   if (r === 5) return State.power5 ? O.openHangar : O.room5;
   if (r === 6) return State.wareCode ? O.openWare : O.room6;
-  if (ROOM_OBJ[r]) return ROOM_OBJ[r](); // salles 7 à 10 : objectifs définis dans leur fichier
+  if (r >= 7 && r <= 10) return 'Zone en reconstruction : suivez le couloir jusqu’au complexe.';
   if (r === 11)
     return State.breaker
       ? O.exitComplex

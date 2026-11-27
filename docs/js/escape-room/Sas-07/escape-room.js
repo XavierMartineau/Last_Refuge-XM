@@ -69,11 +69,8 @@ export const FICHIERS = [
   'salles/salle-04-distribution.js',
   'salles/salle-05-hangar.js',
   'salles/salle-06-hangar-sud.js',
-  'salles/salle-07-entrepot.js',
-  'salles/salle-08-commandement.js',
-  'salles/salle-09-quartiers.js',
+  'salles/zone-provisoire-07-10.js', // salles 7 à 10 supprimées : couloir provisoire
   'salles/sol-escaliers.js',
-  'salles/salle-10-blocs-cellulaires.js',
   'salles/salle-11-ligne-de-coupure.js',
   '07-combat-infectes.js',
   '08-camera.js',
