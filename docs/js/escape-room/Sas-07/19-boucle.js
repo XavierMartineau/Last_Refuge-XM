@@ -221,10 +221,9 @@ function loop() {
   {
     const bk = loopBack,
       sh = State.focus && !State.releasing ? 'block' : 'none';
-    if (bk && bk.style.display !== sh) {
-      bk.style.display = sh;
-      document.body.classList.toggle('zoom', sh === 'block');
-    }
+    if (bk && bk.style.display !== sh) bk.style.display = sh;
+    // le message remonte au-dessus du bouton « Quitter le zoom » (le bouton peut aussi être affiché ailleurs)
+    if (document.body.classList.contains('zoom') !== (sh === 'block')) document.body.classList.toggle('zoom', sh === 'block');
   }
   renderGame();
   updateFps(delta);
