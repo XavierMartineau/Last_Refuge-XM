@@ -90,9 +90,12 @@ export const FICHIERS = [
 // Les fichiers sont lus puis exécutés comme un seul script, dans l’ordre :
 // les fonctions déclarées plus loin restent utilisables plus haut (comme dans le fichier d’origine).
 const base = new URL('./', import.meta.url);
+const version = new URL(import.meta.url).searchParams.get('v');
 const sources = await Promise.all(
   FICHIERS.map(async (f) => {
-    const r = await fetch(new URL(f, base));
+    const url = new URL(f, base);
+    if (version) url.searchParams.set('v', version);
+    const r = await fetch(url);
     if (!r.ok) throw new Error('Chargement impossible : ' + f + ' (' + r.status + ')');
     return '\n/* ===== ' + f + ' ===== */\n' + (await r.text());
   })

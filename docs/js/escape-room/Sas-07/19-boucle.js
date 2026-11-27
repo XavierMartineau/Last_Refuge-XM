@@ -161,7 +161,7 @@ function loop() {
     if (bk && bk.style.display !== sh) bk.style.display = sh;
     document.body.classList.toggle('zoom', sh === 'block');
   }
-  composer.render();
+  renderGame();
 }
 /* ── Audit des zones de clic : une zone invisible plus grande que l'objet qu'elle protège est réduite à sa taille réelle (+ marge) ── */
 function fitHitBoxes() {

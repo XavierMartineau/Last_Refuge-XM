@@ -65,7 +65,9 @@
         { id: "brightness", label: "Luminosité", type: "slider", def: 100, min: 60, max: 150, step: 5, format: pct, scope: "jeu",
           desc: "Exposition générale de la scène 3D. Augmentez-la si les couloirs du bunker sont trop sombres sur votre écran." },
         { id: "shadows", label: "Ombres", type: "choice", def: true, options: [[false, "Non"], [true, "Oui"]], scope: "jeu",
-          desc: "Ombres portées en temps réel. Désactivez-les si le jeu manque de fluidité (pris en compte au prochain lancement)." }
+          desc: "Ombres portées en temps réel. Désactivez-les si le jeu manque de fluidité (pris en compte au prochain lancement)." },
+        { id: "lowEnd", label: "Mode PC peu puissant", type: "choice", def: false, options: [[false, "Non"], [true, "Oui"]], scope: "jeu",
+          desc: "Réduit fortement la résolution, le nombre de lumières et les mises à jour des caméras ; désactive ombres, halo et contour 3D. Les réglages précédents sont rétablis à la désactivation." }
       ]}
     ]},
     { id: "audio", label: "Audio", sections: [

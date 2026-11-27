@@ -176,6 +176,11 @@ body.page-createur {
 .page-createur button.p:hover,
 .page-createur .finish:hover { color: var(--hazard-ink); background: var(--hazard-light); }
 
+.page-createur .hud button[aria-pressed="true"] {
+  color: var(--hazard-ink);
+  background: var(--hazard);
+}
+
 .page-createur button.no { color: var(--alarm-light); }
 
 
@@ -220,6 +225,13 @@ body.page-createur {
   padding: 4px;
   font-size: 11px;
   line-height: 1.2;
+}
+
+.page-createur .steps button:disabled {
+  color: #77766f;
+  background: #171715;
+  border-color: #3a3934;
+  cursor: not-allowed;
 }
 
 .step-intro {

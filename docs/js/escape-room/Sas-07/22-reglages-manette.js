@@ -46,6 +46,9 @@
       case 'uiScale':
         document.documentElement.style.setProperty('--ui-scale', String(v / 100));
         break;
+      case 'lowEnd':
+        setLowEndMode(v);
+        break;
       default:
         // touches clavier réaffectées dans la console de réglages
         if (id.startsWith('kb_') && CONTROLS.keys[id.slice(3)]) {
@@ -90,6 +93,7 @@
         });
     });
   }
+  setLowEndMode(S.lowEnd);
   // durée d’affichage des messages
   {
     const _say = say;

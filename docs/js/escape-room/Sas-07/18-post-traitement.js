@@ -234,7 +234,9 @@ const perf = {
   cool: 3000,
   cut: false,
   outlineCut: false,
-  outlineRetry: 0
+  outlineRetry: 0,
+  lowEnd: false,
+  beforeLowEnd: null
 };
 function perfApply() {
   const pr = perf.base * perf.s;
@@ -247,11 +249,63 @@ function perfApply() {
     flash.castShadow = false;
   }
 } // dernier recours : plus d’ombre pour la lampe
+function setLowEndMode(enabled) {
+  enabled = !!enabled;
+  if (perf.lowEnd === enabled) return;
+  if (enabled) {
+    const reducedLights = [...neonPool.slice(2).map((entry) => entry.L), bigLights[0], bigLights[2]];
+    perf.beforeLowEnd = {
+      s: perf.s, cut: perf.cut, flashShadow: flash.castShadow,
+      shadows: renderer.shadowMap.enabled, bloom: bloom.enabled, outline: outline.enabled,
+      lights: reducedLights.map((light) => [light, light.visible])
+    };
+    perf.lowEnd = true;
+    perf.s = Math.min(perf.s, 0.5);
+    perfApply();
+    renderer.shadowMap.enabled = false;
+    bloom.enabled = false;
+    outline.enabled = false;
+    reducedLights.forEach((light) => { light.visible = false; });
+  } else {
+    const previous = perf.beforeLowEnd;
+    perf.lowEnd = false;
+    perf.s = previous.s;
+    perfApply();
+    perf.cut = previous.cut;
+    flash.castShadow = previous.flashShadow;
+    renderer.shadowMap.enabled = previous.shadows;
+    bloom.enabled = previous.bloom;
+    outline.enabled = previous.outline;
+    previous.lights.forEach(([light, visible]) => { light.visible = visible; });
+    perf.beforeLowEnd = null;
+  }
+  scene.traverse((object) => {
+    if (object.material) [].concat(object.material).forEach((material) => { material.needsUpdate = true; });
+  });
+  perf.acc = 0;
+  perf.n = 0;
+  perf.last = performance.now();
+}
+function renderGame() {
+  if (!perf.lowEnd || daltonien.enabled) {
+    composer.render();
+    return;
+  }
+  const autoClear = renderer.autoClear;
+  renderer.autoClear = true;
+  renderer.render(scene, camera);
+  if (firstPersonPass.enabled) {
+    renderer.autoClear = false;
+    renderer.clearDepth();
+    renderer.render(FP.scene, FP.camera);
+  }
+  renderer.autoClear = autoClear;
+}
 function perfTick() {
   const now = performance.now(),
     d = now - perf.last;
   perf.last = now;
-  if (document.hidden || d > 400 || modalOpen) return;
+  if (perf.lowEnd || document.hidden || d > 400 || modalOpen) return;
   perf.acc += d;
   perf.n++;
   perf.cool -= d;

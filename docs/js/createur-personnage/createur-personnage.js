@@ -293,6 +293,7 @@ new ResizeObserver(resize).observe(stage);
    ════════════════════════════════════════════════════════════════ */
 let state = sanitize({}),
   step = 0,
+  unlockedStep = 0,
   character = null,
   lastBg = -1,
   lastPat = -1;
@@ -357,7 +358,7 @@ function setGender(g) {
 /* ── colonne de droite ── */
 function renderSteps() {
   $('steps').innerHTML = STEPS.map(
-    (s, i) => `<button type="button" data-step="${i}" aria-current="${i === step}">${s.t}</button>`
+    (s, i) => `<button type="button" data-step="${i}" aria-current="${i === step}"${i > unlockedStep ? ' disabled title="Utilisez Continuer pour déverrouiller cette étape"' : ''}>${i > unlockedStep ? '<span aria-hidden="true">🔒 </span>' : ''}${s.t}</button>`
   ).join('');
   $('steps')
     .querySelectorAll('button')
@@ -466,7 +467,9 @@ function openGallery(k) {
   const generation = ++galleryGeneration;
   WCTX.w = state.weapon;
   const reg = REGS(state.gender),
-    dlg = $('gallery-dialog');
+    dlg = $('gallery-dialog'),
+    previews = !!GALLERY_SHOTS[k] || (!WK.includes(k) &&
+      (!!COLORS[k] || ['background', 'pattern', 'nameFont', 'nameStyle', 'nameSize', 'namePos'].includes(k)));
   $('gallery-title').textContent = labelOf(k);
   dlg.querySelector('.gh').textContent = ['brows', 'eyes', 'nose', 'mouth'].includes(k)
     ? 'Aperçus sans coiffure ni accessoires pour mieux voir les traits. Vos choix restent inchangés.'
@@ -474,7 +477,7 @@ function openGallery(k) {
   $('gallery-options').innerHTML = [...Array(reg[k]).keys()]
     .map(
       (i) =>
-        `<button type="button" class="opt${GALLERY_SHOTS[k] ? ' opt--visual' : ''}" data-i="${i}" aria-pressed="${state[k] === i}">${GALLERY_SHOTS[k] ? '<span class="opt-preview" aria-hidden="true"><img class="thumb" alt="" hidden><span>Aperçu…</span></span>' : swatchOf(k, i)}<span>${choiceName(k, i, state.gender)}</span></button>`
+        `<button type="button" class="opt${previews ? ' opt--visual' : ''}" data-i="${i}" aria-pressed="${state[k] === i}">${previews ? '<span class="opt-preview" aria-hidden="true"><img class="thumb" alt="" hidden><span>Aperçu…</span></span>' : (swatchOf(k, i) || (k === 'weapon' && i === 0 ? '<svg class="thumb" viewBox="0 0 240 150" aria-hidden="true"><path d="M66 70h85l20 12h20v11h-39l-8 22h-16l3-22H66z" fill="#777"/><path d="M70 39l100 76" stroke="#e9b847" stroke-width="6"/></svg>' : ''))}<span>${choiceName(k, i, state.gender)}</span></button>`
     )
     .join('');
   $('gallery-options')
@@ -492,7 +495,7 @@ function openGallery(k) {
     outfitColor: 'bust', pantsColor: 'legs', bootsColor: 'feet', glovesColor: 'arm'
   }[k] || (k[0] === 'w' ? 'weapon' : 'full'));
   dlg.showModal();
-  if (GALLERY_SHOTS[k]) renderGalleryPreviews(k, { ...state }, generation);
+  if (previews) renderGalleryPreviews(k, { ...state }, generation);
   const selected = $('gallery-options').querySelector('[aria-pressed="true"]');
   if (selected) selected.focus();
   if (embedded) window.parent.postMessage({ type: 'afterlock-creator-modal', open: true }, '*');
@@ -512,6 +515,7 @@ $('back').onclick = () => {
 };
 $('next').onclick = () => {
   step = Math.min(LAST, step + 1);
+  unlockedStep = Math.max(unlockedStep, step);
   renderSteps();
   renderControls();
 };
@@ -923,6 +927,28 @@ function renderGalleryPreviews(k, base, generation) {
       const reg = REGS(base.gender);
       for (const [key, value] of Object.entries(D.PRESETS[i]))
         if (key in reg && value < reg[key]) previewState[key] = value;
+    }
+    if (!GALLERY_SHOTS[k]) {
+      const canvas = document.createElement('canvas'), context = canvas.getContext('2d');
+      canvas.width = 240;
+      canvas.height = 150;
+      if (COLORS[k]) {
+        context.fillStyle = COLORS[k]()[i];
+        context.fillRect(0, 0, canvas.width, canvas.height);
+      } else {
+        const backdrop = backdropCanvas(previewState.background, previewState.pattern);
+        context.drawImage(backdrop, 0, 0, canvas.width, canvas.height);
+        if (k.startsWith('name')) {
+          const sample = nameCanvas(previewState, previewState.name || 'XM 0714');
+          context.drawImage(sample, 10, previewState.namePos ? 5 : 90, 220, 55);
+        }
+      }
+      const image = button.querySelector('img');
+      image.src = canvas.toDataURL('image/png');
+      image.hidden = false;
+      button.querySelector('.opt-preview span').remove();
+      requestAnimationFrame(next);
+      return;
     }
     let model;
     const viewport = renderer.getViewport(new THREE.Vector4());

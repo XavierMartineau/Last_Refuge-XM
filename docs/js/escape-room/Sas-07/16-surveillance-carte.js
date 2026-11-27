@@ -543,9 +543,9 @@ const CCTV = (function () {
         c.tilt = (c.tilt || 0) + (ty - (c.tilt || 0)) * k;
       }
 
-      if (sel.i < N && fr % 2 === 0) renderFeed(sel.i, mainRT, true);
+      if (sel.i < N && fr % (perf.lowEnd ? 4 : 2) === 0) renderFeed(sel.i, mainRT, true);
     }
-    if (fr % 3 === 0) {
+    if (fr % (perf.lowEnd ? 12 : 3) === 0) {
       const i = rr++ % N;
       if (!(active() && i === sel.i && false)) renderFeed(i, rts[i], true);
     } // vignettes : une caméra à la fois
