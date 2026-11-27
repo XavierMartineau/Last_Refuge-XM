@@ -310,8 +310,7 @@ body.page-createur {
   border-radius: 50%;
 }
 
-input[type="text"],
-textarea {
+input[type="text"] {
   width: 100%;
   padding: 9px 10px;
   border: 1px solid var(--steel-light);
@@ -320,16 +319,6 @@ textarea {
   background: #0b0b0a;
   font-family: var(--font-mono);
 }
-
-textarea {
-  height: 130px;
-  color: var(--toxic);
-  font-size: 12px;
-  line-height: 1.35;
-  resize: vertical;
-}
-
-.tools { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 
 .nav {
   position: sticky;

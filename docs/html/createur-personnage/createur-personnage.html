@@ -8,14 +8,14 @@
 <title>Fiche d’écrou 3D | LAST REFUGE</title>
 <link rel="icon" href="../../assets/svg/identite/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../css/commun/site.css">
-<link rel="stylesheet" href="../../css/createur-personnage/createur-personnage.css?v=20261126c">
+<link rel="stylesheet" href="../../css/createur-personnage/createur-personnage.css?v=20261126d">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script src="../../js/commun/preferences.js"></script>
 <script src="../../js/commun/reglages.js?v=20261126c"></script>
 <script src="../../js/commun/ambiance-menu.js"></script>
     <script src="../../js/commun/manette-menus.js"></script>
 <script src="../../js/commun/progression.js"></script>
-<script type="module" src="../../js/createur-personnage/createur-personnage.js?v=20261126c"></script>
+<script type="module" src="../../js/createur-personnage/createur-personnage.js?v=20261126d"></script>
 </head>
 <body class="page-createur" data-device-gate>
 <div class="device-notice"><div class="device-notice__panel">
@@ -55,12 +55,7 @@
     <div id="nameBox" hidden><label for="name" class="field-label">Nom du détenu</label><input id="name" type="text" maxlength="20" placeholder="Écrivez un nom…"></div>
     <div id="controls"></div>
     <div id="wstats" hidden></div>
-    <div id="jsonbox" hidden>
-      <h3 class="field-label">Sauvegarde du détenu (JSON)</h3><p class="help">Les choix sont enregistrés avec leurs index d’origine : compatible avec l’escape room.</p>
-      <textarea id="json" spellcheck="false" aria-label="JSON du personnage"></textarea>
-      <div class="tools"><button type="button" id="load">Charger ce JSON</button><button type="button" id="copy">Copier</button><button type="button" id="dl">Télécharger .json</button><button type="button" id="open-file">Ouvrir un .json…</button><input id="file" type="file" accept=".json,application/json" hidden></div>
-      <h3 class="field-label">Exporter le modèle</h3>
-      <div class="tools"><button type="button" class="p" id="glb">Modèle 3D (.glb)</button><button type="button" id="png">Image (.png)</button></div>
+    <div id="saved-box" hidden>
       <small id="msg" role="status"></small>
       <h3 class="field-label">Mes détenus</h3><div id="saved"></div>
     </div>

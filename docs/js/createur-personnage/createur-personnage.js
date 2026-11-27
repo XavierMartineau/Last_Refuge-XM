@@ -1,10 +1,9 @@
 /* LAST REFUGE · XM — Fiche d’écrou 3D (créateur de détenu).
-   Scène, caméra, interface et exports. Les modèles du personnage (tête, cheveux, tenues, armes…)
+   Scène, caméra et interface. Les modèles du personnage (tête, cheveux, tenues, armes…)
    sont rangés par type dans docs/assets/creation-personnage/ et importés via son index. */
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 const $ = (id) => document.getElementById(id),
@@ -289,7 +288,7 @@ function resize() {
 new ResizeObserver(resize).observe(stage);
 
 /* ════════════════════════════════════════════════════════════════
-   9. ÉTAT DU PERSONNAGE + interface (étapes, onglets de type, galerie de choix, nom, JSON, sauvegardes)
+   9. ÉTAT DU PERSONNAGE + interface (étapes, onglets de type, galerie de choix, nom, sauvegardes)
    ════════════════════════════════════════════════════════════════ */
 let state = sanitize({}),
   step = 0,
@@ -338,7 +337,6 @@ function refresh() {
   }
   paintName(state);
   lsSet(KEY, JSON.stringify(state));
-  $('json').value = JSON.stringify(state, null, 1);
   renderControls();
 }
 function setVal(k, v) {
@@ -374,7 +372,7 @@ function renderSteps() {
   $('step-description').textContent = STEP_DETAILS[step][1];
   $('step-label').textContent = `ÉTAPE 0${step + 1} / 0${STEPS.length}`;
   $('tabs').hidden = $('type-label').hidden = step !== 0;
-  $('nameBox').hidden = $('jsonbox').hidden = step !== LAST;
+  $('nameBox').hidden = $('saved-box').hidden = step !== LAST;
   $('back').hidden = step === 0;
   $('next').hidden = step === LAST;
   $('finish').hidden = step !== LAST;
@@ -523,7 +521,6 @@ $('name').addEventListener('input', (e) => {
   state.name = e.target.value.slice(0, 20);
   paintName(state);
   lsSet(KEY, JSON.stringify(state));
-  $('json').value = JSON.stringify(state, null, 1);
 });
 $('rand').onclick = () => {
   const g = ['male', 'female', 'other'][(Math.random() * 3) | 0],
@@ -538,73 +535,8 @@ $('reset').onclick = () => {
   state = sanitize({ gender: state.gender, name: state.name });
   refresh();
 };
-/* ── JSON : même format que la version 2D ── */
 const msg = (t) => {
   $('msg').textContent = t;
-};
-$('load').onclick = () => {
-  try {
-    const raw = JSON.parse($('json').value);
-    state = sanitize(raw);
-    refresh();
-    msg('Personnage chargé.');
-  } catch (e) {
-    msg('JSON invalide : ' + e.message);
-  }
-};
-const dl = (blob, name) => {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-};
-const fname = () => (state.name || 'personnage').replace(/[^\p{L}\p{N}_-]+/gu, '_');
-$('dl').onclick = () => {
-  dl(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }), fname() + '.json');
-};
-$('copy').onclick = async () => {
-  try {
-    await navigator.clipboard.writeText($('json').value);
-    msg('JSON copié.');
-  } catch (e) {
-    $('json').select();
-    msg('Sélectionné : faites Ctrl+C.');
-  }
-};
-$('open-file').onclick = () => $('file').click();
-$('file').onchange = async (e) => {
-  const f = e.target.files[0];
-  if (!f) return;
-  try {
-    state = sanitize(JSON.parse(await f.text()));
-    refresh();
-    msg('Fichier chargé.');
-  } catch (err) {
-    msg('Fichier invalide.');
-  }
-  e.target.value = '';
-};
-/* ── exports 3D / image ── */
-$('glb').onclick = () => {
-  msg('Export .glb en cours…');
-  try {
-    new GLTFExporter().parse(
-      character,
-      (res) => {
-        dl(new Blob([res], { type: 'model/gltf-binary' }), fname() + '.glb');
-        msg('Fichier .glb téléchargé (modèle 3D complet).');
-      },
-      (err) => msg('Export impossible : ' + err.message),
-      { binary: true, onlyVisible: true }
-    );
-  } catch (e) {
-    msg('Export impossible : ' + e.message);
-  }
-};
-$('png').onclick = () => {
-  renderer.render(scene, camera);
-  renderer.domElement.toBlob((b) => dl(b, fname() + '.png'));
 };
 $('spin').onclick = (e) => {
   controls.autoRotate = !controls.autoRotate;
