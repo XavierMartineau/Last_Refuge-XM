@@ -320,6 +320,12 @@ fitHitBoxes();
   ['pointerdown', 'mousedown', 'touchstart', 'wheel', 'keydown'].forEach((ev) =>
     ov.addEventListener(ev, (x) => x.stopPropagation(), { passive: true })
   );
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || ov.style.display !== 'grid') return;
+    event.preventDefault();
+    event.stopPropagation();
+    document.getElementById('quitcancel').click();
+  }, true);
   const btn = (label, fn, main) => {
     const e = document.createElement('button');
     e.textContent = label;
