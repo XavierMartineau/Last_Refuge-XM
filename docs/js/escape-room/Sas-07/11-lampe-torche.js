@@ -30,9 +30,25 @@ function flashLabel() {
   document.getElementById('fl').textContent = flashOn ? TEXTS.ui.flashOn : TEXTS.ui.flashOff;
 }
 function toggleFlash() {
+  if (AV.heldItem !== 'flashlight') {
+    selectHeldItem('flashlight');
+    return;
+  }
   flashOn = !flashOn;
   SND.play('flash');
   flashLabel();
+}
+function selectHeldItem(item) {
+  if (item === 'weapon' && !State.armed) return say('Récupérez d’abord une arme dans le casier.', 2500);
+  AV.heldItem = item;
+  flashOn = item === 'flashlight';
+  if (AV.obj) {
+    AV.obj.userData.setHeldItem(item);
+    setFirstPersonAvatar(AV.obj);
+  }
+  SND.play('flash');
+  flashLabel();
+  say(item === 'weapon' ? 'Arme en main.' : 'Lampe torche en main.', 1800);
 }
 document.getElementById('fl').onclick = toggleFlash;
 flashLabel();

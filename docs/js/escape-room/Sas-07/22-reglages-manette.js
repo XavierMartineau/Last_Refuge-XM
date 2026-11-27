@@ -297,6 +297,7 @@
             ab = pad.buttons[ai];
           padAim = !!(ab && free() && (ab.value > trig || (ab.pressed && ai !== B.LT && ai !== B.RT)));
           if (fb && (fb.value > trig || (fb.pressed && fi !== B.LT && fi !== B.RT))) {
+            if (State.armed && AV.heldItem !== 'weapon') selectHeldItem('weapon');
             const before = State.ammo;
             fire();
             if (State.ammo !== before) rumble(0.35, 0.6, 70);

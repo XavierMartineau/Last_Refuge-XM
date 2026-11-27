@@ -43,7 +43,9 @@ function setFirstPersonAvatar(avatar) {
   body.position.set(0.23, -1.55 * avatar.scale.y, -0.05);
   body.rotation.y = Math.PI;
   body.scale.copy(avatar.scale);
-  parts.forEach((part) => body.add(part.clone()));
+  parts.forEach((part, i) => {
+    if (i < 2 || AV.heldItem === 'weapon') body.add(part.clone());
+  });
   FP.model.add(body);
 }
 let _env = null;
@@ -129,6 +131,7 @@ function loadAvatar(json) {
     scene.add(o);
     AV.obj = o;
     AV.state = st;
+    o.userData.setHeldItem(AV.heldItem);
     setFirstPersonAvatar(o);
     if (State.armed) {
       AV.stats = CL.weaponStats(st);
@@ -154,7 +157,7 @@ function camCollide(x, z) {
 }
 function avatarFrame(dt, t) {
   const o = AV.obj;
-  const fp = !!o && State.armed && !AV.tp && !State.focus && !State.doorExit && FP.model.children.length > 0;
+  const fp = !!o && !AV.tp && !State.focus && !State.doorExit && FP.model.children.length > 0;
   firstPersonPass.enabled = fp && !(hasMagnifyingOptic() && aimBlend > 0.6);
   if (fp) {
     if (FP.camera.fov !== rig.fov || FP.camera.aspect !== camera.aspect) {
@@ -167,7 +170,7 @@ function avatarFrame(dt, t) {
       walk = rig.moving ? Math.sin(walkD * 4.2) : 0;
     const body = FP.model.children[0],
       weapon = body.children[2];
-    body.position.x = THREE.MathUtils.lerp(0.23, weapon.position.x * body.scale.x, aimBlend);
+    body.position.x = weapon ? THREE.MathUtils.lerp(0.23, weapon.position.x * body.scale.x, aimBlend) : 0.23;
     body.position.y = THREE.MathUtils.lerp(-1.55, -1.43, aimBlend) * body.scale.y;
     FP.model.position.set(walk * 0.008 * motion, Math.abs(walk) * 0.006 * motion, FP.kick * 0.06);
     FP.model.rotation.set(-FP.kick * (FP.melee ? 0.35 : 0.1), 0, FP.kick * (FP.melee ? 0.18 : 0.025));

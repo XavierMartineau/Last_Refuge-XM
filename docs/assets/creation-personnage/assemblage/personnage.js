@@ -105,7 +105,56 @@ function buildCharacter(raw, opt = {}) {
   root.userData.setPitch = (p) => {
     C.pitch = p;
   };
-  root.userData.getFirstPersonParts = () => C.weapon ? [...C.arms.map((a) => a.ag), C.weapon] : [];
+  let torch, ammunition;
+  const heldPosition = C.weapon && C.weapon.position.clone();
+  const heldRotation = C.weapon && C.weapon.quaternion.clone();
+  root.userData.setHeldItem = (item) => {
+    if (!torch) {
+      torch = new THREE.Group();
+      const grip = new THREE.MeshStandardMaterial({ color: 0x262b27, metalness: 0.65, roughness: 0.55 });
+      const lens = new THREE.MeshStandardMaterial({ color: 0xe7d9a1, metalness: 0.35, roughness: 0.25 });
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.022, 0.2, 12), grip);
+      barrel.rotation.x = Math.PI / 2;
+      torch.add(barrel);
+      const head = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.032, 0.05, 16), grip);
+      head.rotation.x = Math.PI / 2;
+      head.position.z = 0.12;
+      torch.add(head);
+      const glass = new THREE.Mesh(new THREE.CircleGeometry(0.032, 16), lens);
+      glass.position.z = 0.148;
+      torch.add(glass);
+      torch.traverse((object) => { object.raycast = () => {}; });
+      torch.position.set(0, -0.025, 0.03);
+      C.arms.find((arm) => arm.side > 0).hand.root.add(torch);
+      if (C.weapon && C.s.weapon !== 1 && C.s.weapon !== 11) {
+        ammunition = new THREE.Group();
+        const pouch = new THREE.MeshStandardMaterial({ color: 0x343b2d, roughness: 0.85 });
+        const brass = new THREE.MeshStandardMaterial({ color: 0x96783e, metalness: 0.75, roughness: 0.45 });
+        for (let i = 0; i < 4; i++) {
+          const box = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.13, 0.045), pouch);
+          box.position.set((i - 1.5) * 0.075, 1.03, -0.15);
+          ammunition.add(box);
+          const round = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.035, 8), brass);
+          round.position.set((i - 1.5) * 0.075, 1.11, -0.15);
+          ammunition.add(round);
+        }
+        ammunition.traverse((object) => { object.raycast = () => {}; });
+        body.add(ammunition);
+      }
+    }
+    torch.visible = item === 'flashlight';
+    if (ammunition) ammunition.visible = item === 'flashlight';
+    if (C.weapon) {
+      if (item === 'weapon') {
+        C.weapon.position.copy(heldPosition);
+        C.weapon.quaternion.copy(heldRotation);
+      } else {
+        C.weapon.position.set(-0.15, 1.4, -0.25);
+        C.weapon.rotation.set(Math.PI / 2, 0, -0.3);
+      }
+    }
+  };
+  root.userData.getFirstPersonParts = () => [...C.arms.map((a) => a.ag), ...(C.weapon ? [C.weapon] : [])];
   // clignement des yeux
   let nextB = 2;
   C.anim.push((t) => {

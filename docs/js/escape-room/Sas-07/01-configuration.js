@@ -17,6 +17,7 @@ function gameTimersFrame(dt) {
 const AV = {
   obj: null,
   tp: true,
+  heldItem: 'flashlight',
   vis: true,
   dist: 2.3,
   shoulder: 0.5,

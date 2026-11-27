@@ -113,6 +113,7 @@ function equipWeapon() {
   }
   AV.tp = true;
   AV.stats = CL.weaponStats(AV.state);
+  selectHeldItem('weapon');
   State.ammo = AV.stats.mag;
   State.hp = 100;
   State.spawnT = 1.5;
@@ -170,6 +171,7 @@ let fireT = 0,
 function fire(e) {
   if (
     !State.armed ||
+    AV.heldItem !== 'weapon' ||
     MapScenes.active !== 'town' ||
     State.zDone ||
     State.focus ||
@@ -278,7 +280,7 @@ function fireShot(e, st, t) {
 }
 function reload() {
   const st = AV.stats;
-  if (!State.armed || !st || !st.mag || State.reloading || State.ammo >= st.mag) return;
+  if (!State.armed || AV.heldItem !== 'weapon' || !st || !st.mag || State.reloading || State.ammo >= st.mag) return;
   State.reloading = true;
   SND.play('reload');
   hud();

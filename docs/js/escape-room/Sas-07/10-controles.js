@@ -12,13 +12,14 @@ let mouseAim = false,
   aimBlend = 0,
   aimedMouseShot = false;
 function canAim() {
-  return !!(State.armed && AV.stats && AV.stats.mag && !State.focus && !modalOpen && !rig.locked && !State.doorExit);
+  return !!(State.armed && AV.heldItem === 'weapon' && AV.stats && AV.stats.mag &&
+    !State.focus && !modalOpen && !rig.locked && !State.doorExit);
 }
 function isAiming() {
   return canAim() && (mouseAim || padAim);
 }
 function hasMagnifyingOptic() {
-  return !!(AV.state && (AV.state.wOptic === 3 || AV.state.wOptic === 4));
+  return !!(AV.heldItem === 'weapon' && AV.state && (AV.state.wOptic === 3 || AV.state.wOptic === 4));
 }
 function updateAim(dt) {
   if (!canAim()) mouseAim = padAim = false;
@@ -86,6 +87,10 @@ addEventListener('keydown', (e) => {
   if (K.exitZoom.includes(e.code)) release(true);
   if (K.mute.includes(e.code) && !e.repeat) SND.toggle();
   if (K.flashlight.includes(e.code) && !e.repeat && !modalOpen) toggleFlash();
+  if (!e.repeat && !modalOpen && !State.focus && !rig.locked) {
+    if (e.code === 'Digit1' || e.code === 'Numpad1') selectHeldItem('weapon');
+    if (e.code === 'Digit2' || e.code === 'Numpad2') selectHeldItem('flashlight');
+  }
   if (K.take.includes(e.code) && !e.repeat && !modalOpen && !State.focus && !rig.locked && !State.doorExit)
     takeNearest();
   if (K.fire.includes(e.code) && !modalOpen) fire();
