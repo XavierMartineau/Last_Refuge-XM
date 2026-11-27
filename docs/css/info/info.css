@@ -600,6 +600,11 @@
 .page-info .hub-game[hidden] { display: none !important; }
 
 .page-info .hub-game__bar {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   min-height: 40px;
   align-items: center;
@@ -612,7 +617,12 @@
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: .14em;
+  opacity: .15;
+  transition: opacity 200ms ease;
 }
+
+.page-info .hub-game__bar:hover,
+.page-info .hub-game__bar:focus-within { opacity: 1; }
 
 .page-info .hub-game__bar i {
   display: inline-block;

@@ -106,6 +106,10 @@ button.no{background:#3a4038;color:var(--txt)}
 #back{pointer-events:auto;left:12px;top:calc(100px + env(safe-area-inset-top,0px));display:none}
 #menub{pointer-events:auto;right:14px;top:calc(14px + env(safe-area-inset-top,0px));width:36px;height:36px;padding:0;display:grid;place-items:center;background:#0a0c0a8c;color:#b9bca8;border:1px solid #ffffff1c;border-radius:8px;backdrop-filter:blur(6px);transition:color .15s,border-color .15s}
 #menub:hover{color:var(--amber);border-color:#ffb34766}
+#fps-widget{right:14px;top:calc(96px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:6px;pointer-events:auto}
+#fps-toggle,#fps-value{padding:6px 8px;font:700 12px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.1em;color:#dfe2cc;background:#0a0c0ae6;border:1px solid #ffffff38;border-radius:6px}
+#fps-toggle[aria-pressed="true"]{color:var(--amber);border-color:var(--amber)}
+#fps-value[hidden]{display:none}
 #menu{backdrop-filter:blur(7px);background:#02040299}
 .box.menu{width:min(540px,92vw);max-height:92dvh;overflow:auto;padding:0;text-align:left;border:1px solid #ffffff22;border-radius:14px;background:linear-gradient(180deg,#151915f2,#0b0e0bf7);box-shadow:0 30px 80px #000c,inset 0 1px 0 #ffffff14;position:relative}
 .box.menu::before{content:'';position:absolute;left:24px;right:24px;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:.8}

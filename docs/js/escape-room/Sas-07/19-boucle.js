@@ -5,11 +5,38 @@
    12. BOUCLE D’ANIMATION
    ════════════════════════════════════════════════════════════════ */
 const clock = new THREE.Clock();
+const fpsToggle = document.getElementById('fps-toggle'),
+  fpsValue = document.getElementById('fps-value');
+let fpsFrames = 0, fpsElapsed = 0;
+fpsToggle.addEventListener('click', () => {
+  const enabled = fpsToggle.getAttribute('aria-pressed') !== 'true';
+  fpsToggle.setAttribute('aria-pressed', String(enabled));
+  fpsValue.hidden = !enabled;
+  fpsValue.textContent = '-- FPS';
+  fpsFrames = 0;
+  fpsElapsed = 0;
+});
+function updateFps(delta) {
+  if (fpsValue.hidden || document.hidden) {
+    fpsFrames = 0;
+    fpsElapsed = 0;
+    return;
+  }
+  fpsFrames++;
+  fpsElapsed += delta;
+  if (fpsElapsed >= 1) {
+    fpsValue.textContent = Math.round(fpsFrames / fpsElapsed) + ' FPS';
+    fpsFrames = 0;
+    fpsElapsed = 0;
+  }
+}
 function loop() {
   requestAnimationFrame(loop);
   const delta = clock.getDelta();
   if (document.getElementById('menu').classList.contains('on')) {
     clock.elapsedTime -= delta;
+    fpsFrames = 0;
+    fpsElapsed = 0;
     return;
   }
   const dt = Math.min(delta, 0.05),
@@ -162,6 +189,7 @@ function loop() {
     document.body.classList.toggle('zoom', sh === 'block');
   }
   renderGame();
+  updateFps(delta);
 }
 /* ── Audit des zones de clic : une zone invisible plus grande que l'objet qu'elle protège est réduite à sa taille réelle (+ marge) ── */
 function fitHitBoxes() {

@@ -17,7 +17,7 @@ three.js est chargé depuis le CDN jsDelivr (connexion Internet requise).
 3. `docs/html/info/info.html` — plan d’évasion en 3 étapes verrouillées :
    - **01 Fiche d’écrou** : créateur 3D intégré ; son dernier bouton « Trouver sa salle d’évasion » débloque l’étape 02 ;
    - **02 Salle d’évasion** : ouvre `docs/html/choix-salle/choix-salle.html` (catalogue classé par difficulté, nombre de salles et durée, avec description et rapport de situation) ;
-   - **03 Lancement** : débloquée quand une salle est choisie, lance le jeu en plein écran.
+   - **03 Lancement** : débloquée quand une salle est choisie, lance le jeu dans toute la fenêtre du navigateur.
 4. `docs/html/escape-room/Sas-07/escape-room.html` — escape room 3D « Sas 07 » (12 salles).
 
 Autres pages : `docs/html/createur-personnage/createur-personnage.html` (créateur seul), `docs/html/options/options.html` (réglages, bouton ✕ qui ramène à la page d’origine), `docs/html/dev/dev.html` (poste de garde / DEV), `404.html`.
@@ -30,13 +30,14 @@ La progression (fiche terminée, salle choisie) est enregistrée dans le navigat
 
 Par défaut : **WASD** pour marcher, souris pour regarder (un clic initial autorise la capture du curseur, puis il n’est plus nécessaire de maintenir le clic ; Échap libère le curseur). Après avoir récupéré une arme, **1** équipe l’arme et **2** la lampe ; F allume ou éteint la lampe. Maintenez le **clic droit** pour viser, puis le clic gauche pour tirer ; les lunettes ACOG et longue portée affichent leur réticule et leur zoom. Le navigateur doit autoriser le verrouillage du pointeur. À la manette : sticks pour marcher / regarder, A interagir, B s’accroupir, X recharger, Y lampe, RT équiper et tirer, LT viser, L3 courir, LB inventaire, RB carnet, View carte, R3 vue, Menu réglages. `docs/js/commun/manette-menus.js` gère la navigation des menus à la manette.
 
-Dans le créateur, la croix ou le stick gauche navigue entre les choix, A valide, B revient et le stick droit tourne l’aperçu. Les manettes compatibles avec la disposition standard de l’API Gamepad sont prises en charge ; leur disponibilité dépend du navigateur et de la console.
+Dans le créateur, « Continuer » déverrouille l’étape suivante ; les étapes déjà visitées restent accessibles. La croix ou le stick gauche navigue entre les choix, A valide, B revient et le stick droit tourne l’aperçu. Les manettes compatibles avec la disposition standard de l’API Gamepad sont prises en charge ; leur disponibilité dépend du navigateur et de la console.
 
 Si le jeu ralentit, le contour lumineux des objets peut être temporairement désactivé avant de réduire la résolution ; le cadre de sélection reste visible.
 
 Le menu des réglages met la partie en pause : le temps, les animations, les combats et leurs délais reprennent à sa fermeture.
 
 **Options → Affichage → Mode PC peu puissant** adapte la résolution et réduit la distance d’affichage, les lumières et la fréquence des caméras de surveillance ; il désactive les ombres, le halo et le contour 3D en jeu. La sélection des objets reste visible ; désactiver ce mode rétablit les réglages graphiques précédents.
+Le bouton **FPS** en jeu (ou **Échap → Partie → Compteur FPS**) affiche temporairement les images par seconde ; il est masqué au prochain lancement.
 
 Les menus proposent une ambiance sonore générée en direct. Si le navigateur bloque la lecture automatique, elle démarre à la première interaction. **Options → Audio → Ambiance des menus** permet de la couper ; les volumes général et musique s’appliquent également.
 

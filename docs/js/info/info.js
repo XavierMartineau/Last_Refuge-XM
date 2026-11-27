@@ -121,7 +121,7 @@
     }
   });
 
-  /* ---------- Étape 3 : lancement en immersion complète ---------- */
+  /* ---------- Étape 3 : lancement dans la fenêtre du navigateur ---------- */
   function exitGame() {
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     gameFrame.removeAttribute("src");
@@ -136,9 +136,6 @@
     game.hidden = false;
     $("game-title").textContent = `${room.code} — ${room.name}`;
     gameFrame.src = room.url;
-    if (game.requestFullscreen) {
-      game.requestFullscreen({ navigationUI: "hide" }).catch(() => { /* plein écran refusé : la vue reste en pleine fenêtre */ });
-    }
     gameFrame.focus();
   });
 
