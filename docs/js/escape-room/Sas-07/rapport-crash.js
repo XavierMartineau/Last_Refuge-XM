@@ -5,7 +5,7 @@
 
   function reportGameCrash(reason, phase) {
     const error = reason instanceof Error ? reason : new Error(String(reason));
-    const key = error.name + '\n' + error.message;
+    const key = phase + '\n' + error.name + '\n' + error.message;
     if (reported.has(key)) return;
     reported.add(key);
 

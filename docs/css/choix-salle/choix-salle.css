@@ -331,5 +331,6 @@
 }
 
 .page-choix .er-choose { margin-top: auto; cursor: pointer; }
+.manette-active .page-choix .er-choose:focus { background: var(--focus); }
 .page-choix .er-choose:disabled { cursor: default; filter: saturate(.4); }
 
