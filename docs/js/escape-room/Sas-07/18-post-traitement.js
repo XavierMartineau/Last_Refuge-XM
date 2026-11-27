@@ -257,7 +257,8 @@ function setLowEndMode(enabled) {
     perf.beforeLowEnd = {
       s: perf.s, cut: perf.cut, flashShadow: flash.castShadow,
       shadows: renderer.shadowMap.enabled, bloom: bloom.enabled, outline: outline.enabled,
-      lights: reducedLights.map((light) => [light, light.visible]), cameraFar: camera.far
+      lights: reducedLights.map((light) => [light, light.visible]), cameraFar: camera.far,
+      localLights: scene.children.filter((object) => object.isLight && object.distance > 0)
     };
     perf.lowEnd = true;
     perf.s = Math.min(perf.s, 0.5);
@@ -266,7 +267,7 @@ function setLowEndMode(enabled) {
     bloom.enabled = false;
     outline.enabled = false;
     reducedLights.forEach((light) => { light.visible = false; });
-    camera.far = Math.min(camera.far, 100);
+    camera.far = Math.min(camera.far, MapScenes.active ? 100 : roomOf(rig.pos.z) <= 4 ? 20 : 60);
   } else {
     const previous = perf.beforeLowEnd;
     perf.lowEnd = false;
@@ -290,19 +291,41 @@ function setLowEndMode(enabled) {
   perf.last = performance.now();
 }
 function renderGame() {
-  if (!perf.lowEnd || daltonien.enabled) {
+  if (!perf.lowEnd) {
     composer.render();
     return;
   }
-  const autoClear = renderer.autoClear;
-  renderer.autoClear = true;
-  renderer.render(scene, camera);
-  if (firstPersonPass.enabled) {
-    renderer.autoClear = false;
-    renderer.clearDepth();
-    renderer.render(FP.scene, FP.camera);
+  const far = Math.min(perf.beforeLowEnd.cameraFar,
+    MapScenes.active ? 100 : roomOf(rig.pos.z) <= 4 ? 20 : 60);
+  if (camera.far !== far) {
+    camera.far = far;
+    camera.updateProjectionMatrix();
   }
-  renderer.autoClear = autoClear;
+  const hiddenLights = [];
+  for (const light of perf.beforeLowEnd.localLights) {
+    const range = far + light.distance;
+    if (light.visible && light.position.distanceToSquared(camera.position) > range * range) {
+      light.visible = false;
+      hiddenLights.push(light);
+    }
+  }
+  const autoClear = renderer.autoClear;
+  try {
+    if (daltonien.enabled) {
+      composer.render();
+    } else {
+      renderer.autoClear = true;
+      renderer.render(scene, camera);
+      if (firstPersonPass.enabled) {
+        renderer.autoClear = false;
+        renderer.clearDepth();
+        renderer.render(FP.scene, FP.camera);
+      }
+    }
+  } finally {
+    hiddenLights.forEach((light) => { light.visible = true; });
+    renderer.autoClear = autoClear;
+  }
 }
 function perfTick() {
   const now = performance.now(),

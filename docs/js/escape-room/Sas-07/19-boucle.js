@@ -7,7 +7,7 @@
 const clock = new THREE.Clock();
 const fpsToggle = document.getElementById('fps-toggle'),
   fpsValue = document.getElementById('fps-value');
-let fpsFrames = 0, fpsElapsed = 0;
+let fpsFrames = 0, fpsElapsed = 0, fpsSkip = true;
 fpsToggle.addEventListener('click', () => {
   const enabled = fpsToggle.getAttribute('aria-pressed') !== 'true';
   fpsToggle.setAttribute('aria-pressed', String(enabled));
@@ -15,11 +15,21 @@ fpsToggle.addEventListener('click', () => {
   fpsValue.textContent = '-- FPS';
   fpsFrames = 0;
   fpsElapsed = 0;
+  fpsSkip = true;
+});
+document.addEventListener('visibilitychange', () => {
+  fpsFrames = 0;
+  fpsElapsed = 0;
+  fpsSkip = true;
 });
 function updateFps(delta) {
   if (fpsValue.hidden || document.hidden) {
     fpsFrames = 0;
     fpsElapsed = 0;
+    return;
+  }
+  if (fpsSkip) {
+    fpsSkip = false;
     return;
   }
   fpsFrames++;
