@@ -144,6 +144,7 @@ function loadAvatar(json) {
   }
 }
 function camCollide(x, z) {
+  if (MapScenes.active && rig.pos.z < -900) return MapScenes.walkHeight(x, z, MapScenes.height()) === null;
   return blocked(x, z);
 }
 function avatarFrame(dt, t) {
@@ -191,7 +192,8 @@ function applyRig(t) {
       hy = rig.pos.y + 0.18; // point visé : tête, légèrement à droite
     const dtc = Math.min(0.1, Math.max(0, t - (AV.lt || t)));
     AV.lt = t;
-    const rh = [0, 3.4, 3.4, 3.4, 3.4, 6.5, 4.8, 10, 9.6, 8.6, 4.6, 9.6, 8.6][roomOf(rig.pos.z)] || 3.4,
+    const rh = MapScenes.active ? Infinity :
+      ([0, 3.4, 3.4, 3.4, 3.4, 6.5, 4.8, 10, 9.6, 8.6, 4.6, 9.6, 8.6][roomOf(rig.pos.z)] || 3.4),
       fl = rig.pos.y - 1.6 + rig.dip;
     let k = 1;
     for (; k > 0.1; k -= 0.05) {
@@ -354,7 +356,12 @@ function applyRig(t) {
     if (o && modalOpen && !mn.classList.contains('on')) return;
     mn.classList.toggle('on', o);
     modalOpen = o;
-    if (o) viewLabel();
+    if (o) {
+      keysDown.clear();
+      mouseAim = padAim = false;
+      SND.pause();
+      viewLabel();
+    } else SND.resume();
   };
   $m('menub').onclick = () => setMenu(true);
   $m('menux').onclick = () => setMenu(false);

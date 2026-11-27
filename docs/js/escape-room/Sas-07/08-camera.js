@@ -43,8 +43,8 @@ function openDoorAnim(o, d) {
   tween(d * 0.45, (k) => {
     w.rotation.z = -6.28 * k;
   });
-  setTimeout(() => SND.play('unlock'), d * 380);
-  setTimeout(
+  gameTimeout(() => SND.play('unlock'), d * 380);
+  gameTimeout(
     () =>
       tween(
         d * 0.75,

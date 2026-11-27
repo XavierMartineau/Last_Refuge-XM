@@ -7,8 +7,14 @@
 const clock = new THREE.Clock();
 function loop() {
   requestAnimationFrame(loop);
-  const dt = Math.min(clock.getDelta(), 0.05),
+  const delta = clock.getDelta();
+  if (document.getElementById('menu').classList.contains('on')) {
+    clock.elapsedTime -= delta;
+    return;
+  }
+  const dt = Math.min(delta, 0.05),
     t = clock.elapsedTime;
+  gameTimersFrame(delta);
   renderer.shadowMap.needsUpdate = (loop.f = (loop.f || 0) + 1) % 2 === 0;
   for (const w of tweens) {
     w.t += dt;
@@ -23,6 +29,7 @@ function loop() {
   updateAim(dt);
   applyRig(t);
   avatarFrame(dt, t);
+  MapScenes.animate(t);
   combatFrame(dt, t);
   if (State.armed && down('fire')) fire();
   updateFlash(dt, t);
@@ -250,7 +257,7 @@ function nudgeApart() {
 }
 nudgeApart();
 fitHitBoxes();
-/* ── Quitter l’escape room (bouton du menu Options) : confirmation → écran de fin → « Rejouer » recharge la page ── */
+/* ── Quitter l’escape room : confirmation puis retour à l’accueil ── */
 (function () {
   const b = document.getElementById('menuquit');
   if (!b) return;
@@ -283,14 +290,12 @@ fitHitBoxes();
     ov.style.display = 'grid';
   };
   const askQuit = () => {
-    const mo = document.getElementById('menuok');
-    if (mo) mo.click();
     modalOpen = true;
     show('QUITTER L’ESCAPE ROOM ?', 'La partie en cours sera perdue.', [
       btn('Quitter', bye, true),
       btn('Annuler', () => {
         ov.style.display = 'none';
-        modalOpen = false;
+        modalOpen = document.getElementById('menu').classList.contains('on');
       })
     ]);
   };
@@ -302,19 +307,7 @@ fitHitBoxes();
       window.parent.postMessage({ type: 'lastrefuge-game-quit' }, '*');
       return;
     }
-    if (CONFIG.quitUrl) {
-      location.href = CONFIG.quitUrl;
-      return;
-    }
-    modalOpen = true;
-    show(
-      'PARTIE TERMINÉE',
-      'Vous avez quitté le bunker 07. Vous pouvez fermer cet onglet ou relancer une partie.',
-      [btn('Rejouer', () => location.reload(), true)]
-    );
-    try {
-      window.close();
-    } catch (e) {}
+    location.href = CONFIG.quitUrl;
   }
   b.addEventListener('click', askQuit);
 })();

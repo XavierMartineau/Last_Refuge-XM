@@ -2,7 +2,9 @@
 'use strict';
 const MapScenes = (() => {
   const offset = -2000;
-  const mapScale = 4;
+  const mapScale = 2;
+  const sceneScale = 2;
+  const zombieRadius = 0.7 * sceneScale;
   const definitions = {
     city: {
       file: 'post-apocalyptic_city.glb',
@@ -34,18 +36,23 @@ const MapScenes = (() => {
   }
   const loader = new GLTFLoader();
   const down = new THREE.Vector3(0, -1, 0);
-  const api = { active: null, height: () => ground };
+  const api = {
+    active: null,
+    height: () => ground,
+    movementScale: () => api.active ? 2 : 1,
+    zombieScale: () => sceneScale
+  };
   let current = null, ground = 0, busy = false;
 
   function floorAt(octree, x, z, from) {
     const hit = octree.rayIntersect(new THREE.Ray(new THREE.Vector3(x, from, z), down));
     return hit && hit.distance <= 2 * mapScale ? hit.position.y : null;
   }
-  function clearAt(octree, x, z, y) {
+  function clearAt(octree, x, z, y, radius = 0.3, scale = 1) {
     const capsule = new Capsule(
-      new THREE.Vector3(x, y + 0.4, z),
-      new THREE.Vector3(x, y + 1.3, z),
-      0.3
+      new THREE.Vector3(x, y + radius + 0.1 * scale, z),
+      new THREE.Vector3(x, y + 1.3 * scale, z),
+      radius
     );
     const hit = octree.capsuleIntersect(capsule);
     return !hit || hit.depth < 0.04;
@@ -54,14 +61,54 @@ const MapScenes = (() => {
     if (map.id === 'town') return 0.7 * mapScale;
     return floorAt(map.octree, x, z, previous + 0.65);
   }
-  api.blocked = (x, z) => {
+  function findClearPoint(map, x, z) {
+    const b = map.definition.bounds;
+    for (let radius = 0; radius <= 24; radius++) {
+      for (let dx = -radius; dx <= radius; dx++) for (let dz = -radius; dz <= radius; dz++) {
+        if (Math.max(Math.abs(dx), Math.abs(dz)) !== radius) continue;
+        const px = x + dx, pz = z + dz;
+        if (px < b[0] + 0.3 || px > b[1] - 0.3 || pz < b[2] + 0.3 || pz > b[3] - 0.3) continue;
+        const y = map.id === 'town' ? 0.7 * mapScale : floorAt(map.octree, px, pz, 1.3 * mapScale);
+        if (y !== null && clearAt(map.octree, px, pz, y)) return [px, y, pz];
+      }
+    }
+    return null;
+  }
+  api.walkHeight = (x, z, previous) => {
     const localZ = z - offset, b = current.definition.bounds;
     if (x < b[0] + 0.3 || x > b[1] - 0.3 || localZ < b[2] + 0.3 || localZ > b[3] - 0.3)
-      return true;
-    const y = pointHeight(current, x, localZ, ground);
-    if (y === null || Math.abs(y - ground) > 0.45 || !clearAt(current.octree, x, localZ, y)) return true;
+      return null;
+    const y = pointHeight(current, x, localZ, previous);
+    if (y === null || Math.abs(y - previous) > 0.45 || !clearAt(current.octree, x, localZ, y)) return null;
+    return y;
+  };
+  api.blocked = (x, z) => {
+    const y = api.walkHeight(x, z, ground);
+    if (y === null) return true;
     ground = y;
     return false;
+  };
+  api.safe = (x, z, padding = 0) => api.active === 'town' &&
+    Math.hypot(x - current.entry[0], z - offset - current.entry[1]) < 8 + padding;
+  api.townMove = (x, z) => {
+    if (api.active !== 'town' || api.safe(x, z, 0.4 * sceneScale)) return false;
+    const b = current.definition.bounds, localZ = z - offset;
+    return x >= b[0] + zombieRadius && x <= b[1] - zombieRadius && localZ >= b[2] + zombieRadius &&
+      localZ <= b[3] - zombieRadius && clearAt(current.octree, x, localZ, 0.7 * mapScale, zombieRadius, sceneScale);
+  };
+  api.respawn = () => {
+    const entry = current.entry;
+    rig.pos.set(entry[0], ground + 1.6, entry[1] + offset);
+    rig.vy = rig.vp = 0;
+  };
+  api.obstruction = (ray, maxDistance) => {
+    if (!current) return null;
+    const localRay = ray.clone();
+    localRay.origin.z -= offset;
+    const hit = current.octree.rayIntersect(localRay);
+    if (!hit || hit.distance > maxDistance) return null;
+    hit.position.z += offset;
+    return hit;
   };
   function disposeMap(map) {
     if (!map) return;
@@ -79,28 +126,80 @@ const MapScenes = (() => {
     geometries.forEach((g) => g.dispose());
     map.octree.clear();
   }
+  api.leave = () => {
+    if (!current) return;
+    clearTownZombies();
+    disposeMap(current);
+    current = null;
+    api.active = null;
+    scene.fog.density = 0.04;
+    hud();
+  };
   function portal(map, info) {
-    const y = map.id === 'town' ? 0.7 * mapScale : floorAt(map.octree, info.x, info.z, 1.3 * mapScale);
-    if (y === null || !clearAt(map.octree, info.x, info.z, y))
-      throw new Error('Passage inaccessible : ' + info.label);
+    const point = findClearPoint(map, info.x, info.z);
+    if (!point) throw new Error('Passage inaccessible : ' + info.label);
+    info.x = point[0];
+    info.z = point[2];
+    const y = point[1];
     const mesh = new THREE.Group();
     mesh.position.set(info.x, y, info.z);
+    mesh.scale.setScalar(sceneScale);
     if (map.id === 'town') mesh.rotation.y = Math.PI / 2;
     interactive(mesh, 'map_' + info.target, info.label, 'use');
-    const metal = new THREE.MeshStandardMaterial({ color: 0x252d2c, metalness: 0.65, roughness: 0.5 });
-    const glow = new THREE.MeshStandardMaterial({ color: 0x31c8b1, emissive: 0x17a894, emissiveIntensity: 1.2 });
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.3, 0.2, 32), metal);
-    base.position.y = 0.1;
+    const metal = new THREE.MeshStandardMaterial({ color: 0x333e3c, metalness: 0.8, roughness: 0.38 });
+    const glow = new THREE.MeshStandardMaterial({ color: 0x58d9bd, emissive: 0x199b82, emissiveIntensity: 1.5 });
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.4, 0.24, 32), metal);
+    base.position.y = 0.12;
     mesh.add(base);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.09, 10, 48), glow);
-    ring.position.y = 1.35;
+    const plinth = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.12, 0.12, 32), glow);
+    plinth.position.y = 0.28;
+    mesh.add(plinth);
+    const frame = new THREE.Mesh(new THREE.TorusGeometry(1, 0.13, 12, 64), metal);
+    frame.position.y = 1.4;
+    mesh.add(frame);
+    const ring = new THREE.Group();
+    ring.position.y = 1.4;
+    ring.add(new THREE.Mesh(new THREE.TorusGeometry(0.91, 0.035, 8, 64), glow));
+    const segments = new THREE.InstancedMesh(new THREE.BoxGeometry(0.06, 0.12, 0.045), glow, 12);
+    const segment = new THREE.Object3D();
+    for (let i = 0; i < 12; i++) {
+      const angle = i * Math.PI / 6;
+      segment.position.set(Math.sin(angle) * 0.98, Math.cos(angle) * 0.98, 0.13);
+      segment.rotation.z = -angle;
+      segment.updateMatrix();
+      segments.setMatrixAt(i, segment.matrix);
+    }
+    ring.add(segments);
     mesh.add(ring);
+    const energy = new THREE.ShaderMaterial({
+      uniforms: { time: { value: 0 } },
+      vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: `
+        uniform float time;
+        varying vec2 vUv;
+        void main() {
+          vec2 p = (vUv - 0.5) * 2.0;
+          float r = length(p);
+          float waves = sin(14.0 * r - time * 1.7 + sin(atan(p.y, p.x) * 4.0 + time) * 0.7);
+          float mist = sin(p.x * 9.0 + time * 0.6) * sin(p.y * 11.0 - time * 0.8);
+          float edge = 1.0 - smoothstep(0.7, 1.0, r);
+          vec3 color = mix(vec3(0.02, 0.15, 0.13), vec3(0.24, 0.85, 0.7), 0.35 + 0.2 * waves + 0.12 * mist);
+          gl_FragColor = vec4(color, edge * (0.62 + 0.12 * waves));
+        }`,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
     const field = new THREE.Mesh(
       new THREE.CircleGeometry(0.9, 48),
-      new THREE.MeshBasicMaterial({ color: 0x4fe7d2, transparent: true, opacity: 0.2, depthWrite: false, side: THREE.DoubleSide })
+      energy
     );
-    field.position.y = 1.35;
+    field.position.y = 1.4;
     mesh.add(field);
+    const light = new THREE.PointLight(0x60e4c4, 4, 6, 2);
+    light.position.set(0, 1.4, 0.4);
+    mesh.add(light);
+    (map.portalEffects || (map.portalEffects = [])).push({ ring, energy });
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 96;
@@ -121,26 +220,34 @@ const MapScenes = (() => {
     map.group.add(mesh);
     Actions.register('map_' + info.target, () => {
       const p = mesh.getWorldPosition(new THREE.Vector3());
-      if (Math.hypot(p.x - rig.pos.x, p.z - rig.pos.z) > 3.5)
+      if (Math.hypot(p.x - rig.pos.x, p.z - rig.pos.z) > 3.5 * sceneScale)
         return say('Approchez-vous du passage.', 2500);
       if (info.target === 'end') {
+        if (!State.zDone) return say('Éliminez les infectés avant d’utiliser la sortie : ' +
+          State.kills + ' / ' + CONFIG.zombieTarget + '.', 4000);
         document.getElementById('end').classList.add('on');
         modalOpen = true;
       } else if (info.target === 'complex') {
-        disposeMap(current);
-        current = null;
-        api.active = null;
-        scene.fog.density = 0.04;
+        api.leave();
         rig.pos.set(0, 1.6, -309.6);
         rig.yaw = Math.PI;
         rig.pitch = 0;
+        hud();
         setObjective(objectiveNow());
       } else {
         enter(info.target, info.target === 'city');
       }
     });
   }
-  function makePlan(map) {
+  api.animate = (time) => {
+    if (!current || !current.portalEffects) return;
+    current.portalEffects.forEach(({ ring, energy }) => {
+      ring.rotation.z = time * 0.12;
+      energy.uniforms.time.value = time;
+    });
+  };
+  const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+  async function makePlan(map, progress) {
     const b = map.definition.bounds, canvas = document.createElement('canvas'), step = 2;
     canvas.width = Math.floor((b[1] - b[0]) / step) + 1;
     canvas.height = Math.floor((b[3] - b[2]) / step) + 1;
@@ -148,14 +255,142 @@ const MapScenes = (() => {
     ctx.fillStyle = '#0c1b11';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#6f8e79';
-    for (let z = b[2]; z <= b[3]; z += step) {
-      for (let x = b[0]; x <= b[1]; x += step) {
+    const walkable = new Uint8Array(canvas.width * canvas.height);
+    for (let row = 0; row < canvas.height; row++) {
+      const z = b[2] + row * step;
+      for (let col = 0; col < canvas.width; col++) {
+        const x = b[0] + col * step;
         const y = map.id === 'town' ? 0.7 * mapScale : floorAt(map.octree, x, z, 1.3 * mapScale);
         if (y === null || !clearAt(map.octree, x, z, y))
           ctx.fillRect((x - b[0]) / step, (z - b[2]) / step, 1, 1);
+        else if (map.id !== 'town' || (x >= b[0] + zombieRadius && x <= b[1] - zombieRadius &&
+          z >= b[2] + zombieRadius && z <= b[3] - zombieRadius &&
+          clearAt(map.octree, x, z, y, zombieRadius, sceneScale)))
+          walkable[((z - b[2]) / step) * canvas.width + (x - b[0]) / step] = 1;
+      }
+      if (row % 8 === 7) {
+        progress('Analyse du terrain', row + 1, canvas.height);
+        await nextFrame();
       }
     }
+    if (map.id === 'town') {
+      const edges = new Uint8Array(walkable.length);
+      for (let row = 0; row < canvas.height; row++) {
+        for (let col = 0; col < canvas.width; col++) {
+          const i = row * canvas.width + col;
+          if (!walkable[i]) continue;
+          if (col + 1 < canvas.width && walkable[i + 1] &&
+            clearAt(map.octree, b[0] + (col + 0.5) * step, b[2] + row * step, 0.7 * mapScale, zombieRadius, sceneScale)) {
+            edges[i] |= 1; edges[i + 1] |= 2;
+          }
+          if (row + 1 < canvas.height && walkable[i + canvas.width] &&
+            clearAt(map.octree, b[0] + col * step, b[2] + (row + 0.5) * step, 0.7 * mapScale, zombieRadius, sceneScale)) {
+            edges[i] |= 4; edges[i + canvas.width] |= 8;
+          }
+        }
+        if (row % 8 === 7) {
+          progress('Préparation des déplacements des infectés', row + 1, canvas.height);
+          await nextFrame();
+        }
+      }
+      map.nav = { width: canvas.width, height: canvas.height, walkable, edges, b, step, field: null, target: -1, updated: 0 };
+    }
     return canvas;
+  }
+  function nearestCell(nav, x, z) {
+    const cx = Math.round((x - nav.b[0]) / nav.step), cz = Math.round((z - offset - nav.b[2]) / nav.step);
+    let best = -1, distance = Infinity;
+    for (let dz = -3; dz <= 3; dz++) for (let dx = -3; dx <= 3; dx++) {
+      const col = cx + dx, row = cz + dz, d = dx * dx + dz * dz;
+      if (col < 0 || col >= nav.width || row < 0 || row >= nav.height || d >= distance) continue;
+      const index = row * nav.width + col;
+      if (nav.walkable[index]) { best = index; distance = d; }
+    }
+    return best;
+  }
+  function cellPosition(nav, index) {
+    return [nav.b[0] + (index % nav.width) * nav.step,
+      nav.b[2] + Math.floor(index / nav.width) * nav.step + offset];
+  }
+  function navigation() {
+    if (api.active !== 'town') return null;
+    const nav = current.nav, target = nearestCell(nav, rig.pos.x, rig.pos.z), now = performance.now();
+    if (target < 0) return null;
+    if (nav.field && now - nav.updated < 1000) return nav;
+    const field = new Int32Array(nav.walkable.length);
+    field.fill(-1);
+    const queue = new Int32Array(field.length);
+    let head = 0, tail = 0;
+    queue[tail++] = target;
+    field[target] = 0;
+    while (head < tail) {
+      const i = queue[head++], col = i % nav.width, row = Math.floor(i / nav.width);
+      for (const [dx, dz, bit] of [[1, 0, 1], [-1, 0, 2], [0, 1, 4], [0, -1, 8]]) {
+        if (!(nav.edges[i] & bit)) continue;
+        const x = col + dx, z = row + dz;
+        if (x < 0 || x >= nav.width || z < 0 || z >= nav.height) continue;
+        const next = z * nav.width + x;
+        if (!nav.walkable[next] || field[next] !== -1) continue;
+        field[next] = field[i] + 1;
+        queue[tail++] = next;
+      }
+    }
+    nav.field = field;
+    nav.target = target;
+    nav.updated = now;
+    return nav;
+  }
+  api.spawnPoint = () => {
+    const nav = navigation();
+    if (!nav) return null;
+    const candidates = [];
+    for (let i = 0; i < nav.field.length; i++) {
+      if (nav.field[i] < 0) continue;
+      const [x, z] = cellPosition(nav, i), d = Math.hypot(x - rig.pos.x, z - rig.pos.z);
+      if (d >= 16 && d <= 48 && !api.safe(x, z, 2))
+        candidates.push([x, 0.7 * mapScale, z]);
+    }
+    return candidates.length ? candidates[Math.floor(Math.random() * candidates.length)] : null;
+  };
+  api.zombieTarget = (x, z) => {
+    const nav = navigation();
+    if (!nav) return null;
+    const i = nearestCell(nav, x, z);
+    if (i < 0 || nav.field[i] < 0) return null;
+    if (nav.field[i] <= 1) return [rig.pos.x, rig.pos.z];
+    const col = i % nav.width, row = Math.floor(i / nav.width);
+    let best = i;
+    for (const [dx, dz, bit] of [[1, 0, 1], [-1, 0, 2], [0, 1, 4], [0, -1, 8]]) {
+      if (!(nav.edges[i] & bit)) continue;
+      const nx = col + dx, nz = row + dz;
+      if (nx < 0 || nx >= nav.width || nz < 0 || nz >= nav.height) continue;
+      const next = nz * nav.width + nx;
+      if (nav.field[next] >= 0 && nav.field[next] < nav.field[best]) best = next;
+    }
+    return cellPosition(nav, best);
+  };
+  function townLocker(map) {
+    const entry = map.entry;
+    const pos = findClearPoint(map, entry[0] + 4, entry[1] + 4);
+    if (!pos) throw new Error('Aucun emplacement libre pour le casier de Zombie Town.');
+    const locker = new THREE.Group();
+    locker.position.set(pos[0], pos[1], pos[2]);
+    locker.scale.setScalar(sceneScale);
+    interactive(locker, 'town_locker', 'Prendre son arme dans le casier', 'use');
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.55),
+      new THREE.MeshStandardMaterial({ color: 0x455b52, metalness: 0.5, roughness: 0.6 }));
+    body.position.y = 1;
+    locker.add(body);
+    map.group.add(locker);
+    Actions.register('town_locker', () => {
+      const p = locker.getWorldPosition(new THREE.Vector3());
+      if (Math.hypot(p.x - rig.pos.x, p.z - rig.pos.z) > 3.5 * sceneScale) return say('Approchez-vous du casier.', 2500);
+      if (State.armed) return say('Votre arme est déjà équipée.', 2500);
+      if (!equipWeapon()) return;
+      SND.play('locker');
+      setObjective(objectiveNow());
+      say('Arme équipée. Quittez la zone sûre pour affronter les infectés.', 5000);
+    });
   }
   api.drawMap = (ctx, width, height) => {
     const b = current.definition.bounds, top = 36;
@@ -173,8 +408,18 @@ const MapScenes = (() => {
       ctx.fillStyle = '#22d3ee';
       ctx.fillRect(x - 4, y - 4, 8, 8);
     });
+    if (api.active === 'town') {
+      ctx.fillStyle = '#ff3b2a';
+      zRoots.forEach((zombie) => {
+        if (zombie.userData.state !== 'walk') return;
+        const [x, y] = point(zombie.position.x, zombie.position.z - offset);
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
     const [x, y] = point(rig.pos.x, rig.pos.z - offset);
-    ctx.fillStyle = '#ff3b2a';
+    ctx.fillStyle = '#ffe078';
     ctx.beginPath();
     ctx.arc(x, y, 5, 0, Math.PI * 2);
     ctx.fill();
@@ -187,17 +432,53 @@ const MapScenes = (() => {
     busy = true;
     rig.locked = true;
     const overlay = document.createElement('div');
-    overlay.textContent = 'Chargement de la carte : ' + definitions[id].name + '…';
+    overlay.setAttribute('role', 'status');
+    overlay.setAttribute('aria-live', 'polite');
     Object.assign(overlay.style, {
-      position: 'fixed', inset: '0', zIndex: '9999', display: 'grid', placeItems: 'center',
-      color: '#d8fff1', background: '#07100a', font: 'bold 20px sans-serif'
+      position: 'fixed', inset: '0', zIndex: '9999', display: 'grid', placeItems: 'center', padding: '24px',
+      boxSizing: 'border-box', color: '#d8fff1',
+      background: 'radial-gradient(ellipse at center, #172b22, #07100a 70%)', font: '16px sans-serif'
     });
+    const panel = document.createElement('div');
+    Object.assign(panel.style, {
+      width: 'min(480px, 100%)', padding: '28px', boxSizing: 'border-box',
+      background: '#0a1712ed', border: '1px solid #396758', boxShadow: '0 20px 70px #000b'
+    });
+    const heading = document.createElement('div');
+    heading.textContent = 'TRANSFERT EN COURS';
+    Object.assign(heading.style, { color: '#89bfa9', fontSize: '12px', letterSpacing: '.18em', fontWeight: 'bold' });
+    const title = document.createElement('h2');
+    title.textContent = definitions[id].name;
+    Object.assign(title.style, { margin: '12px 0 22px', fontSize: 'clamp(20px, 5vw, 28px)' });
+    const status = document.createElement('div');
+    Object.assign(status.style, { marginBottom: '12px', minHeight: '1.4em', color: '#b8d7c7' });
+    const bar = document.createElement('progress');
+    bar.max = 1;
+    bar.setAttribute('aria-label', 'Progression de l’étape de chargement');
+    Object.assign(bar.style, { width: '100%', height: '10px', accentColor: '#62d1ae' });
+    const hint = document.createElement('p');
+    hint.textContent = 'Préparation du terrain et des passages. Merci de patienter.';
+    Object.assign(hint.style, { margin: '16px 0 0', color: '#829d8e', fontSize: '13px', lineHeight: '1.5' });
+    panel.append(heading, title, status, bar, hint);
+    overlay.appendChild(panel);
     document.body.appendChild(overlay);
+    const progress = (label, done, total) => {
+      status.textContent = label;
+      if (Number.isFinite(done) && Number.isFinite(total) && total > 0) bar.value = Math.min(1, done / total);
+      else bar.removeAttribute('value');
+    };
     let map;
     try {
-      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+      progress('Téléchargement de la carte…');
+      await nextFrame();
       const definition = definitions[id];
-      const gltf = await loader.loadAsync(new URL(definition.file, window.zombieMapBase).href);
+      const gltf = await loader.loadAsync(new URL(definition.file, window.zombieMapBase).href, (event) => {
+        const loaded = (event.loaded / 1048576).toFixed(1);
+        const total = event.total > 0 ? (event.total / 1048576).toFixed(1) : null;
+        progress('Téléchargement : ' + loaded + (total ? ' / ' + total : '') + ' Mo', event.loaded, event.total);
+      });
+      progress('Construction des collisions…');
+      await nextFrame();
       gltf.scene.scale.multiplyScalar(mapScale);
       const octree = new Octree().fromGraphNode(gltf.scene);
       const group = new THREE.Group();
@@ -245,23 +526,30 @@ const MapScenes = (() => {
         floor.raycast = () => {};
         group.add(floor);
       }
-      definition.portals.forEach((p) => portal(map, p));
-      map.plan = makePlan(map);
       const start = returning && definition.returnPoint ? definition.returnPoint : definition.entry;
-      const y = id === 'town' ? 0.7 * mapScale : floorAt(octree, start[0], start[1], 1.3 * mapScale);
-      if (y === null || !clearAt(octree, start[0], start[1], y)) throw new Error('Point d’entrée inaccessible.');
+      const entry = findClearPoint(map, start[0], start[1]);
+      if (!entry) throw new Error('Point d’entrée inaccessible.');
+      map.entry = [entry[0], entry[2]];
+      definition.portals.forEach((p) => portal(map, p));
+      if (id === 'town') townLocker(map);
+      progress('Analyse du terrain…', 0, 1);
+      await nextFrame();
+      map.plan = await makePlan(map, (stage, done, total) => progress(stage + '…', done, total));
+      clearTownZombies();
       disposeMap(current);
       current = map;
       api.active = id;
-      ground = y;
+      ground = entry[1];
       scene.fog.density = 0.01;
       scene.add(group);
-      rig.pos.set(start[0], y + 1.6, start[1] + offset);
+      rig.pos.set(entry[0], entry[1] + 1.6, entry[2] + offset);
       rig.yaw = id === 'town' ? -Math.PI / 2 : returning ? 0 : Math.PI;
       rig.pitch = 0;
       rig.vy = rig.vp = 0;
+      hud();
       setObjective(objectiveNow());
-      say('Carte chargée : ' + definition.name + '. Les infectés ne sont pas encore activés.', 5000);
+      say(id === 'town' && !State.armed ? 'Prenez votre arme dans le casier près de l’entrée.' :
+        'Carte chargée : ' + definition.name + '.', 5000);
     } catch (error) {
       disposeMap(map);
       console.error('Chargement de la carte impossible :', error);
@@ -277,5 +565,6 @@ const MapScenes = (() => {
     if (!State.doorExit3 || !State.breaker) return originalDoor(door);
     enter('city');
   });
+  api.enter = enter;
   return api;
 })();

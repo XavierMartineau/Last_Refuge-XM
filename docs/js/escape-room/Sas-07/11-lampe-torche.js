@@ -76,7 +76,6 @@ function renderInv() {
       State.fuses > 0 && TEXTS.ui.items.fuse + ' ×' + State.fuses,
       State.key && TEXTS.ui.items.key,
       State.key2 && TEXTS.ui.items.key2,
-      State.key3 && TEXTS.ui.items.key3,
       State.keyCell && !State.key4 && TEXTS.ui.items.cellkey,
       State.key4 && TEXTS.ui.items.key4,
       State.crowbar && !State.barDone && TEXTS.ui.items.crowbar,

@@ -61,7 +61,6 @@ const State = {
   relays: 0,
   power8: false,
   key2: false,
-  key3: false,
   keyCell: false,
   key4: false,
   crowbar: false,

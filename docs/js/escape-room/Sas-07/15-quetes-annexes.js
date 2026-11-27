@@ -472,7 +472,7 @@ function questLines(rr) {
    2) câble de masse    → pince sur le châssis du générateur                   [State.cable, State.genGround]
    3) vanne de carburant→ molette sur le réservoir                              [State.valve]
    puis : batterie + essence + démarreur (déjà en place) → levier. */
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms) => new Promise((r) => gameTimeout(r, ms));
 const powerKit = (function () {
   const LP = lever.position,
     GP = genG.position,
@@ -536,7 +536,7 @@ const powerKit = (function () {
     if (State.fzIn >= 2) {
       State.brkOk = true;
       SND.play('lever');
-      setTimeout(() => SND.play('success'), 250);
+      gameTimeout(() => SND.play('success'), 250);
       o.userData.led.material = glow(0x30ff70, 3);
       say(
         'Les deux fusibles en place, vous réarmez le disjoncteur : un claquement sec. Le tableau est enfin alimenté.',
@@ -837,7 +837,7 @@ State.wareLight = false;
     if (State.wareLight) return say('L’entrepôt est déjà éclairé.', 2500);
     State.wareLight = true;
     SND.play('lever');
-    setTimeout(() => SND.play('power'), 300);
+    gameTimeout(() => SND.play('power'), 300);
     tween(0.3, (k) => {
       o.userData.arm.rotation.x = 0.5 - 1.0 * k;
     });
@@ -927,7 +927,7 @@ const BOOK = (function () {
       'Un carnet de mission : toutes vos missions y sont notées. Touche O pour l’ouvrir ou le fermer.',
       6500
     );
-    setTimeout(() => api.open(), 900);
+    gameTimeout(() => api.open(), 900);
   });
   // interface : carte des secteurs + sections dépliables
   const css = document.createElement('style');
@@ -1080,7 +1080,7 @@ const BOOK = (function () {
     }, 1200);
     if (iv && iv.unref) iv.unref();
   }
-  setTimeout(() => {
+  gameTimeout(() => {
     if (!State.book)
       say(
         'Un carnet de mission est posé sur la table, près de la porte : prenez-le pour voir vos objectifs.',

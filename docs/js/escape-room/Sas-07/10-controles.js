@@ -199,8 +199,7 @@ room1Colliders.forEach((c) => COLLIDERS.push(c));
   [-72, -102, 20, 5],
   [-102, -132, 15, 4],
   [-132, -172, 25, 5],
-  [-172, -222, 25, 5],
-  [-312, -362, 25, 5]
+  [-172, -222, 25, 5]
 ].forEach(([za, zb, hw, thr]) =>
   [COLLIDERS, EXTRA_COLLIDERS].forEach((arr) =>
     arr.forEach((c) => {
@@ -243,8 +242,7 @@ const WALLS = [
   [-172, () => State.doorCmd],
   [-222, () => State.doorExit2],
   [-262, () => State.doorBlock],
-  [-312, () => State.doorExit3],
-  [-362, () => State.zDone]
+  [-312, () => State.doorExit3]
 ]; // murs mitoyens : passage seulement par la porte ouverte
 function blocked(x, z) {
   if (MapScenes.active && rig.pos.z < -900) return MapScenes.blocked(x, z);
@@ -267,7 +265,7 @@ function blocked(x, z) {
                     : z > -312
                       ? 59.9
                       : 74.9;
-  if (Math.abs(x) > hw - r || z > 22.9 || z < -361.4) return true; // murs extérieurs
+  if (Math.abs(x) > hw - r || z > 22.9 || z < -311.4) return true; // murs extérieurs
   for (const [wz, open] of WALLS)
     if (Math.abs(z - wz) < 0.15 + r && (Math.abs(x) > 0.9 - r || !open())) return true;
   for (const c of COLLIDERS) if (x > c[0] - r && x < c[1] + r && z > c[2] - r && z < c[3] + r) return true;
@@ -282,7 +280,11 @@ function objectiveNow() {
   if (MapScenes.active && rig.pos.z < -900)
     return MapScenes.active === 'city'
       ? 'Explorez la ville et trouvez le passage vers Zombie Town.'
-      : 'Explorez Zombie Town et trouvez la sortie.';
+      : State.zDone
+        ? 'Rejoignez le téléporteur de sortie.'
+        : State.armed
+          ? 'Éliminez les infectés : ' + State.kills + ' / ' + CONFIG.zombieTarget + '.'
+          : 'Prenez votre arme dans le casier près de l’entrée.';
   if (r === 1)
     return State.termOk
       ? O.openDoor
@@ -312,9 +314,7 @@ function objectiveNow() {
           : State.crowbar
             ? O.useBar
             : O.room11;
-  if (State.zDone) return O.exitShutter;
-  if (State.armed) return fmt(O.fight, { n: CONFIG.zombieTarget });
-  return State.key3 ? O.needLocker : O.room12;
+  return O.exitComplex;
 }
 let walkD = 0,
   stepD = 0,
@@ -378,7 +378,7 @@ function updateControls(dt, t) {
       s = (down('right') ? 1 : 0) - (down('left') ? 1 : 0);
     if (f || s) {
       const sp =
-          (Wk.speed * (State.crouch ? Wk.crouchSpeed : down('sprint') ? Wk.sprintMultiplier : 1) * dt) /
+          (Wk.speed * MapScenes.movementScale() * (State.crouch ? Wk.crouchSpeed : down('sprint') ? Wk.sprintMultiplier : 1) * dt) /
           Math.hypot(f, s),
         sy = Math.sin(rig.yaw),
         cy = Math.cos(rig.yaw);

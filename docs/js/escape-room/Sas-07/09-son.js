@@ -59,9 +59,15 @@ const SND = (() => {
     musBus.connect(master);
     mNext = ctx.currentTime + 0.3;
     buildAmbience();
+    if (document.getElementById('menu').classList.contains('on')) pause();
   }
   function resume() {
-    if (ctx && ctx.state === 'suspended') ctx.resume();
+    if (ctx && ctx.state !== 'closed' && !document.getElementById('menu').classList.contains('on'))
+      ctx.resume().catch((error) => console.error('Reprise du son impossible :', error));
+  }
+  function pause() {
+    if (ctx && ctx.state !== 'closed')
+      ctx.suspend().catch((error) => console.error('Pause du son impossible :', error));
   }
   function loopNoise(f, type, q, vol) {
     const src = ctx.createBufferSource();
@@ -825,6 +831,7 @@ const SND = (() => {
   return {
     init,
     resume,
+    pause,
     play,
     update,
     toggle,

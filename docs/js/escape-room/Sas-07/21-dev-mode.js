@@ -27,9 +27,8 @@ const DEV = (function () {
     3: { card: true },
     5: { fuses: 2 },
     7: { key: true },
-    9: { key2: true, key3: true, keyCell: true },
-    10: { crowbar: true, keyCtrl: true, key4: true },
-    12: { armed: true, ammo: 60 }
+    9: { key2: true, keyCell: true },
+    10: { crowbar: true, keyCtrl: true, key4: true }
   };
   const MECH = {
     1: () => {
@@ -62,10 +61,9 @@ const DEV = (function () {
     6: { wareCode: true },
     7: { key: true, wareLight: true },
     8: { power8: true, relays: 4 },
-    9: { key2: true, key3: true, keyCell: true },
+    9: { key2: true, keyCell: true },
     10: { crowbar: true, keyCtrl: true, barDone: true, bureauOpen: true, key4: true },
-    11: { breaker: true },
-    12: { zDone: true, armed: true, ammo: 60 }
+    11: { breaker: true }
   };
   const NAMES = [
     'Sas d’entrée',
@@ -79,7 +77,7 @@ const DEV = (function () {
     'Quartiers',
     'Blocs cellulaires',
     'Ligne de coupure',
-    'Zone d’évacuation'
+    'Post-Apocalyptic City'
   ];
   // — Actions (chacune se termine par sync() : inventaire, objectif, panneau) —
   const sync = () => {
@@ -100,8 +98,10 @@ const DEV = (function () {
     if (MECH[r]) apply(MECH[r]);
   };
   const openDoor = (r) => {
-    const D = DOORS.find((d) => d.z === WALLS[r - 1][0]);
-    if (!D || D.final) return;
+    const wall = WALLS[r - 1];
+    if (!wall) return;
+    const D = DOORS.find((d) => d.z === wall[0]);
+    if (!D) return;
     const o = scene.getObjectByName(D.id);
     if (o && !State[D.flag]) {
       State[D.flag] = true;
@@ -118,6 +118,11 @@ const DEV = (function () {
       genHide();
       document.getElementById('back').style.display = 'none';
     }
+    if (r === 12) {
+      MapScenes.enter('city');
+      return;
+    }
+    MapScenes.leave();
     rig.pos.set(0, 1.6, CONFIG.roomZ[r - 1]);
     rig.vy = 0;
     rig.yaw = 0;

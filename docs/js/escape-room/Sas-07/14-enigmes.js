@@ -87,12 +87,12 @@ R('gen_sas', async (o) => {
   );
   SND.play('lever');
   if (u.tries < 2) {
-    setTimeout(() => SND.play('sputter'), 250);
+    gameTimeout(() => SND.play('sputter'), 250);
     return say(M.genTry, 3000);
   }
   State.gen1 = true;
   u.hint = 'Générateur en marche';
-  setTimeout(() => SND.play('genstart'), 250);
+  gameTimeout(() => SND.play('genstart'), 250);
   u.led.material = glow(0x30ff70, 3);
   tween(
     2.5,
@@ -103,7 +103,7 @@ R('gen_sas', async (o) => {
   );
   say(M.genSasOn, 5500);
   setObjective(objectiveNow());
-  setTimeout(() => {
+  gameTimeout(() => {
     if (State.focus === o) release();
   }, 3200);
 });
@@ -126,7 +126,7 @@ function egg(id, hint, msg, x, z, build, ry = 0, y = 0) {
     if (first) eggN++;
     say(msg + '   [' + eggN + '/' + EGGS.length + ' secrets]', 6500);
     if (first && eggN === EGGS.length)
-      setTimeout(() => {
+      gameTimeout(() => {
         SND.play('success');
         say('Tous les secrets du bunker sont trouvés ! Même les morts en rient jaune.', 8000);
       }, 2600);
@@ -423,23 +423,4 @@ egg(
   -300,
   stele(['PANIQUER', 'DISCRÈTEMENT'], '#d8b020', '#1a1a1a'),
   0.3
-);
-// salle 12 : armurerie
-egg(
-  'egg_arm',
-  'Lire la pancarte',
-  '« Armurerie : interdit de courir avec un chargeur. » Un peu tard pour le règlement, non ?',
-  10,
-  -326,
-  stele(['NE PAS', 'COURIR AVEC', 'UN CHARGEUR'], '#b83a22', '#f2e8d0'),
-  0.1
-);
-egg(
-  'egg_donut',
-  'Ouvrir la boîte',
-  'Une boîte de beignets, vide. Il reste une note : « J’ai pris le dernier. — le Capitaine ». Trahison.',
-  -10,
-  -350,
-  B.donut,
-  0.5
 );

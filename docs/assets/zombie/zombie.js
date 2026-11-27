@@ -78,6 +78,16 @@ export function createZombie(variant) {
   body.add(visual);
   root.add(body);
   const height = (model.bounds.max.y - model.bounds.min.y) * model.scale;
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 16;
+  const texture = new THREE.CanvasTexture(canvas);
+  const bar = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: true }));
+  bar.position.y = height + 0.3;
+  bar.scale.set(1.1, 0.14, 1);
+  bar.visible = false;
+  bar.raycast = () => {};
+  root.add(bar);
   const width = model.height ? 0.65 : Math.max(0.5, (model.bounds.max.x - model.bounds.min.x) * model.scale);
   const hitboxes = [];
   function hitbox(y, h, head) {
@@ -99,7 +109,7 @@ export function createZombie(variant) {
   const walk = mixer.clipAction(clips.get(model.walk));
   walk.play();
   walk.time = Math.random() * walk.getClip().duration;
-  const zombie = { root, body, hitboxes, mixer, clips, walk, attack: model.attack, death: model.death, dead: false };
+  const zombie = { root, body, hitboxes, mixer, clips, walk, attack: model.attack, death: model.death, dead: false, bar, canvas, texture };
   mixer.addEventListener('finished', (event) => {
     if (!zombie.dead && event.action.getClip().name === zombie.attack) {
       walk.reset().play().crossFadeFrom(event.action, 0.15, false);
@@ -108,13 +118,32 @@ export function createZombie(variant) {
   return zombie;
 }
 
+export function setZombieHealth(zombie, fraction) {
+  const ctx = zombie.canvas.getContext('2d');
+  ctx.fillStyle = '#160707';
+  ctx.fillRect(0, 0, 128, 16);
+  ctx.fillStyle = '#e83d32';
+  ctx.fillRect(2, 2, 124 * THREE.MathUtils.clamp(fraction, 0, 1), 12);
+  zombie.texture.needsUpdate = true;
+  zombie.bar.visible = fraction > 0;
+}
+
 export function animateZombie(zombie, dt, speed) {
   zombie.walk.timeScale = Math.max(0.35, speed);
   zombie.mixer.update(dt);
+  if (zombie.attackTime > 0) {
+    zombie.attackTime = Math.max(0, zombie.attackTime - dt);
+    const lunge = Math.sin(Math.PI * zombie.attackTime / 0.6);
+    zombie.body.rotation.x = -0.3 * lunge;
+    zombie.body.position.z = 0.18 * lunge;
+  }
 }
 
 export function attackZombie(zombie) {
-  if (!zombie.attack) return;
+  if (!zombie.attack) {
+    zombie.attackTime = 0.6;
+    return;
+  }
   const action = zombie.mixer.clipAction(zombie.clips.get(zombie.attack));
   action.reset().setLoop(THREE.LoopOnce, 1);
   action.setEffectiveTimeScale(action.getClip().duration / 0.8);
@@ -125,6 +154,8 @@ export function attackZombie(zombie) {
 
 export function killZombieModel(zombie) {
   zombie.dead = true;
+  zombie.bar.visible = false;
+  zombie.body.position.z = 0;
   if (!zombie.death) return false;
   zombie.mixer.stopAllAction();
   const action = zombie.mixer.clipAction(zombie.clips.get(zombie.death));
@@ -135,6 +166,8 @@ export function killZombieModel(zombie) {
 }
 
 export function disposeZombie(zombie) {
+  zombie.texture.dispose();
+  zombie.bar.material.dispose();
   zombie.mixer.stopAllAction();
   zombie.mixer.uncacheRoot(zombie.mixer.getRoot());
   zombie.root.traverse((object) => {

@@ -2,7 +2,7 @@
    Fichier chargé dans l’ordre par escape-room.js : il partage la portée globale des autres fichiers. */
 'use strict';
 /* ═════════ COMBAT : zombies, tir, munitions, vie ═════════
-   Réglages : CONFIG.zombies (nombre simultané, vitesse, dégâts…) et CONFIG.zombieTarget (nombre à abattre, écrit sur le recensement).
+   Réglages : CONFIG.zombies (nombre simultané, vitesse, dégâts…) et CONFIG.zombieTarget (nombre à abattre).
    Contrôles : clic = tirer là où l’on pointe · Espace = tirer devant soi (maintenir = rafale) · R = recharger. */
 const ZC = CONFIG.zombies,
   zRoots = [],
@@ -19,24 +19,8 @@ const partM = new THREE.MeshBasicMaterial({ color: 0x7a0d0a }),
   });
 const mFlash = new THREE.PointLight(0xffc880, 0, 9, 2);
 scene.add(mFlash);
-const SPAWNS = [
-  [-18, -264],
-  [0, -267],
-  [18, -264],
-  [-21, -232],
-  [21, -232],
-  [-10, -268],
-  [10, -268],
-  [21, -250],
-  [-45, -264],
-  [45, -264],
-  [-60, -245],
-  [60, -245],
-  [-40, -232],
-  [40, -232],
-  [-65, -262],
-  [65, -262]
-];
+const inSafeZone = (x, z, padding = 0) => MapScenes.safe(x, z, padding);
+let spawnWarning = false;
 function waveIndex() {
   let total = 0;
   for (let i = 0; i < ZC.waveSizes.length; i++) {
@@ -50,7 +34,7 @@ function waveStats(stats, index) {
     throw new Error('Statistiques de l’arme indisponibles pour la vague de zombies.');
   const power = Math.min(1, Math.log2(1 + stats.dmg / 25) / 5);
   const ranged = stats.mag > 0 ? 0.38 + 0.3 * Math.sqrt(Math.min(stats.rate, 3000) / 3000) : 0;
-  return { hp: Math.ceil(stats.dmg * (3 + index)), speed: 0.72 + 0.16 * power + ranged + index * 0.1 };
+  return { hp: Math.ceil(stats.dmg * (3 + index)), speed: (0.72 + 0.16 * power + ranged + index * 0.1) * MapScenes.zombieScale() };
 }
 function rebalanceZombies() {
   for (const z of zRoots) {
@@ -60,12 +44,14 @@ function rebalanceZombies() {
     u.hp = (u.hp / u.maxHp) * stats.hp;
     u.maxHp = stats.hp;
     u.speed = stats.speed;
+    if (u.model.bar.visible) ZombieAssets.setZombieHealth(u.model, u.hp / u.maxHp);
   }
 }
 function makeZombie(index) {
   const stats = waveStats(AV.stats, index);
   const model = ZombieAssets.createZombie(State.spawned);
   const root = model.root;
+  root.scale.setScalar(MapScenes.zombieScale());
   root.userData = {
     zombie: true,
     model,
@@ -81,24 +67,18 @@ function makeZombie(index) {
 }
 function spawnZombie(index = waveIndex()) {
   if (!ZombieAssets.zombiesReady()) return false;
-  let spawn = null;
-  for (let i = 0; i < 48 && !spawn; i++) {
-    const p = SPAWNS[(Math.random() * SPAWNS.length) | 0],
-      x = p[0] + (Math.random() - 0.5) * 3,
-      z = p[1] + Z12 + (Math.random() - 0.5) * 3;
-    if (!zBlock(x, z)) spawn = [x, z];
-  }
+  const spawn = MapScenes.spawnPoint();
   if (!spawn) {
-    const p = SPAWNS.find(([x, z]) => !zBlock(x, z + Z12));
-    if (p) spawn = [p[0], p[1] + Z12];
-  }
-  if (!spawn) {
-    console.error('Aucun point d’apparition libre pour les infectés.');
-    say('Les infectés ne peuvent pas apparaître : aucun point libre.', 4000);
+    if (!spawnWarning) {
+      console.error('Aucun point accessible pour les infectés près du joueur.');
+      say('Aucun point d’apparition accessible. Déplacez-vous dans la ville.', 4000);
+      spawnWarning = true;
+    }
     return false;
   }
+  spawnWarning = false;
   const z = makeZombie(index);
-  z.position.set(spawn[0], GH(spawn[0], spawn[1]), spawn[1]);
+  z.position.set(spawn[0], spawn[1], spawn[2]);
   scene.add(z);
   zRoots.push(z);
   State.spawned++;
@@ -114,20 +94,14 @@ function killZombie(z, t) {
   State.kills++;
   SND.play('zdie');
   hud();
+  setObjective(objectiveNow());
   if (State.kills >= CONFIG.zombieTarget && !State.zDone) endFight();
 }
 function endFight() {
   State.zDone = true;
-  setObjective(TEXTS.objectives.exitShutter);
+  setObjective(objectiveNow());
   SND.play('success');
-  say(TEXTS.msg.zWin, 8000);
-  doorShutter.userData.led.material = glow(0x30ff70, 3);
-  doorShutter.userData.hint = TEXTS.hints.door_shutter_unlocked;
-  zRoots.forEach((z) => {
-    if (z.userData.state === 'walk') z.userData.state = 'collapse';
-  });
-  exitLight.material.emissiveIntensity = 5;
-  setTimeout(() => Actions.handlers.door_shutter(doorShutter), 3200);
+  say('Dernier infecté abattu. Le téléporteur de sortie est déverrouillé.', 8000);
 }
 function hud() {
   const hp = THREE.MathUtils.clamp(State.hp, 0, 100);
@@ -136,8 +110,9 @@ function hud() {
   document.getElementById('player-health').textContent = Math.round(hp * 10) / 10 + ' / 100 PV';
   const c = document.getElementById('combat');
   if (!c) return;
-  c.style.display = State.armed ? 'flex' : 'none';
-  document.getElementById('ammo-panel').style.display = State.armed ? 'flex' : 'none';
+  const fighting = State.armed && MapScenes.active === 'town';
+  c.style.display = fighting ? 'flex' : 'none';
+  document.getElementById('ammo-panel').style.display = fighting ? 'flex' : 'none';
   document.getElementById('wave').textContent = 'VAGUE ' + (State.wave || 1) + ' / ' + ZC.waveSizes.length;
   const st = AV.stats;
   document.getElementById('ammo-state').textContent = State.reloading ? 'RECHARGEMENT…' : 'CHARGEUR';
@@ -147,7 +122,12 @@ function hud() {
 function equipWeapon() {
   const w = (AV.state && AV.state.weapon) || 2;
   State.armed = true;
-  loadAvatar({ ...(AV.state || {}), weapon: w });
+  if (!loadAvatar({ ...(AV.state || {}), weapon: w })) {
+    State.armed = false;
+    hud();
+    say('Impossible d’équiper votre personnage. Réessayez.', 5000);
+    return false;
+  }
   AV.tp = true;
   AV.stats = CL.weaponStats(AV.state);
   State.ammo = AV.stats.mag;
@@ -158,6 +138,7 @@ function equipWeapon() {
     say('Chargement des infectés impossible. Rechargez la page pour réessayer.', 10000);
   });
   hud();
+  return true;
 }
 function muzzlePos() {
   const sy = Math.sin(rig.yaw),
@@ -195,6 +176,7 @@ function hitZombie(z, dmg, head, p, t) {
   const u = z.userData;
   if (u.state === 'dead') return;
   u.hp -= dmg * (head ? 2.5 : 1);
+  ZombieAssets.setZombieHealth(u.model, u.hp / u.maxHp);
   burst(p, head ? 9 : 5);
   SND.play('zhit');
   u.stagger = t + 0.25;
@@ -207,6 +189,7 @@ let fireT = 0,
 function fire(e) {
   if (
     !State.armed ||
+    MapScenes.active !== 'town' ||
     State.zDone ||
     State.focus ||
     modalOpen ||
@@ -238,8 +221,12 @@ function fire(e) {
     alive.forEach((z) => {
       const d = z.position.clone().sub(rig.pos);
       d.y = 0;
-      if (d.length() < 2.3 && d.normalize().dot(fw) > 0.25)
-        hitZombie(z, st.dmg, false, z.position.clone().setY(1.3), t);
+      const distance = d.length();
+      const origin = rig.pos.clone(), target = z.position.clone().add(new THREE.Vector3(0, 1, 0));
+      const toward = target.clone().sub(origin);
+      if (distance < 2.3 && d.normalize().dot(fw) > 0.25 &&
+        !MapScenes.obstruction(new THREE.Ray(origin, toward.clone().normalize()), toward.length()))
+        hitZombie(z, st.dmg, false, target, t);
     });
     return;
   }
@@ -254,7 +241,7 @@ function fire(e) {
   SND.play('shot', k);
   mFlash.position.copy(muzzlePos());
   mFlash.intensity = 7;
-  setTimeout(() => (mFlash.intensity = 0), 55);
+  gameTimeout(() => (mFlash.intensity = 0), 55);
   const pellets = k === 3 ? 8 : 1,
     spread = ((100 - st.acc) / 100) * (k === 3 ? 0.09 : 0.05);
   for (let i = 0; i < pellets; i++) {
@@ -266,8 +253,10 @@ function fire(e) {
     d.normalize();
     zRay.set(o, d);
     zRay.far = st.range + 4;
-    const hit = zRay.intersectObjects(alive.flatMap((z) => z.userData.model.hitboxes), false)[0],
-      end = hit ? hit.point : o.clone().addScaledVector(d, Math.min(st.range, 40));
+    let hit = zRay.intersectObjects(alive.flatMap((z) => z.userData.model.hitboxes), false)[0];
+    const obstruction = MapScenes.obstruction(zRay.ray, hit ? hit.distance : Math.min(st.range, 40));
+    if (obstruction) hit = null;
+    const end = obstruction ? obstruction.position : hit ? hit.point : o.clone().addScaledVector(d, Math.min(st.range, 40));
     tracer(muzzlePos(), end);
     if (k === 12) {
       // roquette : dégâts de zone autour du point d’impact
@@ -276,7 +265,10 @@ function fire(e) {
       mFlash.intensity = 14;
       alive.forEach((z) => {
         const dd = z.position.distanceTo(end);
-        if (dd < 4.5) hitZombie(z, st.dmg * (1 - dd / 4.5), false, z.position.clone().setY(1.2), t);
+        const target = z.position.clone().add(new THREE.Vector3(0, 1, 0));
+        const toward = target.clone().sub(end);
+        if (dd < 4.5 && !MapScenes.obstruction(new THREE.Ray(end.clone().addScaledVector(d, -0.02), toward.clone().normalize()), toward.length()))
+          hitZombie(z, st.dmg * (1 - dd / 4.5), false, target, t);
       });
       continue;
     }
@@ -294,7 +286,7 @@ function reload() {
   State.reloading = true;
   SND.play('reload');
   hud();
-  setTimeout(
+  gameTimeout(
     () => {
       State.reloading = false;
       State.ammo = AV.stats ? AV.stats.mag : 0;
@@ -304,7 +296,7 @@ function reload() {
   );
 }
 function playerHurt(n) {
-  if (inSafeZone(rig.pos.x, rig.pos.z)) return false;
+  if (MapScenes.active !== 'town' || inSafeZone(rig.pos.x, rig.pos.z)) return false;
   n *= Math.max(0.35, 1 - 0.06 * (State.bonus || 0));
   State.hp -= n;
   hurtT = 0.5;
@@ -314,14 +306,9 @@ function playerHurt(n) {
     State.hp = 100;
     healingRemaining = 0;
     say(TEXTS.msg.zDead, 5000);
-    zRoots.forEach((z) => {
-      scene.remove(z);
-      ZombieAssets.disposeZombie(z.userData.model);
-    });
-    zRoots.length = 0;
-    State.spawned = State.kills;
-    rig.pos.set(0, 1.6, -228 + Z12);
-    rig.yaw = 0;
+    clearTownZombies();
+    MapScenes.respawn();
+    rig.yaw = -Math.PI / 2;
     rig.pitch = 0;
     State.reloading = false;
     State.ammo = AV.stats ? AV.stats.mag : 0;
@@ -330,12 +317,14 @@ function playerHurt(n) {
   }
   return false;
 }
-const zBlock = (x, z) => {
-  if (inSafeZone(x, z, 0.4)) return true;
-  for (const c of EXTRA_COLLIDERS)
-    if (x > c[0] - 0.3 && x < c[1] + 0.3 && z > c[2] - 0.3 && z < c[3] + 0.3) return true;
-  return Math.abs(x) > 74.3 || z < -271 + Z12 || z > -222.4 + Z12;
-};
+function clearTownZombies() {
+  zRoots.forEach((z) => {
+    scene.remove(z);
+    ZombieAssets.disposeZombie(z.userData.model);
+  });
+  zRoots.length = 0;
+  State.spawned = State.kills;
+}
 function combatFrame(dt, t) {
   if (healingRemaining > 0) {
     const amount = Math.min(healingRemaining, 10 * dt, 100 - State.hp);
@@ -355,7 +344,7 @@ function combatFrame(dt, t) {
     hurtT = Math.max(0, hurtT - dt);
     hurt.style.opacity = hurtT * 1.6;
   }
-  if (State.armed && !State.zDone && !MapScenes.active && roomOf(rig.pos.z) === 12 && !State.doorExit) {
+  if (State.armed && !State.zDone && MapScenes.active === 'town' && !State.doorExit) {
     State.spawnT = (State.spawnT || 0) - dt;
     const aliveN = zRoots.filter((z) => z.userData.state === 'walk').length;
     const index = waveIndex();
@@ -372,38 +361,44 @@ function combatFrame(dt, t) {
   }
   for (let i = zRoots.length - 1; i >= 0; i--) {
     const z = zRoots[i],
-      u = z.userData;
+      u = z.userData,
+      scale = MapScenes.zombieScale();
     if (u.state === 'walk') {
-      const dx = rig.pos.x - z.position.x,
-        dz = rig.pos.z - z.position.z,
-        d = Math.hypot(dx, dz) || 1;
-      z.rotation.y = Math.atan2(dx, dz);
+      const d = Math.hypot(rig.pos.x - z.position.x, rig.pos.z - z.position.z);
+      if (!u.waypoint || Math.hypot(u.waypoint[0] - z.position.x, u.waypoint[1] - z.position.z) < 0.2)
+        u.waypoint = MapScenes.zombieTarget(z.position.x, z.position.z);
+      const goal = u.waypoint;
+      const dx = goal ? goal[0] - z.position.x : 0, dz = goal ? goal[1] - z.position.z : 0;
+      const distance = Math.hypot(dx, dz) || 1;
+      if (goal) z.rotation.y = Math.atan2(dx, dz);
       const sp = (t < (u.stagger || 0) ? 0.25 : 1) * u.speed;
-      if (d > 0.95) {
-        const sx = (dx / d) * sp * dt,
-          sz = (dz / d) * sp * dt;
-        if (!zBlock(z.position.x + sx, z.position.z)) z.position.x += sx;
-        if (!zBlock(z.position.x, z.position.z + sz)) z.position.z += sz;
-      } else if (t > u.nextHit && !State.doorExit && !safe &&
-        Math.abs(GH(rig.pos.x, rig.pos.z) - GH(z.position.x, z.position.z)) < 1.2) {
-        u.nextHit = t + 1;
-        if (playerHurt(ZC.hitDamage)) return;
-        ZombieAssets.attackZombie(u.model);
+      if (d > 0.95 * scale && goal) {
+        const sx = (dx / distance) * Math.min(distance, sp * dt),
+          sz = (dz / distance) * Math.min(distance, sp * dt);
+        if (MapScenes.townMove(z.position.x + sx, z.position.z)) z.position.x += sx;
+        if (MapScenes.townMove(z.position.x, z.position.z + sz)) z.position.z += sz;
+      } else if (d <= 0.95 * scale && t > u.nextHit && !State.doorExit && !safe) {
+        const origin = z.position.clone().add(new THREE.Vector3(0, scale, 0));
+        const toward = rig.pos.clone().sub(origin);
+        if (!MapScenes.obstruction(new THREE.Ray(origin, toward.clone().normalize()), toward.length())) {
+          u.nextHit = t + 1;
+          if (playerHurt(ZC.hitDamage)) return;
+          ZombieAssets.attackZombie(u.model);
+        }
       }
       for (const o of zRoots)
         if (o !== z && o.userData.state === 'walk') {
           const ox = z.position.x - o.position.x,
             oz = z.position.z - o.position.z,
             od = Math.hypot(ox, oz);
-          if (od < 0.6 && od > 0.001) {
-            const sx = (ox / od) * 0.6 * dt,
-              sz = (oz / od) * 0.6 * dt;
-            if (!zBlock(z.position.x + sx, z.position.z)) z.position.x += sx;
-            if (!zBlock(z.position.x, z.position.z + sz)) z.position.z += sz;
+          if (od < 0.6 * scale && od > 0.001) {
+            const sx = (ox / od) * 0.6 * scale * dt,
+              sz = (oz / od) * 0.6 * scale * dt;
+            if (MapScenes.townMove(z.position.x + sx, z.position.z)) z.position.x += sx;
+            if (MapScenes.townMove(z.position.x, z.position.z + sz)) z.position.z += sz;
           }
         }
-      z.position.y = GH(z.position.x, z.position.z);
-      ZombieAssets.animateZombie(u.model, dt, d > 0.95 ? sp : 0.35);
+      ZombieAssets.animateZombie(u.model, dt, d > 0.95 * scale ? sp / scale : 0.35);
       if (State.doorExit) z.visible = false;
     } else {
       // chute puis disparition

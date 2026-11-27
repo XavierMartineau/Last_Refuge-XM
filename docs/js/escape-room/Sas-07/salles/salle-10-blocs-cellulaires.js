@@ -73,7 +73,7 @@ function openGate(o) {
   const u = o.userData;
   u.opened = true;
   SND.play('unlock');
-  setTimeout(() => SND.play('door'), 250);
+  gameTimeout(() => SND.play('door'), 250);
   tween(1, (k) => {
     o.rotation.y = -u.side * 1.5 * k;
   });

@@ -168,7 +168,7 @@ function plateTool(kind, list) {
       tl.rotation.set(0, 0, 0);
       await tween(0.4, (k) => tl.position.set(sx + 0.4 * (1 - k), sy - 0.3 * (1 - k), 0.6 - 0.55 * k)); // l'outil arrive devant la vis
       if (kind === 'driver') {
-        for (let n = 0; n < 5; n++) setTimeout(() => SND.play('click'), n * 170);
+        for (let n = 0; n < 5; n++) gameTimeout(() => SND.play('click'), n * 170);
         await tween(
           0.95,
           (k) => {
@@ -197,7 +197,7 @@ function plateTool(kind, list) {
       } else {
         SND.play('drill');
         for (let n = 0; n < 4; n++)
-          setTimeout(
+          gameTimeout(
             () => {
               bloodCover.localToWorld(wp.set(sx, sy, 0.07));
               sparkBurst(wp.x, wp.y, wp.z);

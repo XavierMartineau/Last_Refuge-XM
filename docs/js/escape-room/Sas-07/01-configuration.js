@@ -1,6 +1,19 @@
 /* LAST REFUGE · XM — Escape room « Sas 07 » · Configuration : réglages du jeu, des contrôles, du son et tous les textes.
    Fichier chargé dans l’ordre par escape-room.js : il partage la portée globale des autres fichiers. */
 'use strict';
+const gameTimers = new Set();
+function gameTimeout(callback, ms) {
+  gameTimers.add({ callback, remaining: ms });
+}
+function gameTimersFrame(dt) {
+  for (const timer of [...gameTimers]) {
+    timer.remaining -= dt * 1000;
+    if (timer.remaining <= 0) {
+      gameTimers.delete(timer);
+      timer.callback();
+    }
+  }
+}
 const AV = {
   obj: null,
   tp: true,
@@ -16,7 +29,7 @@ const AV = {
    1. CONFIGURATION (tout ce qu’on peut vouloir ajuster est ici)
    Pièce 1 : sas, centrée en (0,0,0)   — Pièce 2 : salle de contrôle, centrée en (0,0,-8)
    ════════════════════════════════════════════════════════════════ */
-const ZOMBIE_WAVE_SIZES = [1, 1, 2, 2, 3, 4];
+const ZOMBIE_WAVE_SIZES = [10, 15, 20, 25, 30];
 const CONFIG = {
   W: 8,
   H: 3.4,
@@ -39,10 +52,10 @@ const CONFIG = {
   doorCode: '482915', // code à 6 chiffres de la porte du sas (révélé par le terminal quand l’énigme de la pièce 1 est résolue)
   code: '4719', // code du terminal (47 sur le panneau + 19 dans la note)
   sequence: ['green', 'red', 'blue'], // ordre des boutons de la salle 2
-  roomZ: [0, -8, -17, -27, -52, -87, -117, -152, -197, -242, -287, -337],
+  roomZ: [0, -8, -17, -27, -52, -87, -117, -152, -197, -242, -287],
   drawerCode: '739', // tiroir du garde (bloc cellulaire) : chiffres gravés dans la cellule n°1
   bureauCode: '418',
-  quitUrl: '', // page vers laquelle « Quitter l’escape room » redirige (ex. 'https://mon-site.fr') ; vide = écran de fin
+  quitUrl: '../../../../index.html', // retour à l'accueil depuis la page du jeu
   camCode: '4719', // code de l’armoire à munitions : peint sur un mur, visible UNIQUEMENT via la caméra n°2 (poste de surveillance)                         // cadenas du bureau (complexe) : indiqué sur la note de la mezzanine
   zombieTarget: ZOMBIE_WAVE_SIZES.reduce((total, count) => total + count, 0),
   zombies: { waveSizes: ZOMBIE_WAVE_SIZES, maxAlive: 7, spawnEvery: 2.2, hitDamage: 5 },
@@ -161,7 +174,6 @@ const TEXTS = {
       fuse: 'Fusible',
       key: 'Clé du silo',
       key2: 'Clé du convoi',
-      key3: 'Clé du casier d’armes',
       cellkey: 'Clé de cellule',
       key4: 'Clé du bloc cellulaire',
       crowbar: 'Pied-de-biche',
@@ -196,10 +208,6 @@ const TEXTS = {
     openCmd: 'Alimentation principale rétablie. Ouvrez la porte du fond.',
     room9: 'Aire d’évacuation : trouvez la clé du convoi sur un véhicule.',
     exitFinal2: 'Vous avez la clé du convoi. Ouvrez la grande porte de sortie.',
-    room12: 'Armurerie : retrouvez la clé du casier d’armes (lisez la note près de l’entrée).',
-    needLocker: 'Vous avez la clé. Ouvrez le casier d’armes (mur ouest).',
-    fight: 'Abattez les infectés : lisez le recensement sur le mur ouest pour connaître le nombre exact.',
-    exitShutter: 'Le sas est déverrouillé. Rejoignez la grande porte au fond.',
     room10:
       'Bloc cellulaire : lisez la note de l’entrée, trouvez le code gravé dans une cellule et ouvrez le tiroir du garde, au fond.',
     openCell: 'Vous avez la clé de cellule. Ouvrez la cellule du fond (côté ouest) et fouillez sa couchette.',
@@ -274,16 +282,10 @@ const TEXTS = {
     relay_2: 'Abaisser le relais',
     relay_3: 'Abaisser le relais',
     key_02: 'Prendre la clé du convoi',
-    door_shutter: 'Examiner la grande porte de sortie',
     door_block: 'Examiner la porte du bloc',
     door_block_unlocked: 'Ouvrir la porte du bloc',
     door_exit3: 'Examiner la porte principale',
-    door_exit3_unlocked: 'Ouvrir la porte principale',
-    door_shutter_unlocked: 'Ouvrir la grande porte de sortie',
-    note_gunkey: 'Lire la note',
-    key_03: 'Prendre la clé du casier',
-    locker_gun: 'Examiner le casier d’armes',
-    clue_zombies: 'Lire le recensement'
+    door_exit3_unlocked: 'Ouvrir la porte principale'
   },
   msg: {
     panel1: 'Des chiffres tracés dans le sang séché : « 4 7 ». La suite a été effacée.',
@@ -390,15 +392,7 @@ const TEXTS = {
     exit2Locked: 'Verrouillée. Il faut la clé du convoi.',
     exit2Open2:
       'La grande porte s’ouvre sur un bloc cellulaire glacial : des barreaux à perte de vue, et des cellules plongées dans l’ombre.',
-    shutterLocked: 'Le sas est verrouillé. Le panneau indique : abattre le nombre d’infectés du recensement.',
-    keyNote: '« La clé du casier d’armes ? Posée sur le bureau du capitaine, tout au fond, à droite. »',
-    key3Taken: 'Vous prenez la clé du casier d’armes.',
-    lockerNoKey: 'Le casier d’armes est verrouillé. Il faut sa clé.',
-    lockerX: 'Un casier vide, couvert de sang séché.',
-    lockerOpen: 'Le casier s’ouvre : votre arme est là. Chargée. Les infectés arrivent, tirez !',
-    census: 'Recensement, secteur 10 : « {n} infectés à neutraliser avant l’ouverture du sas. »',
-    zWin: 'Dernier infecté abattu. Le sas se déverrouille avec un grondement : la sortie est ouverte !',
-    zDead: 'Vous êtes tombé… Vous vous réveillez à l’entrée de la salle. Le décompte est conservé.',
+    zDead: 'Vous êtes tombé… Vous vous réveillez à l’entrée de Zombie Town. Le décompte est conservé.',
     cellAlready: 'La porte de cette cellule est déjà ouverte.',
     cellLocked: 'Cellule verrouillée. Il faut la clé de cellule.',
     cellRust: 'La serrure est rouillée, soudée par le sang séché. Impossible de l’ouvrir.',

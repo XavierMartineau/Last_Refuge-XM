@@ -54,8 +54,7 @@ const CCTV = (function () {
     8: 74.9,
     9: 74.9,
     10: 44.9,
-    11: 59.9,
-    12: 74.9
+    11: 59.9
   };
   const ZR = {
     1: [23.4, -4],
@@ -68,8 +67,7 @@ const CCTV = (function () {
     8: [-132, -172],
     9: [-172, -222],
     10: [-222, -262],
-    11: [-262, -312],
-    12: [-312, -362]
+    11: [-262, -312]
   };
   /* ── Carte : plan 2D de LA SALLE où vous êtes (murs et meubles à l’échelle, portes, objets présents, votre position et direction) ── */
   let _ints = [],
@@ -536,11 +534,10 @@ const CCTV = (function () {
     8: 4.4,
     9: 4.4,
     10: 4.3,
-    11: 4.3,
-    12: 4.3
+    11: 4.3
   };
   const roomCams = [];
-  for (let r = 1; r <= 12; r++) {
+  for (let r = 1; r <= 11; r++) {
     const zT = ZR[r][0],
       zw = r === 1 ? zT - 0.5 : zT - 0.5,
       x = r === 1 ? 4 : 4.5,
@@ -670,7 +667,7 @@ R('switch_power', (o) => {
   o.userData.state = 'on';
   o.userData.hint = Hn.switch_power_on;
   SND.play('lever');
-  setTimeout(() => SND.play('power'), 350);
+  gameTimeout(() => SND.play('power'), 350);
   tween(0.6, (k) => {
     o.userData.arm.rotation.z = 0.65 - 1.3 * k;
   });
@@ -708,11 +705,11 @@ R('locker_03', (o) => {
   });
   o.userData.hint = Hn.locker_03_open;
   SND.play('latch');
-  setTimeout(() => SND.play('lockerdoor'), 140);
+  gameTimeout(() => SND.play('lockerdoor'), 140);
   tween(0.9, (k) => {
     o.userData.pivot.rotation.y = -1.9 * k;
   });
-  setTimeout(() => lockerStuff(true), 350);
+  gameTimeout(() => lockerStuff(true), 350);
   say(M.locker3Open, 6000);
 });
 R('note_log', async (o) => {
@@ -764,7 +761,7 @@ const LKMSG = [
       if (c.userData && c.userData.hit) c.raycast = () => {};
     });
     SND.play('cutlock');
-    setTimeout(() => SND.play('padfall'), 380);
+    gameTimeout(() => SND.play('padfall'), 380);
     const pd = u.pad,
       py = pd.position.y;
     tween(
@@ -778,9 +775,9 @@ const LKMSG = [
     ).then(() => {
       pd.visible = false;
     });
-    setTimeout(() => {
+    gameTimeout(() => {
       SND.play('latch');
-      setTimeout(() => SND.play('lockerdoor'), 140);
+      gameTimeout(() => SND.play('lockerdoor'), 140);
       tween(0.9, (t) => {
         u.pivot.rotation.y = -1.9 * t;
       });
@@ -840,14 +837,14 @@ const press = (o) => {
   const ok = State.seq.every((c, i) => c === CONFIG.sequence[i]);
   if (!ok) {
     State.seq = [];
-    setTimeout(() => SND.play('error'), 150);
+    gameTimeout(() => SND.play('error'), 150);
     say(M.seqWrong);
     setMonitors(...TEXTS.screens.mon_err, '#ff6a5a');
     return;
   }
   if (State.seq.length === CONFIG.sequence.length) {
     State.solved = true;
-    setTimeout(() => {
+    gameTimeout(() => {
       SND.play('success');
       SND.play('unlock');
     }, 250);
@@ -927,14 +924,6 @@ const DOORS = [
     ok: () => State.breaker,
     locked: M.exit3Locked,
     open: M.exit3Open
-  },
-  {
-    id: 'door_shutter',
-    z: -362,
-    flag: 'doorShutter',
-    ok: () => State.zDone,
-    locked: M.shutterLocked,
-    final: true
   }
 ];
 DOORS.forEach((D) =>
@@ -947,22 +936,11 @@ DOORS.forEach((D) =>
       State[D.flag] = true;
       o.userData.hint = Hn.door_room1_open;
       SND.play('door');
-      const d = D.final ? 1.8 : 1.6;
-      openDoorAnim(o, d);
+      openDoorAnim(o, 1.6);
       if (D.open) say(D.open);
-      if (D.final) {
-        State.doorExit = true;
-        exitLight.material.emissiveIntensity = 6;
-        setTimeout(async () => {
-          await flyTo(new THREE.Vector3(0, 1.6, -362.2), 0, 0, 52, 2.2);
-          SND.play('success');
-          document.getElementById('end').classList.add('on');
-          modalOpen = true;
-        }, 900);
-      }
       return;
     }
-    if (!D.final) passDoor(D.z);
+    passDoor(D.z);
   })
 );
 
@@ -982,7 +960,7 @@ DOORS.forEach((D) =>
       }
       await focusOn(o);
       SND.play('click');
-      setTimeout(() => SND.play('unlock'), 350);
+      gameTimeout(() => SND.play('unlock'), 350);
       State.panelOpen = true;
       say('Vous dévissez le panneau : le digicode apparaît, câbles à nu.', 4500);
       setObjective(objectiveNow());
@@ -993,7 +971,7 @@ DOORS.forEach((D) =>
       if (await askCode(M.doorCodeTitle, 6, CONFIG.doorCode)) {
         State.unlocked = true;
         SND.play('success');
-        setTimeout(() => SND.play('unlock'), 450);
+        gameTimeout(() => SND.play('unlock'), 450);
         o.userData.led.material = glow(0x30ff70, 3);
         o.userData.hint = Hn.door_room1_unlocked;
         say(M.doorUnlocked);
@@ -1068,7 +1046,7 @@ R('safe_01', async (o) => {
     State.safe = true;
     o.userData.hint = Hn.safe_01_open;
     SND.play('success');
-    setTimeout(() => SND.play('locker'), 300);
+    gameTimeout(() => SND.play('locker'), 300);
     tween(0.9, (k) => {
       o.userData.pivot.rotation.y = -1.9 * k;
     });
@@ -1097,7 +1075,7 @@ R('reader_01', (o) => {
   State.card = false;
   renderInv();
   SND.play('success');
-  setTimeout(() => SND.play('unlock'), 400);
+  gameTimeout(() => SND.play('unlock'), 400);
   o.userData.led.material = glow(0x30ff70, 3);
   doorVault.userData.led.material = glow(0x30ff70, 3);
   doorVault.userData.hint = Hn.door_vault_unlocked;
@@ -1130,7 +1108,7 @@ for (let i = 1; i <= 4; i++)
     o.userData.led.material = glow(State.brk[j] ? 0x30ff70 : 0xff2a1a, 3);
     if (State.brk.every((v, n) => v === CONFIG.breakers[n])) {
       State.power4 = true;
-      setTimeout(() => SND.play('genstart'), 300);
+      gameTimeout(() => SND.play('genstart'), 300);
       gen.userData.led.material = glow(0x30ff70, 3);
       doorFinal.userData.led.material = glow(0x30ff70, 3);
       doorFinal.userData.hint = Hn.door_final_unlocked;
@@ -1164,7 +1142,7 @@ R('fusebox_01', (o) => {
   });
   if (State.fusesIn >= 3) {
     State.power5 = true;
-    setTimeout(() => {
+    gameTimeout(() => {
       SND.play('success');
       SND.play('genstart');
     }, 350);
@@ -1187,7 +1165,7 @@ R('keypad_ware', async (o) => {
   if (await askCode(M.wareTitle, CONFIG.wareCode.length, CONFIG.wareCode.join(''))) {
     State.wareCode = true;
     SND.play('success');
-    setTimeout(() => SND.play('unlock'), 350);
+    gameTimeout(() => SND.play('unlock'), 350);
     o.userData.led.material = glow(0x30ff70, 3);
     doorWare.userData.led.material = glow(0x30ff70, 3);
     doorWare.userData.hint = Hn.door_ware_unlocked;
@@ -1220,7 +1198,7 @@ R('key_01', (o) => {
     o.userData.led.material = glow(0x30ff70, 3);
     if (State.relays >= 3) {
       State.power8 = true;
-      setTimeout(() => {
+      gameTimeout(() => {
         SND.play('success');
         SND.play('genstart');
       }, 350);
@@ -1273,7 +1251,7 @@ R('drawer_guard', async (o) => {
   if (await askCode(M.drawerTitle, 3, CONFIG.drawerCode)) {
     State.keyCell = true;
     SND.play('success');
-    setTimeout(() => SND.play('key'), 300);
+    gameTimeout(() => SND.play('key'), 300);
     renderInv();
     say(M.drawerOk, 6000);
     setObjective(objectiveNow());
@@ -1336,7 +1314,7 @@ R('bar_depot', (o) => {
   }
   State.barDone = true;
   SND.play('lever');
-  setTimeout(() => SND.play('clank'), 400);
+  gameTimeout(() => SND.play('clank'), 400);
   const y0 = o.position.y;
   tween(0.7, (k) => {
     o.position.y = y0 - 1.0 * k * k;
@@ -1376,7 +1354,7 @@ R('breaker', (o) => {
   if (State.breaker) return say(M.breakerDone);
   State.breaker = true;
   SND.play('lever');
-  setTimeout(() => {
+  gameTimeout(() => {
     SND.play('success');
     SND.play('genstart');
   }, 350);
@@ -1390,83 +1368,4 @@ R('breaker', (o) => {
   doorExit3.userData.hint = Hn.door_exit3_unlocked;
   say(M.breakerOk, 7000);
   setObjective(objectiveNow());
-});
-R('note_gunkey', async (o) => {
-  SND.play('paper');
-  await focusOn(o);
-  say(M.keyNote, 7000);
-});
-R('clue_zombies', async (o) => {
-  SND.play('paper');
-  await focusOn(o);
-  say(fmt(M.census, { n: CONFIG.zombieTarget }), 9000);
-});
-R('key_03', (o) => {
-  State.key3 = true;
-  hideObj(o);
-  SND.play('paper');
-  renderInv();
-  say(M.key3Taken);
-  setObjective(TEXTS.objectives.needLocker);
-});
-['arena_medkit_1', 'arena_medkit_2'].forEach((id) =>
-  R(id, (o) => {
-    if (State.hp >= 100) return say('Votre vie est déjà au maximum.', 2500);
-    if (healingRemaining > 0) return say('Un soin progressif est déjà en cours.', 2500);
-    healingRemaining = 100;
-    hideObj(o);
-    SND.play('paper');
-    say('Trousse utilisée : votre vie remonte progressivement.', 3000);
-  })
-);
-['arena_ammo_1', 'arena_ammo_2'].forEach((id) =>
-  R(id, (o) => {
-    if (!State.armed || !AV.stats || !AV.stats.mag) return say('Équipez une arme à feu pour utiliser cette boîte.', 2500);
-    if (State.reloading) return say('Attendez la fin du rechargement.', 2500);
-    if (State.ammo >= AV.stats.mag) return say('Votre chargeur est déjà plein.', 2500);
-    State.ammo = AV.stats.mag;
-    hideObj(o);
-    SND.play('reload');
-    hud();
-    say('Chargeur rempli instantanément.', 2500);
-  })
-);
-[0, 1, 2, 4, 5].forEach((i) =>
-  R('locker_x' + i, (o) => {
-    const u = o.userData,
-      pv = u.pivot;
-    u.open = !u.open;
-    SND.play('locker');
-    say(u.open ? M.lockerX : M.nothing, 2600);
-    const a0 = pv.rotation.y,
-      a1 = u.open ? -1.9 : 0;
-    tween(
-      0.8,
-      (k) => {
-        pv.rotation.y = a0 + (a1 - a0) * easeOutBack(k);
-      },
-      (k) => k
-    );
-  })
-); // casiers de l'armurerie : s'ouvrent et se referment
-R('locker_gun', async (o) => {
-  if (State.armed) return say(M.lockerOpen);
-  if (!State.key3) {
-    SND.play('locked');
-    return say(M.lockerNoKey);
-  }
-  State.key3 = false;
-  renderInv();
-  SND.play('unlock');
-  const pv = o.userData.pivot;
-  tween(1.1, (k) => {
-    pv.rotation.y = -1.9 * k;
-  });
-  o.userData.led.material = glow(0x30ff70, 3);
-  setTimeout(() => {
-    SND.play('locker');
-    equipWeapon();
-    say(M.lockerOpen, 7000);
-    setObjective(objectiveNow());
-  }, 900);
 });

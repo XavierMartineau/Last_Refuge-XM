@@ -68,7 +68,6 @@ export const FICHIERS = [
   'salles/sol-escaliers.js',
   'salles/salle-10-blocs-cellulaires.js',
   'salles/salle-11-ligne-de-coupure.js',
-  'salles/salle-12-armurerie-arene.js',
   '07-combat-infectes.js',
   '08-camera.js',
   '09-son.js',

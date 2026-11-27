@@ -3,16 +3,27 @@
 'use strict';
 /* ═════════ HAUTEUR DU SOL : escaliers et mezzanine (utilisée par la marche, le personnage et la caméra) ═════════ */
 const PLAT = { x0: -60, x1: -3.6, z0: -312, z1: -275.2, y: 4.8 },
-  STAIR = { x0: -6, x1: -3.6, za: -268, zb: -275.2 },
-  ARENA_STAIR = { x0: 5, x1: 9, za: -320, zb: -326, end: -329, steps: 6, rise: 0.25 };
+  STAIR = { x0: -6, x1: -3.6, za: -268, zb: -275.2 };
 function GH(x, z) {
   if (typeof MapScenes !== 'undefined' && MapScenes.active && z < -900) return MapScenes.height();
   if (x <= PLAT.x1 && x >= PLAT.x0 && z <= PLAT.z1 && z >= PLAT.z0) return PLAT.y;
   if (x >= STAIR.x0 && x <= STAIR.x1 && z <= STAIR.za && z > STAIR.zb)
     return (PLAT.y * (STAIR.za - z)) / (STAIR.za - STAIR.zb);
-  if (x >= ARENA_STAIR.x0 && x <= ARENA_STAIR.x1 && z <= ARENA_STAIR.za && z >= ARENA_STAIR.end)
-    return Math.min(ARENA_STAIR.steps, Math.floor(ARENA_STAIR.za - z) + 1) * ARENA_STAIR.rise;
   return 0;
+}
+function paperNote(lines, x, y, z, ry, id, w = 0.9, h = 1.1) {
+  const sf = new Surface(256)
+    .base('#c9bc99', 0.9, 0.5)
+    .grain(30)
+    .blob(40, 200, 60, '110,80,30', 0.4)
+    .blob(210, 50, 50, '110,80,30', 0.35);
+  lines.forEach((t, i) =>
+    sf.write(t, 128, 36 + i * (200 / lines.length), 'bold 19px Georgia', 'rgba(40,30,20,.92)')
+  );
+  sf.blood(1, { w: 120, h: 100, drip: false });
+  const p = plane(w, h, pbr(sf, { bump: 0.6 }), x, y, z, scene, ry);
+  interactive(p, id, 'Lire la note', 'inspect', { focusDist: 1.4 });
+  return p;
 }
 // murs intérieurs avec colliders (la porte, si elle existe, laisse un passage de 1,9 m)
 function wallX(x0, x1, z, h, dx = null, y0 = 0) {
