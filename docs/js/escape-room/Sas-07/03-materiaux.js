@@ -123,6 +123,7 @@ const tiled = (m, rx, ry) => {
       c[k].needsUpdate = true;
     }
   });
+  levelMaterials.add(c);
   return c;
 };
 const glow = (hex, i = 3) =>

@@ -134,14 +134,8 @@
     if (!room) return;
     overview.hidden = true;
     game.hidden = false;
-    $("game-title").textContent = `${room.code} — ${room.name}`;
     gameFrame.src = room.url;
     gameFrame.focus();
-  });
-
-  $("exit-game").addEventListener("click", exitGame);
-  document.addEventListener("fullscreenchange", () => {
-    game.classList.toggle("is-fullscreen", document.fullscreenElement === game);
   });
 
   // la progression peut changer dans un autre onglet (créateur autonome, choix de salle)

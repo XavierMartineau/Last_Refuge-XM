@@ -24,6 +24,7 @@ _rc.camera = camera;
 let _fk = 1,
   _fkT = 1,
   _fc = 0,
+  _nextFlashProbe = 0,
   _fkF = 1,
   _fkFs = 1;
 function flashLabel() {
@@ -69,7 +70,8 @@ function updateFlash(dt, t) {
     fNext = t + 7 + Math.random() * 16;
   } // minuscule scintillement de temps en temps
   const m = !flashOn ? 0 : FL.flicker && t < fUntil ? 0.4 : 1;
-  if (_fc++ % 4 === 0) {
+  if (flashOn && (perf.lowEnd ? t >= _nextFlashProbe : _fc++ % 4 === 0)) {
+    _nextFlashProbe = t + 0.25;
     _rc.set(rig.pos, _f);
     _rc.far = 6;
     const h = _rc

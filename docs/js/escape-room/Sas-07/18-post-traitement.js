@@ -243,7 +243,7 @@ function perfApply() {
   renderer.setPixelRatio(pr);
   composer.setPixelRatio(pr);
   resize();
-  perf.cool = 3500;
+  perf.cool = perf.lowEnd ? 2000 : 3500;
   if (perf.s <= 0.6 && !perf.cut) {
     perf.cut = true;
     flash.castShadow = false;
@@ -258,14 +258,19 @@ function setLowEndMode(enabled) {
       s: perf.s, cut: perf.cut, flashShadow: flash.castShadow,
       shadows: renderer.shadowMap.enabled, bloom: bloom.enabled, outline: outline.enabled,
       lights: reducedLights.map((light) => [light, light.visible]), cameraFar: camera.far,
+      materials: [...levelMaterials].map((material) => [material, material.bumpMap, material.roughnessMap]),
       localLights: scene.children.filter((object) => object.isLight && object.distance > 0)
     };
     perf.lowEnd = true;
-    perf.s = Math.min(perf.s, 0.5);
+    perf.s = Math.min(perf.s, 0.4);
     perfApply();
     renderer.shadowMap.enabled = false;
     bloom.enabled = false;
     outline.enabled = false;
+    perf.beforeLowEnd.materials.forEach(([material]) => {
+      material.bumpMap = null;
+      material.roughnessMap = null;
+    });
     reducedLights.forEach((light) => { light.visible = false; });
     camera.far = Math.min(camera.far, MapScenes.active ? 100 : roomOf(rig.pos.z) <= 4 ? 20 : 60);
   } else {
@@ -278,6 +283,10 @@ function setLowEndMode(enabled) {
     renderer.shadowMap.enabled = previous.shadows;
     bloom.enabled = previous.bloom;
     outline.enabled = previous.outline;
+    previous.materials.forEach(([material, bumpMap, roughnessMap]) => {
+      material.bumpMap = bumpMap;
+      material.roughnessMap = roughnessMap;
+    });
     previous.lights.forEach(([light, visible]) => { light.visible = visible; });
     camera.far = previous.cameraFar;
     perf.beforeLowEnd = null;
@@ -336,17 +345,17 @@ function perfTick() {
   perf.n++;
   perf.cool -= d;
   perf.outlineRetry = Math.max(0, perf.outlineRetry - d);
-  if (perf.n >= 90) {
+  if (perf.n >= (perf.lowEnd ? 30 : 90)) {
     const avg = perf.acc / perf.n;
     perf.acc = 0;
     perf.n = 0;
     if (perf.cool <= 0) {
       if (perf.lowEnd) {
-        if (avg > 33 && perf.s > 0.35) {
-          perf.s = Math.max(0.35, perf.s - 0.05);
+        if (avg > 33 && perf.s > 0.25) {
+          perf.s = Math.max(0.25, perf.s - 0.1);
           perfApply();
-        } else if (avg < 19 && perf.s < 0.5) {
-          perf.s = Math.min(0.5, perf.s + 0.05);
+        } else if (avg < 19 && perf.s < 0.4) {
+          perf.s = Math.min(0.4, perf.s + 0.05);
           perfApply();
         }
       } else if (avg > 21) {

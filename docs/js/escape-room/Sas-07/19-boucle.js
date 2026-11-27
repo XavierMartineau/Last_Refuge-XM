@@ -72,7 +72,6 @@ function updateFps(delta) {
   if (fpsValue.hidden || document.hidden) {
     fpsFrames = 0;
     fpsElapsed = 0;
-    lagMessage.hidden = true;
     return;
   }
   if (fpsSkip) {
@@ -94,6 +93,7 @@ function loop() {
     clock.elapsedTime -= delta;
     fpsFrames = 0;
     fpsElapsed = 0;
+    lagMessage.hidden = true;
     resetLagDiagnostic();
     return;
   }
@@ -155,6 +155,8 @@ function loop() {
   } // plancher : jamais sous 10 % une fois le courant rétabli
   neon.tubes.forEach((o) => {
     const k = neon.k[o.room];
+    if (o.lastK === k) return;
+    o.lastK = k;
     o.m.emissiveIntensity = (o.room === 12 ? 0.8 : 3.2) * k;
     o.m.emissive.setHex(k > 0.6 ? 0xcfe4ff : 0x8e9296);
     if (o.hm) {
@@ -223,7 +225,17 @@ function loop() {
     if (fx) fx.style.opacity = al ? 0.03 + 0.05 * (0.5 + 0.5 * Math.sin(t * 2)) : 0;
   } // alarme rouge pulsante
   beacons.forEach((b) => (b.m.emissiveIntensity = b.on() ? 3 * (0.5 + 0.5 * Math.sin(t * 4)) : 0));
-  blinkers.forEach((b) => (b.m.emissiveIntensity = Math.sin(t * b.s + b.p) > 0.2 ? 2.2 : 0.1));
+  if (perf.lowEnd) {
+    const count = Math.ceil(blinkers.length / 4),
+      start = loop.blinkerIndex || 0;
+    for (let i = 0; i < count; i++) {
+      const b = blinkers[(start + i) % blinkers.length];
+      b.m.emissiveIntensity = Math.sin(t * b.s + b.p) > 0.2 ? 2.2 : 0.1;
+    }
+    loop.blinkerIndex = (start + count) % (blinkers.length || 1);
+  } else {
+    blinkers.forEach((b) => (b.m.emissiveIntensity = Math.sin(t * b.s + b.p) > 0.2 ? 2.2 : 0.1));
+  }
   rotors.forEach((r) => {
     if (!r.on || r.on()) r.o.rotation.z += dt * r.s;
   });

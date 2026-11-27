@@ -357,17 +357,21 @@ class Surface {
   }
 }
 // Fabrique un matériau PBR à partir d’une Surface
-const pbr = (s, { rx = 1, ry = 1, metal = 0, bump = 1.5, extra = {} } = {}) =>
-  new THREE.MeshStandardMaterial({
+const levelMaterials = new Set();
+const pbr = (s, { rx = 1, ry = 1, metal = 0, bump = 1.5, extra = {} } = {}) => {
+  const material = new THREE.MeshStandardMaterial({
     ...s.build(rx, ry),
     roughness: 1,
     metalness: metal,
     bumpScale: bump,
     ...extra
   });
+  levelMaterials.add(material);
+  return material;
+};
 // Décalque (sang, rouille) : plan transparent posé sur une surface
-const decalMat = (s) =>
-  new THREE.MeshStandardMaterial({
+const decalMat = (s) => {
+  const material = new THREE.MeshStandardMaterial({
     ...s.build(),
     roughness: 1,
     metalness: 0,
@@ -377,3 +381,6 @@ const decalMat = (s) =>
     polygonOffset: true,
     polygonOffsetFactor: -4
   });
+  levelMaterials.add(material);
+  return material;
+};
