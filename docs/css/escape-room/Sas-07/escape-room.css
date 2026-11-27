@@ -110,6 +110,8 @@ button.no{background:#3a4038;color:var(--txt)}
 #fps-toggle,#fps-value{padding:6px 8px;font:700 12px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.1em;color:#dfe2cc;background:#0a0c0ae6;border:1px solid #ffffff38;border-radius:6px}
 #fps-toggle[aria-pressed="true"]{color:var(--amber);border-color:var(--amber)}
 #fps-value[hidden]{display:none}
+#lag-diagnostic{left:50%;top:50%;transform:translate(-50%,-50%);max-width:90vw;box-sizing:border-box;padding:8px 12px;background:#0a0c0ae6;border:1px solid var(--amber);border-radius:6px;color:#e4e1cf;font:600 15px/1.35 "Barlow Condensed","Arial Narrow",sans-serif;text-align:center}
+#lag-diagnostic[hidden]{display:none}
 #menu{backdrop-filter:blur(7px);background:#02040299}
 .box.menu{width:min(540px,92vw);max-height:92dvh;overflow:auto;padding:0;text-align:left;border:1px solid #ffffff22;border-radius:14px;background:linear-gradient(180deg,#151915f2,#0b0e0bf7);box-shadow:0 30px 80px #000c,inset 0 1px 0 #ffffff14;position:relative}
 .box.menu::before{content:'';position:absolute;left:24px;right:24px;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:.8}
@@ -142,8 +144,6 @@ button.no{background:#3a4038;color:var(--txt)}
 @media(max-width:520px){.menu .opts,#help{grid-template-columns:1fr}}
 #snd{pointer-events:auto;right:12px;top:calc(12px + env(safe-area-inset-top,0px));padding:5px 12px;background:#0a0c0acc;color:var(--amber)}
 #fl{pointer-events:auto;right:12px;top:calc(54px + env(safe-area-inset-top,0px));padding:5px 12px;background:#0a0c0acc;color:var(--amber)}
-#chr{pointer-events:auto;right:12px;top:calc(96px + env(safe-area-inset-top,0px));padding:5px 12px;background:#0a0c0acc;color:var(--amber)}
-#chj{width:100%;box-sizing:border-box;background:#0b0d0b;color:var(--txt);border:2px solid #7d8072;font:13px monospace;padding:8px;user-select:text;-webkit-user-select:text}
 #inv{left:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:#0a0c0acc;border-left:4px solid var(--amber);padding:4px 12px;display:none}
 .modal{position:fixed;inset:0;z-index:9;background:#000b;display:none;align-items:center;justify-content:center}
 .modal.on{display:flex}

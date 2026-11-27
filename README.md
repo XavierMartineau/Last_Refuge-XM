@@ -38,7 +38,7 @@ Le menu des réglages met la partie en pause : le temps, les animations, les com
 
 **Options → Affichage → Mode PC peu puissant** adapte la résolution et réduit la distance d’affichage, les lumières et la fréquence des caméras de surveillance ; il désactive les ombres, le halo et le contour 3D en jeu. La sélection des objets reste visible ; désactiver ce mode rétablit les réglages graphiques précédents.
 Le compteur **FPS** s’affiche dès le lancement ; le bouton **FPS** en jeu ou **Échap → Partie → Compteur FPS** permet de le masquer temporairement.
-En cas de baisse sous 45 FPS, la console du navigateur affiche périodiquement un diagnostic des temps CPU moyens par opération. Il indique l’opération mesurée la plus coûteuse, sans mesurer le temps GPU ni garantir la cause exacte du ralentissement.
+En cas de baisse sous 45 FPS, un message temporaire au centre de l’écran indique l’opération CPU mesurée la plus coûteuse, sans mesurer le temps GPU ni garantir la cause exacte du ralentissement.
 
 Les menus proposent une ambiance sonore générée en direct. Si le navigateur bloque la lecture automatique, elle démarre à la première interaction. **Options → Audio → Ambiance des menus** permet de la couper ; les volumes général et musique s’appliquent également.
 

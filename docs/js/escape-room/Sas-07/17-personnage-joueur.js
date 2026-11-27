@@ -4,7 +4,6 @@
 /* ════════════════════════════════════════════════════════════════
    7e. PERSONNAGE JOUABLE (créé avec « createur-personnage-3d.html »)
    • Vue 3e personne par défaut ; touche V (ou bouton) pour alterner avec la vue 1re personne.
-   • Bouton « 👤 Personnage » : collez le JSON exporté par le créateur (ou « Mon navigateur » pour reprendre la sauvegarde locale).
    Réglages : AV.dist (distance caméra), AV.shoulder (décalage d’épaule), AV.tp (true = 3e personne).
    ════════════════════════════════════════════════════════════════ */
 const FP = (() => {
@@ -270,53 +269,8 @@ function applyRig(t) {
     camera.updateProjectionMatrix();
   }
 }
-// interface : bouton + fenêtre de chargement du personnage
+// Chargement du personnage créé et commande de changement de vue
 {
-  const cm = document.getElementById('charm'),
-    tx = document.getElementById('chj'),
-    ms = document.getElementById('chmsg');
-  const open = () => {
-      cm.classList.add('on');
-      modalOpen = true;
-      ms.textContent = '';
-    },
-    close = () => {
-      cm.classList.remove('on');
-      modalOpen = false;
-    };
-  const apply = (j, label) => {
-    if (loadAvatar(j)) {
-      try {
-        localStorage.setItem(AV.key, JSON.stringify(AV.state));
-      } catch (e) {}
-      ms.textContent = label;
-      SND.play('success');
-    } else ms.textContent = 'Impossible de construire ce personnage.';
-  };
-  document.getElementById('chr').onclick = open;
-  document.getElementById('chno').onclick = close;
-  document.getElementById('chok').onclick = () => {
-    try {
-      apply(JSON.parse(tx.value), 'Personnage chargé.');
-    } catch (e) {
-      ms.textContent = 'JSON invalide : ' + e.message;
-    }
-  };
-  document.getElementById('chdef').onclick = () => {
-    apply({}, 'Personnage par défaut.');
-  };
-  document.getElementById('chls').onclick = () => {
-    let j = null;
-    try {
-      j = JSON.parse(localStorage.getItem(AV.key) || 'null');
-    } catch (e) {}
-    if (j) apply(j, 'Personnage du navigateur chargé.');
-    else ms.textContent = 'Aucune sauvegarde trouvée dans ce navigateur : collez le JSON à la place.';
-  };
-  document.getElementById('chv').onclick = () => {
-    AV.tp = !AV.tp;
-    ms.textContent = AV.tp ? 'Vue 3e personne.' : 'Vue 1re personne.';
-  };
   addEventListener('keydown', (e) => {
     if (CONTROLS.keys.view.includes(e.code) && !e.repeat && !modalOpen) {
       AV.tp = !AV.tp;
@@ -413,13 +367,6 @@ function applyRig(t) {
   mn.addEventListener('pointerdown', (e) => {
     if (e.target === mn) setMenu(false);
   });
-  {
-    const prev = $m('chr').onclick;
-    $m('chr').onclick = (e) => {
-      setMenu(false);
-      prev && prev.call(e.currentTarget, e);
-    };
-  }
   addEventListener('keydown', (e) => {
     if (
       e.code === 'Escape' &&

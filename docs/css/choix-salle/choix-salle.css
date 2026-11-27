@@ -40,6 +40,11 @@
   line-height: 1.7;
 }
 
+.page-choix .choix-intro .action-button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .page-choix .choix-warning {
   margin: 20px 0 0;
   padding: 14px 18px 14px 26px;

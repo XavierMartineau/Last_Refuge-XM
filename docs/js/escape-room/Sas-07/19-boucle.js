@@ -6,7 +6,8 @@
    ════════════════════════════════════════════════════════════════ */
 const clock = new THREE.Clock();
 const fpsToggle = document.getElementById('fps-toggle'),
-  fpsValue = document.getElementById('fps-value');
+  fpsValue = document.getElementById('fps-value'),
+  lagMessage = document.getElementById('lag-diagnostic');
 let fpsFrames = 0, fpsElapsed = 0, fpsSkip = true;
 const lagDiagnostic = {
   frames: 0, elapsed: 0, skip: true,
@@ -45,11 +46,9 @@ function recordLagDiagnostic(delta, controls, map, world, cctv, render) {
       ['rendu côté CPU', lagDiagnostic.render]
     ];
     const slowest = stages.reduce((a, b) => b[1] > a[1] ? b : a);
-    const details = stages.map(([name, time]) => name + ' : ' + (time / lagDiagnostic.frames).toFixed(1) + ' ms').join(', ');
-    console.log('[Diagnostic FPS] ' + Math.round(fps) + ' FPS. Opération mesurée la plus coûteuse : ' +
-      slowest[0] + '. Moyennes par image : ' + details +
-      '. Ces mesures CPU ne permettent pas de déterminer le temps GPU ou la cause exacte du ralentissement.');
-  }
+    lagMessage.textContent = 'Ralentissement possible : ' + slowest[0] + ' (opération CPU la plus coûteuse).';
+    lagMessage.hidden = false;
+  } else lagMessage.hidden = true;
   resetLagDiagnostic();
   lagDiagnostic.skip = false;
 }
@@ -66,12 +65,14 @@ document.addEventListener('visibilitychange', () => {
   fpsFrames = 0;
   fpsElapsed = 0;
   fpsSkip = true;
+  lagMessage.hidden = true;
   resetLagDiagnostic();
 });
 function updateFps(delta) {
   if (fpsValue.hidden || document.hidden) {
     fpsFrames = 0;
     fpsElapsed = 0;
+    lagMessage.hidden = true;
     return;
   }
   if (fpsSkip) {

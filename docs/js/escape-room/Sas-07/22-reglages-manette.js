@@ -129,7 +129,6 @@
             act('Son du jeu', 'Couper / rétablir', 'snd'),
             act('Caméra', '1re / 3e personne', 'vw'),
             act('Compteur FPS', 'Afficher / masquer', 'fps-toggle'),
-            act('Personnage', 'Charger un détenu', 'chr'),
             act('Outils de test', 'Dev Mode', 'devmb'),
             act('Quitter l’escape room', 'Quitter', 'menuquit', true)
           ]
