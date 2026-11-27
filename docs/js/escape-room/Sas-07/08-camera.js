@@ -82,6 +82,10 @@ async function flyTo(pos, yaw, pitch, fov, d = 1.2) {
   rig.locked = false;
 }
 let saved = null;
+// après « Quitter le zoom », l’objet quitté ne peut plus être activé pendant 2 s (évite de le recliquer par erreur)
+const ZOOM_COOLDOWN_MS = 2000;
+const zoomCooldown = { obj: null, until: 0 };
+const onZoomCooldown = (o) => !!o && o === zoomCooldown.obj && performance.now() < zoomCooldown.until;
 async function focusOn(obj) {
   // zoom fluide devant un objet
   if (!State.focus) saved = { pos: rig.pos.clone(), yaw: rig.yaw, pitch: rig.pitch, fov: rig.fov };
@@ -103,13 +107,19 @@ async function release(manual) {
   if (manual !== true) return; // sortie automatique ignorée : seul le bouton retour (ou Échap) ramène la caméra
   genHide();
   document.getElementById('back').style.display = 'none';
-  const s = saved;
+  const s = saved,
+    left = State.focus;
+  zoomCooldown.obj = left;
+  zoomCooldown.until = Infinity; // bloqué pendant le retour de la caméra…
   State.releasing = true;
   try {
     await flyTo(s.pos, s.yaw, s.pitch, s.fov, 0.9);
   } finally {
     State.releasing = false;
     State.focus = null;
+    zoomCooldown.until = performance.now() + ZOOM_COOLDOWN_MS; // …puis encore 2 s
+    // le regard à la souris reprend tout seul (sans clic qui réactiverait l’objet)
+    if (window.lastRefugeRelock) window.lastRefugeRelock();
   }
 }
 const roomOf = (z) =>

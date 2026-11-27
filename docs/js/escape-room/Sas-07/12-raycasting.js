@@ -37,7 +37,8 @@ function hover(e) {
     setHover(null);
     return;
   }
-  const o = pick(e);
+  let o = pick(e);
+  if (onZoomCooldown(o)) o = null; // objet qu’on vient de quitter : ni contour ni infobulle pendant 2 s
   setHover(o);
   if (o) {
     tip.textContent = '[' + interactionLabel(o.userData.actionType === 'pickup') + '] ' + o.userData.hint;
@@ -51,7 +52,7 @@ function takeNearest() {
     hovered && hovered.userData.actionType === 'pickup'
       ? hovered
       : pick({ clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 });
-  if (!o || o.userData.actionType !== 'pickup') return;
+  if (!o || o.userData.actionType !== 'pickup' || onZoomCooldown(o)) return;
   const p = new THREE.Vector3();
   o.getWorldPosition(p);
   if (p.distanceTo(new THREE.Vector3(rig.pos.x, rig.pos.y - 0.4, rig.pos.z)) > 3.4) {
@@ -74,6 +75,7 @@ function click(e) {
   if (rig.locked || modalOpen) return;
   if (isAiming()) return fire();
   const o = pick(e);
+  if (onZoomCooldown(o)) return; // objet quitté il y a moins de 2 s
   if (!o) {
     if (!State.focus && State.armed) fire(e);
     return;

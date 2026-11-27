@@ -356,7 +356,8 @@
     const r = canvas.getBoundingClientRect();
     return { clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
   };
-  let wantMenu = false;
+  let wantMenu = false,
+    lockPress = false; // le clic qui verrouille le curseur ne doit pas aussi activer l’objet visé
 
   const lock = () => {
     if (auto() && freeLook() && !locked() && canvas.requestPointerLock) {
@@ -369,6 +370,11 @@
       }
     }
   };
+  // appelé à la sortie du zoom : reverrouille le curseur si le navigateur le permet encore (geste récent)
+  window.lastRefugeRelock = () => {
+    if (navigator.userActivation && !navigator.userActivation.isActive) return;
+    if (!locked()) lock();
+  };
   document.addEventListener('pointerlockerror', () => {
     say('Le navigateur refuse le regard automatique. Choisissez « Cliquer-glisser » dans les réglages.', 6000);
   });
@@ -380,7 +386,10 @@
       if (e.button !== 0) return;
       if (!auto() || !freeLook()) return;
       e.stopImmediatePropagation();
-      if (!locked()) lock();
+      if (!locked()) {
+        lockPress = true;
+        lock();
+      }
     },
     true
   );
@@ -388,6 +397,12 @@
     'pointerup',
     (e) => {
       if (e.button !== 0) return;
+      if (lockPress) {
+        // ce clic servait seulement à reprendre le contrôle de la caméra
+        lockPress = false;
+        e.stopImmediatePropagation();
+        return;
+      }
       if (!auto() || !locked()) return;
       e.stopImmediatePropagation();
       click(center());
