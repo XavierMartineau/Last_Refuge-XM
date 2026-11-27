@@ -341,13 +341,16 @@ fitHitBoxes();
   };
   const askQuit = () => {
     modalOpen = true;
+    const cancel = btn('Annuler', () => {
+      ov.style.display = 'none';
+      modalOpen = document.getElementById('menu').classList.contains('on');
+    });
+    cancel.id = 'quitcancel';
     show('QUITTER L’ESCAPE ROOM ?', 'La partie en cours sera perdue.', [
       btn('Quitter', bye, true),
-      btn('Annuler', () => {
-        ov.style.display = 'none';
-        modalOpen = document.getElementById('menu').classList.contains('on');
-      })
+      cancel
     ]);
+    if (window.LastRefugeManette && window.LastRefugeManette.active) cancel.focus();
   };
   function bye() {
     try {

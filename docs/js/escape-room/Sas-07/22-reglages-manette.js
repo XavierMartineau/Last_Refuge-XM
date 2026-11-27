@@ -214,8 +214,13 @@
         }
         return active;
       },
-      spatial: () => !menuOn(),
+      spatial: () => !menuOn() || topModal() !== menuEl,
       scope: topModal,
+      onBack: () => {
+        const cancel = $g('quitcancel');
+        if (cancel && $g('quitov').style.display === 'grid') cancel.click();
+        else PAD.tap('Escape');
+      },
       onMenu: () => {
         if (menuOn()) $g('menuok').click();
       },
