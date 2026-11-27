@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 const definitions = [
   { file: 'animation_zombie.glb', walk: 'walk01', attack: 'attack01', death: 'death', height: 1.8 },
@@ -8,6 +9,7 @@ const definitions = [
   { file: 'living_flesh_blob_-_free_organic_horror_asset.glb', walk: 'Armature|ArmatureAction', width: 1.4 }
 ];
 const loader = new GLTFLoader();
+loader.setMeshoptDecoder(MeshoptDecoder); // modèles compressés (gltf-transform meshopt) décodés en WebAssembly
 loader.register((parser) => ({
   name: 'KHR_materials_pbrSpecularGlossiness',
   getMaterialType(index) {
@@ -50,7 +52,10 @@ export function loadZombies() {
         throw new Error('Modèle ou animation invalide : ' + definition.file);
       }
       return { ...definition, gltf, bounds, scale: (definition.height || definition.width) / dimension };
-    })).then((loaded) => { models = loaded; });
+    })).then((loaded) => { models = loaded; }, (error) => {
+      loading = null; // un échec réseau n’empêche pas une nouvelle tentative au prochain passage
+      throw error;
+    });
   }
   return loading;
 }

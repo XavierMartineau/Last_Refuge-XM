@@ -335,6 +335,20 @@ window.prepareSas07 = async (progress) => {
   avatarFrame(0, 0);
   await renderer.compileAsync(scene, camera);
   await renderer.compileAsync(FP.scene, FP.camera);
+  // toutes les textures du bunker envoyées à la carte graphique maintenant, pas en entrant dans chaque salle
+  const textures = new Set();
+  scene.traverse((object) => {
+    for (const material of [].concat(object.material || []))
+      for (const value of Object.values(material)) if (value && value.isTexture) textures.add(value);
+  });
+  let sent = 0;
+  for (const texture of textures) {
+    renderer.initTexture(texture);
+    if (++sent % 12 === 0) {
+      progress('Envoi des textures à la carte graphique…', sent, textures.size);
+      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+    }
+  }
   progress('Chargement des textures visibles…');
   await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
   renderGame();

@@ -14,6 +14,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Octree } from 'three/addons/math/Octree.js';
 import { Capsule } from 'three/addons/math/Capsule.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import * as CL from '../../../assets/creation-personnage/personnage_armes.js?v=20261126l';
 import * as ZombieAssets from '../../../assets/zombie/zombie.js';
 
@@ -30,6 +31,7 @@ Object.assign(window, {
   GLTFLoader,
   Octree,
   Capsule,
+  MeshoptDecoder,
   zombieMapBase: new URL('../../../assets/zombie-map/', import.meta.url).href,
   CL,
   ZombieAssets
@@ -118,9 +120,18 @@ const sources = await Promise.all(
   FICHIERS.map(async (f) => {
     const url = new URL(f, base);
     if (version) url.searchParams.set('v', version);
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('Chargement impossible : ' + f + ' (' + r.status + ')');
-    const source = await r.text();
+    let source = null, failure = null;
+    for (let attempt = 0; attempt < 3 && source === null; attempt++) {
+      try {
+        if (attempt) await new Promise((r) => setTimeout(r, 600 * attempt));
+        const r = await fetch(url);
+        if (!r.ok) throw new Error('Chargement impossible : ' + f + ' (' + r.status + ')');
+        source = await r.text();
+      } catch (error) {
+        failure = error;
+      }
+    }
+    if (source === null) throw failure;
     progress('Fichiers du jeu : ' + ++loaded + ' / ' + FICHIERS.length + ' · ' + f, loaded, FICHIERS.length);
     return '\n/* ===== ' + f + ' ===== */\n' + source;
   })

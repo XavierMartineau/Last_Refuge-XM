@@ -18,7 +18,7 @@ function interactionLabel(pickup = false) {
   return TOUCH ? 'Toucher' : 'Clic gauche';
 }
 function pick(e) {
-  const r = el.getBoundingClientRect();
+  const r = gameCanvasRect();
   mv.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(mv, camera);
   for (const h of ray.intersectObjects(scene.children, true)) {
@@ -46,7 +46,7 @@ function hover(e) {
 }
 function takeNearest() {
   // touche E : prend l’objet visé (ou pointé), s’il est à portée
-  const r = el.getBoundingClientRect();
+  const r = gameCanvasRect();
   let o =
     hovered && hovered.userData.actionType === 'pickup'
       ? hovered

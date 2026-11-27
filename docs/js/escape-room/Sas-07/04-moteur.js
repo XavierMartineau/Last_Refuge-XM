@@ -5,9 +5,34 @@
    4. MOTEUR : renderer, scène, post-processing
    ════════════════════════════════════════════════════════════════ */
 const app = document.getElementById('app');
-const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-renderer.domElement.addEventListener('webglcontextlost', () => {
-  window.reportGameCrash(new Error('Le navigateur a perdu le contexte graphique WebGL ; la cause exacte est inconnue.'), 'Rendu graphique');
+// GPU dédié demandé au navigateur ; pas de tampon stencil (inutilisé) ni de copie du tampon d’image.
+const renderer = new THREE.WebGLRenderer({
+  antialias: false,
+  stencil: false,
+  preserveDrawingBuffer: false,
+  powerPreference: 'high-performance'
+});
+/* Carte graphique réellement utilisée : si le navigateur dessine avec le processeur (accélération
+   matérielle désactivée, pilote bloqué…), le jeu passe en mode PC peu puissant et prévient le joueur. */
+const GPU_INFO = (() => {
+  const gl = renderer.getContext();
+  let name = '';
+  try {
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    name = String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+  } catch (e) {}
+  const software = /swiftshader|llvmpipe|softpipe|software|basic render|microsoft basic|mesa offscreen/i.test(name);
+  return { name, software, maxTexture: gl.getParameter(gl.MAX_TEXTURE_SIZE) };
+})();
+window.lastRefugeGpu = GPU_INFO.name;
+console.info('[gpu] ' + (GPU_INFO.name || 'inconnu') + (GPU_INFO.software ? ' (rendu logiciel)' : ''));
+renderer.domElement.addEventListener('webglcontextlost', (event) => {
+  event.preventDefault(); // autorise le navigateur à restaurer le contexte au lieu d’abandonner
+  window.reportGameCrash(new Error('Le navigateur a perdu le contexte graphique WebGL (mémoire graphique saturée ou pilote réinitialisé). GPU : ' + (GPU_INFO.name || 'inconnu')), 'Rendu graphique');
+});
+renderer.domElement.addEventListener('webglcontextrestored', () => {
+  renderer.shadowMap.needsUpdate = true;
+  console.info('[gpu] contexte WebGL restauré');
 });
 const TOUCH =
   CONFIG.device.touch === 'auto'

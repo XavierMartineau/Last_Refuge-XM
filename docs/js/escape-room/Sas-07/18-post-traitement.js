@@ -53,7 +53,11 @@ function resize() {
   camera.aspect = w / h;
   camera.fov = rig.fov = w / h < 1 ? CONFIG.device.fovPortrait : CONFIG.fov;
   camera.updateProjectionMatrix();
+  canvasRect = null; // recalculé à la prochaine utilisation
 }
+// position du canvas mise en cache : la lire à chaque image forçait un recalcul de la page
+let canvasRect = null;
+const gameCanvasRect = () => canvasRect || (canvasRect = el.getBoundingClientRect());
 addEventListener('resize', resize);
 resize();
 var invOpen = false,
@@ -92,7 +96,7 @@ function selFrame(t) {
     x1 = -1e9,
     y1 = -1e9,
     ok = true;
-  const r = el.getBoundingClientRect();
+  const r = gameCanvasRect();
   for (let i = 0; i < 8; i++) {
     _sv.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z).project(camera);
     if (_sv.z > 1) {
@@ -294,7 +298,7 @@ function setLowEndMode(enabled) {
     perf.beforeLowEnd = {
       s: perf.s, cut: perf.cut, flashShadow: flash.castShadow,
       shadows: renderer.shadowMap.enabled, bloom: bloom.enabled, outline: outline.enabled,
-      lights: reducedLights.map((light) => [light, light.visible]), cameraFar: camera.far,
+      lights: reducedLights.map((light) => [light, light.visible || MapScenes.hidesLight(light)]), cameraFar: camera.far,
       materials: [...levelMaterials].map((material) => [material, material.bumpMap, material.roughnessMap]),
       barrels: null,
       localLights: scene.children.filter((object) => object.isLight && object.distance > 0)

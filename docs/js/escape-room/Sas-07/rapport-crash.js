@@ -17,6 +17,8 @@
       'Détails techniques :',
       error.stack || 'Pile non disponible.',
       'Navigateur : ' + navigator.userAgent,
+      'Carte graphique : ' + (window.lastRefugeGpu || 'inconnue'),
+      'Mémoire de l’appareil : ' + (navigator.deviceMemory ? navigator.deviceMemory + ' Go' : 'inconnue'),
       '',
       'La cause exacte peut être inconnue. Vérifiez ce rapport avant de le partager.'
     ].join('\n');

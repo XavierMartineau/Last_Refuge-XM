@@ -198,7 +198,7 @@ function fire(e) {
 function fireShot(e, st, t) {
   const k = AV.state.weapon;
   if (e) {
-    const r = el.getBoundingClientRect();
+    const r = gameCanvasRect();
     zRay.setFromCamera(
       new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1),
       camera
@@ -346,7 +346,8 @@ function combatFrame(dt, t) {
   const hurt = document.getElementById('hurt');
   if (hurt) {
     hurtT = Math.max(0, hurtT - dt);
-    hurt.style.opacity = hurtT * 1.6;
+    const opacity = hurtT > 0 ? (hurtT * 1.6).toFixed(3) : '0';
+    if (hurt.style.opacity !== opacity) hurt.style.opacity = opacity;
   }
   if (!State.zDone && MapScenes.active === 'town' && !State.doorExit) {
     State.spawnT = (State.spawnT || 0) - dt;

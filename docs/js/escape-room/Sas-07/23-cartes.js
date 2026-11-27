@@ -37,11 +37,13 @@ const MapScenes = (() => {
     definition.portals.forEach((p) => { p.x *= mapScale; p.z *= mapScale; });
   }
   const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder); // cartes compressées (meshopt) décodées en WebAssembly
   const down = new THREE.Vector3(0, -1, 0);
   const floorRay = new THREE.Ray(new THREE.Vector3(), down);
   const collisionCapsule = new Capsule(new THREE.Vector3(), new THREE.Vector3(), 0.3);
   const api = {
     active: null,
+    loading: false,
     height: () => ground,
     movementScale: () => api.active ? 2 : 1,
     zombieScale: () => 1
@@ -127,6 +129,27 @@ const MapScenes = (() => {
     hit.position.z += offset;
     return hit;
   };
+  /* Les lampes du bunker (à 2 km) restent sinon calculées pour chaque pixel des cartes :
+     elles sont masquées pendant l’exploration et rétablies au retour. La lampe torche, le
+     flash du tir et les 3 lampes qui suivent le joueur sont conservés. */
+  let hiddenBunkerLights = null;
+  api.hidesLight = (light) => !!hiddenBunkerLights && hiddenBunkerLights.includes(light);
+  function hideBunkerLights() {
+    if (hiddenBunkerLights) return;
+    const keep = new Set([flash, flashFill, mFlash, ...bigLights]);
+    hiddenBunkerLights = [];
+    scene.traverse((object) => {
+      if (!(object.isPointLight || object.isSpotLight) || !object.visible || keep.has(object)) return;
+      for (let parent = object.parent; parent; parent = parent.parent) if (parent.userData.mapGroup) return;
+      hiddenBunkerLights.push(object);
+    });
+    hiddenBunkerLights.forEach((light) => { light.visible = false; });
+  }
+  function restoreBunkerLights() {
+    if (!hiddenBunkerLights) return;
+    hiddenBunkerLights.forEach((light) => { light.visible = true; });
+    hiddenBunkerLights = null;
+  }
   function disposeMap(map) {
     if (!map) return;
     scene.remove(map.group);
@@ -147,6 +170,7 @@ const MapScenes = (() => {
     if (!current) return;
     clearTownZombies();
     disposeMap(current);
+    restoreBunkerLights();
     current = null;
     api.active = null;
     scene.fog.density = 0.04;
@@ -795,6 +819,7 @@ const MapScenes = (() => {
   async function enter(id, returning = false) {
     if (busy) return;
     busy = true;
+    api.loading = true; // l’écran de transfert couvre tout : la boucle cesse de dessiner pendant le chargement
     rig.locked = true;
     const overlay = document.createElement('div');
     overlay.setAttribute('role', 'status');
@@ -847,6 +872,7 @@ const MapScenes = (() => {
       gltf.scene.scale.multiplyScalar(mapScale);
       const octree = new Octree().fromGraphNode(gltf.scene);
       const group = new THREE.Group();
+      group.userData.mapGroup = true;
       group.position.z = offset;
       group.add(gltf.scene);
       map = { id, definition, octree, group };
@@ -913,6 +939,32 @@ const MapScenes = (() => {
         townChest(map, townCage(map));
         townMedkits(map);
       }
+      // Textures envoyées à la carte graphique et shaders compilés pendant l’écran de chargement,
+      // plutôt qu’à la première image (évite le gel à l’arrivée sur la carte).
+      progress('Préparation de la carte graphique…');
+      await nextFrame();
+      const previous = current && current.group;
+      if (previous) previous.visible = false;
+      hideBunkerLights();
+      scene.add(group);
+      try {
+        const textures = new Set();
+        group.traverse((object) => {
+          for (const material of [].concat(object.material || []))
+            for (const value of Object.values(material)) if (value && value.isTexture) textures.add(value);
+        });
+        let sent = 0;
+        for (const texture of textures) {
+          renderer.initTexture(texture);
+          if (++sent % 4 === 0) {
+            progress('Préparation de la carte graphique', sent, textures.size);
+            await nextFrame();
+          }
+        }
+        await renderer.compileAsync(scene, camera);
+      } finally {
+        if (previous) previous.visible = true;
+      }
       clearTownZombies();
       disposeMap(current);
       current = map;
@@ -931,6 +983,7 @@ const MapScenes = (() => {
         'Carte chargée : ' + definition.name + '.', 5000);
     } catch (error) {
       disposeMap(map);
+      if (!current) restoreBunkerLights(); // échec depuis le bunker : ses lampes sont rallumées
       console.error('Chargement de la carte impossible :', error);
       window.reportGameCrash(error, 'Chargement de la carte : ' + definitions[id].name);
       say('Impossible de charger la carte. Réessayez depuis le passage.', 7000);
@@ -938,6 +991,7 @@ const MapScenes = (() => {
       overlay.remove();
       rig.locked = false;
       busy = false;
+      api.loading = false;
     }
   }
   const originalDoor = Actions.handlers.door_exit3;

@@ -93,7 +93,9 @@
         });
     });
   }
-  setLowEndMode(S.lowEnd);
+  setLowEndMode(S.lowEnd || GPU_INFO.software);
+  if (GPU_INFO.software && !S.lowEnd)
+    gameTimeout(() => say('Le navigateur n’utilise pas la carte graphique : le mode PC peu puissant est activé. Activez l’accélération matérielle dans les paramètres du navigateur pour de meilleures performances.', 9000), 1500);
   // durée d’affichage des messages
   {
     const _say = say;

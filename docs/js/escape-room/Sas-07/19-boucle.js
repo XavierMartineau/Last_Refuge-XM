@@ -40,10 +40,14 @@ function updateFps(delta) {
     fpsElapsed = 0;
   }
 }
+const loopMenu = document.getElementById('menu'),
+  loopAlarm = document.getElementById('alarmfx'),
+  loopBack = document.getElementById('back');
 function loop() {
   requestAnimationFrame(loop);
   const delta = clock.getDelta();
-  if (document.getElementById('menu').classList.contains('on')) {
+  // menu ouvert, onglet caché ou carte en cours de transfert : rien à dessiner, le temps de jeu est figé
+  if (loopMenu.classList.contains('on') || document.hidden || MapScenes.loading) {
     clock.elapsedTime -= delta;
     fpsFrames = 0;
     fpsElapsed = 0;
@@ -170,8 +174,9 @@ function loop() {
           !State.breaker,
           !State.zDone
         ][State.room - 1],
-      fx = document.getElementById('alarmfx');
-    if (fx) fx.style.opacity = al ? 0.03 + 0.05 * (0.5 + 0.5 * Math.sin(t * 2)) : 0;
+      fx = loopAlarm,
+      op = al ? (0.03 + 0.05 * (0.5 + 0.5 * Math.sin(t * 2))).toFixed(3) : '0';
+    if (fx && fx.style.opacity !== op) fx.style.opacity = op;
   } // alarme rouge pulsante
   beacons.forEach((b) => (b.m.emissiveIntensity = b.on() ? 3 * (0.5 + 0.5 * Math.sin(t * 4)) : 0));
   if (perf.lowEnd) {
@@ -205,10 +210,12 @@ function loop() {
   }
   selFrame(t);
   {
-    const bk = document.getElementById('back'),
+    const bk = loopBack,
       sh = State.focus && !State.releasing ? 'block' : 'none';
-    if (bk && bk.style.display !== sh) bk.style.display = sh;
-    document.body.classList.toggle('zoom', sh === 'block');
+    if (bk && bk.style.display !== sh) {
+      bk.style.display = sh;
+      document.body.classList.toggle('zoom', sh === 'block');
+    }
   }
   renderGame();
   updateFps(delta);
