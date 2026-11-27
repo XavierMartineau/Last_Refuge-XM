@@ -31,7 +31,7 @@ function loop() {
   avatarFrame(dt, t);
   MapScenes.animate(t);
   combatFrame(dt, t);
-  if (State.armed && down('fire')) fire();
+  if (State.armed && (down('fire') || (aimedMouseShot && isAiming()))) fire();
   updateFlash(dt, t);
   // néons : éteints tant que le courant n’est pas rétabli (levier → pièces 1-2, générateur → pièces 3-4), avec des étincelles rares
   for (const r of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {

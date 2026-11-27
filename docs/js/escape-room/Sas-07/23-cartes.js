@@ -4,7 +4,9 @@ const MapScenes = (() => {
   const offset = -2000;
   const mapScale = 2;
   const sceneScale = 2;
-  const zombieRadius = 0.7 * sceneScale;
+  const zombieRadius = 0.7;
+  const townExit = { start: 100, depth: 0.65, steps: 12, rise: 0.22, z: 1.5, width: 3, end: 110 };
+  const townKits = [];
   const definitions = {
     city: {
       file: 'post-apocalyptic_city.glb',
@@ -24,7 +26,7 @@ const MapScenes = (() => {
       entry: [-45, 0],
       portals: [
         { x: -47, z: 4, label: 'RETOUR À LA VILLE', target: 'city' },
-        { x: 25, z: 0, label: 'FIN DE L’EXPLORATION', target: 'end' }
+        { x: 54, z: 0.75, label: 'FIN DE L’EXPLORATION', target: 'end' }
       ]
     }
   };
@@ -40,7 +42,7 @@ const MapScenes = (() => {
     active: null,
     height: () => ground,
     movementScale: () => api.active ? 2 : 1,
-    zombieScale: () => sceneScale
+    zombieScale: () => 1
   };
   let current = null, ground = 0, busy = false;
 
@@ -58,7 +60,14 @@ const MapScenes = (() => {
     return !hit || hit.depth < 0.04;
   }
   function pointHeight(map, x, z, previous) {
-    if (map.id === 'town') return 0.7 * mapScale;
+    if (map.id === 'town') {
+      const base = 0.7 * mapScale;
+      if (x >= townExit.start && x <= townExit.end && Math.abs(z - townExit.z) <= townExit.width / 2) {
+        const step = Math.min(townExit.steps, Math.floor((x - townExit.start) / townExit.depth) + 1);
+        return base + step * townExit.rise;
+      }
+      return base;
+    }
     return floorAt(map.octree, x, z, previous + 0.65);
   }
   function findClearPoint(map, x, z) {
@@ -78,6 +87,7 @@ const MapScenes = (() => {
     const localZ = z - offset, b = current.definition.bounds;
     if (x < b[0] + 0.3 || x > b[1] - 0.3 || localZ < b[2] + 0.3 || localZ > b[3] - 0.3)
       return null;
+    if (current.id === 'town' && cageBlocked(current, x, localZ)) return null;
     const y = pointHeight(current, x, localZ, previous);
     if (y === null || Math.abs(y - previous) > 0.45 || !clearAt(current.octree, x, localZ, y)) return null;
     return y;
@@ -91,10 +101,12 @@ const MapScenes = (() => {
   api.safe = (x, z, padding = 0) => api.active === 'town' &&
     Math.hypot(x - current.entry[0], z - offset - current.entry[1]) < 8 + padding;
   api.townMove = (x, z) => {
-    if (api.active !== 'town' || api.safe(x, z, 0.4 * sceneScale)) return false;
+    if (api.active !== 'town' || api.safe(x, z, 0.4)) return false;
     const b = current.definition.bounds, localZ = z - offset;
+    if (x >= townExit.start - zombieRadius && x <= townExit.end + zombieRadius &&
+      Math.abs(localZ - townExit.z) <= townExit.width / 2 + zombieRadius) return false;
     return x >= b[0] + zombieRadius && x <= b[1] - zombieRadius && localZ >= b[2] + zombieRadius &&
-      localZ <= b[3] - zombieRadius && clearAt(current.octree, x, localZ, 0.7 * mapScale, zombieRadius, sceneScale);
+      localZ <= b[3] - zombieRadius && clearAt(current.octree, x, localZ, 0.7 * mapScale, zombieRadius);
   };
   api.respawn = () => {
     const entry = current.entry;
@@ -140,7 +152,8 @@ const MapScenes = (() => {
     if (!point) throw new Error('Passage inaccessible : ' + info.label);
     info.x = point[0];
     info.z = point[2];
-    const y = point[1];
+    const y = info.target === 'end' && map.id === 'town'
+      ? point[1] + townExit.steps * townExit.rise : point[1];
     const mesh = new THREE.Group();
     mesh.position.set(info.x, y, info.z);
     mesh.scale.setScalar(sceneScale);
@@ -223,8 +236,11 @@ const MapScenes = (() => {
       if (Math.hypot(p.x - rig.pos.x, p.z - rig.pos.z) > 3.5 * sceneScale)
         return say('Approchez-vous du passage.', 2500);
       if (info.target === 'end') {
-        if (!State.zDone) return say('Éliminez les infectés avant d’utiliser la sortie : ' +
+        if (townPopulation.length !== CONFIG.zombieTarget || !townPopulation.every((zombie) => zombie.dead))
+          return say('Éliminez les infectés avant d’utiliser la sortie : ' +
           State.kills + ' / ' + CONFIG.zombieTarget + '.', 4000);
+        if (Math.abs((rig.pos.y - 1.6) - y) > 0.7)
+          return say('Montez les marches pour atteindre le passage.', 2500);
         document.getElementById('end').classList.add('on');
         modalOpen = true;
       } else if (info.target === 'complex') {
@@ -240,8 +256,8 @@ const MapScenes = (() => {
     });
   }
   api.animate = (time) => {
-    if (!current || !current.portalEffects) return;
-    current.portalEffects.forEach(({ ring, energy }) => {
+    if (!current) return;
+    if (current.portalEffects) current.portalEffects.forEach(({ ring, energy }) => {
       ring.rotation.z = time * 0.12;
       energy.uniforms.time.value = time;
     });
@@ -265,7 +281,7 @@ const MapScenes = (() => {
           ctx.fillRect((x - b[0]) / step, (z - b[2]) / step, 1, 1);
         else if (map.id !== 'town' || (x >= b[0] + zombieRadius && x <= b[1] - zombieRadius &&
           z >= b[2] + zombieRadius && z <= b[3] - zombieRadius &&
-          clearAt(map.octree, x, z, y, zombieRadius, sceneScale)))
+          clearAt(map.octree, x, z, y, zombieRadius)))
           walkable[((z - b[2]) / step) * canvas.width + (x - b[0]) / step] = 1;
       }
       if (row % 8 === 7) {
@@ -280,11 +296,11 @@ const MapScenes = (() => {
           const i = row * canvas.width + col;
           if (!walkable[i]) continue;
           if (col + 1 < canvas.width && walkable[i + 1] &&
-            clearAt(map.octree, b[0] + (col + 0.5) * step, b[2] + row * step, 0.7 * mapScale, zombieRadius, sceneScale)) {
+            clearAt(map.octree, b[0] + (col + 0.5) * step, b[2] + row * step, 0.7 * mapScale, zombieRadius)) {
             edges[i] |= 1; edges[i + 1] |= 2;
           }
           if (row + 1 < canvas.height && walkable[i + canvas.width] &&
-            clearAt(map.octree, b[0] + col * step, b[2] + (row + 0.5) * step, 0.7 * mapScale, zombieRadius, sceneScale)) {
+            clearAt(map.octree, b[0] + col * step, b[2] + (row + 0.5) * step, 0.7 * mapScale, zombieRadius)) {
             edges[i] |= 4; edges[i + canvas.width] |= 8;
           }
         }
@@ -311,6 +327,324 @@ const MapScenes = (() => {
   function cellPosition(nav, index) {
     return [nav.b[0] + (index % nav.width) * nav.step,
       nav.b[2] + Math.floor(index / nav.width) * nav.step + offset];
+  }
+  async function reachableTown(map, progress) {
+    const b = map.definition.bounds, step = 0.5;
+    const width = Math.floor((b[1] - b[0]) / step) + 1;
+    const height = Math.floor((b[3] - b[2]) / step) + 1;
+    const visited = new Uint8Array(width * height), passable = new Uint8Array(width * height);
+    const queue = new Int32Array(visited.length), y = 0.7 * mapScale;
+    const sx = Math.round((map.entry[0] - b[0]) / step), sz = Math.round((map.entry[1] - b[2]) / step);
+    const start = sz * width + sx;
+    visited[start] = 1;
+    queue[0] = start;
+    let head = 0, tail = 1;
+    while (head < tail) {
+      const i = queue[head++], col = i % width, row = Math.floor(i / width);
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const x = col + dx, z = row + dz;
+        if (x < 1 || x >= width - 1 || z < 1 || z >= height - 1) continue;
+        const next = z * width + x;
+        if (visited[next]) continue;
+        if (!passable[next])
+          passable[next] = clearAt(map.octree, b[0] + x * step, b[2] + z * step, y) ? 1 : 2;
+        if (passable[next] === 2 ||
+          !clearAt(map.octree, b[0] + (col + dx * 0.5) * step, b[2] + (row + dz * 0.5) * step, y)) continue;
+        visited[next] = 1;
+        queue[tail++] = next;
+      }
+      if (head % 1024 === 0) {
+        progress('Vérification des chemins accessibles');
+        await nextFrame();
+      }
+    }
+    return { visited, width, step, b };
+  }
+  function prepareTownPopulation(map, reachable) {
+    const nav = map.nav, bins = Array.from({ length: 10 }, () => []);
+    for (let i = 0; i < nav.walkable.length; i++) {
+      if (!nav.walkable[i]) continue;
+      const [x, z] = cellPosition(nav, i), localZ = z - offset;
+      if (x >= townExit.start - zombieRadius && x <= townExit.end + zombieRadius &&
+        Math.abs(localZ - townExit.z) <= townExit.width / 2 + zombieRadius) continue;
+      const col = Math.round((x - reachable.b[0]) / reachable.step);
+      const row = Math.round((localZ - reachable.b[2]) / reachable.step);
+      if (!reachable.visited[row * reachable.width + col] ||
+        Math.hypot(x - map.entry[0], localZ - map.entry[1]) < 12) continue;
+      const bin = Math.min(9, Math.floor((x - nav.b[0]) / (nav.b[1] - nav.b[0]) * 10));
+      bins[bin].push({ x, y: 0.7 * mapScale, z });
+    }
+    bins.forEach((bin) => {
+      for (let i = bin.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [bin[i], bin[j]] = [bin[j], bin[i]];
+      }
+    });
+    const points = [];
+    for (const separation of [4, 2]) {
+      let added = true;
+      while (points.length < CONFIG.zombieTarget && added) {
+        added = false;
+        for (const bin of bins) {
+          const index = bin.findIndex((p) => points.every((q) => Math.hypot(p.x - q.x, p.z - q.z) >= separation));
+          if (index < 0) continue;
+          points.push(bin.splice(index, 1)[0]);
+          added = true;
+          if (points.length === CONFIG.zombieTarget) break;
+        }
+      }
+      if (points.length === CONFIG.zombieTarget) break;
+    }
+    if (points.length !== CONFIG.zombieTarget)
+      throw new Error('Pas assez d’emplacements accessibles pour les infectés : ' + points.length);
+    points.forEach((point, id) => townPopulation.push({ ...point, id, health: 1, dead: false, root: null }));
+  }
+  function cageBlocked(map, x, z) {
+    const dx = x - map.entry[0], dz = z - map.entry[1], r = 0.3;
+    return (Math.abs(dz) >= 5 - r && Math.abs(dz) <= 5 + r && Math.abs(dx) <= 5 + r) ||
+      (Math.abs(dx + 5) <= r && Math.abs(dz) <= 5 + r) ||
+      (Math.abs(dx - 5) <= r && Math.abs(dz) <= 5 + r &&
+        (!State.townGateOpen || Math.abs(dz) >= 1.7));
+  }
+  function townCage(map) {
+    const cage = new THREE.Group();
+    cage.position.set(map.entry[0], 0.7 * mapScale, map.entry[1]);
+    const metal = new THREE.MeshStandardMaterial({ color: 0x414743, metalness: 0.7, roughness: 0.65 });
+    const surface = document.createElement('canvas');
+    surface.width = surface.height = 512;
+    const paint = surface.getContext('2d');
+    paint.fillStyle = '#60675d';
+    paint.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 4500; i++) {
+      const shade = Math.floor(Math.random() * 35);
+      paint.fillStyle = `rgba(${35 + shade},${32 + shade},${24 + shade},0.16)`;
+      paint.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 4, 1 + Math.random() * 14);
+    }
+    for (let x = 0; x <= 512; x += 128) {
+      paint.fillStyle = '#30362f';
+      paint.fillRect(x, 0, 4, 512);
+      paint.fillStyle = 'rgba(126,74,40,0.55)';
+      paint.fillRect(x + 4, 0, 3, 512);
+      for (let y = 16; y < 512; y += 64) {
+        paint.fillStyle = '#292f29';
+        paint.beginPath();
+        paint.arc(x + 10, y, 3, 0, Math.PI * 2);
+        paint.fill();
+      }
+    }
+    const texture = new THREE.CanvasTexture(surface);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(3, 2);
+    const panel = new THREE.MeshStandardMaterial({ map: texture, metalness: 0.45, roughness: 0.85 });
+    const wall = (width, height, depth, x, y, z) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), panel);
+      mesh.position.set(x, y, z);
+      cage.add(mesh);
+    };
+    wall(10, 7, 0.1, 0, 3.5, -5);
+    wall(10, 7, 0.1, 0, 3.5, 5);
+    wall(0.1, 7, 10, -5, 3.5, 0);
+    wall(0.1, 3, 3.3, 5, 1.5, -3.35);
+    wall(0.1, 3, 3.3, 5, 1.5, 3.35);
+    wall(0.1, 4, 10, 5, 5, 0);
+    wall(10.1, 0.1, 10.1, 0, 7.05, 0);
+    const light = new THREE.PointLight(0xffe6b0, 55, 18, 2);
+    light.position.set(0, 4.5, 0);
+    cage.add(light);
+    const doors = [-1, 1].map((side) => {
+      const hinge = new THREE.Group();
+      hinge.position.set(5, 0, side * 1.7);
+      const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.12, 3, 1.7), panel);
+      leaf.position.set(0, 1.5, -side * 0.85);
+      hinge.add(leaf);
+      for (let n = 0; n < 4; n++) {
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(0.16, 2.9, 0.045), metal);
+        bar.position.set(-0.02, 1.5, -side * (0.2 + n * 0.4));
+        hinge.add(bar);
+      }
+      hinge.rotation.y = State.townGateOpen ? -side * Math.PI / 2 : 0;
+      cage.add(hinge);
+      return { hinge, side };
+    });
+    const positions = [];
+    for (let n = -5; n <= 5; n += 0.5) {
+      positions.push([n, -5], [n, 5], [-5, n]);
+      if (Math.abs(n) >= 1.7) positions.push([5, n]);
+    }
+    const bars = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.035, 0.035, 2.8, 6), metal, positions.length);
+    const transform = new THREE.Object3D();
+    positions.forEach(([x, z], i) => {
+      transform.position.set(x, 1.4, z);
+      transform.updateMatrix();
+      bars.setMatrixAt(i, transform.matrix);
+    });
+    cage.add(bars);
+    const railX = new THREE.BoxGeometry(10.1, 0.08, 0.08);
+    const railZ = new THREE.BoxGeometry(0.08, 0.08, 10.1);
+    for (const h of [0.2, 2.8]) {
+      for (const z of [-5, 5]) {
+        const rail = new THREE.Mesh(railX, metal);
+        rail.position.set(0, h, z);
+        cage.add(rail);
+      }
+      const rail = new THREE.Mesh(railZ, metal);
+      rail.position.set(-5, h, 0);
+      cage.add(rail);
+    }
+    map.group.add(cage);
+    return doors;
+  }
+  function townStairs(map) {
+    const base = 0.7 * mapScale;
+    const material = new THREE.MeshStandardMaterial({ color: 0x6a6e68, metalness: 0.3, roughness: 0.8 });
+    for (let i = 0; i < townExit.steps; i++) {
+      const height = (i + 1) * townExit.rise;
+      const step = new THREE.Mesh(new THREE.BoxGeometry(townExit.depth, height, townExit.width), material);
+      step.position.set(townExit.start + (i + 0.5) * townExit.depth, base + height / 2, townExit.z);
+      map.group.add(step);
+    }
+    const start = townExit.start + townExit.steps * townExit.depth;
+    const height = townExit.steps * townExit.rise;
+    const platform = new THREE.Mesh(new THREE.BoxGeometry(townExit.end - start, height, townExit.width), material);
+    platform.position.set((start + townExit.end) / 2, base + height / 2, townExit.z);
+    map.group.add(platform);
+    const light = new THREE.PointLight(0xffe3ae, 45, 16, 2);
+    light.position.set(start, base + height + 4, townExit.z);
+    map.group.add(light);
+  }
+  function townPadlock(parent, x, y, z) {
+    const lock = padlock(parent, x, y, z);
+    const brass = new THREE.MeshStandardMaterial({ color: 0x80683c, metalness: 0.8, roughness: 0.5 });
+    const steel = new THREE.MeshStandardMaterial({ color: 0x89908a, metalness: 0.85, roughness: 0.4 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x141814, roughness: 0.9 });
+    lock.traverse((object) => {
+      if (object.isMesh)
+        object.material = object.material === padMat ? brass : object.material === mats.steel ? steel : dark;
+    });
+    return lock;
+  }
+  function townChest(map, doors) {
+    const pos = findClearPoint(map, map.entry[0] + 1.5, map.entry[1] - 1);
+    if (!pos || Math.abs(pos[0] - map.entry[0]) > 4 || Math.abs(pos[2] - map.entry[1]) > 4)
+      throw new Error('Aucun emplacement libre dans l’enclos pour le coffre.');
+    const chest = new THREE.Group();
+    chest.position.set(pos[0], pos[1], pos[2]);
+    interactive(chest, 'town_chest', 'Ouvrir le coffre à code', 'use');
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x594a35, metalness: 0.55, roughness: 0.75 });
+    const metal = new THREE.MeshStandardMaterial({ color: 0x262b29, metalness: 0.8, roughness: 0.5 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.48, 0.7), bodyMat);
+    body.position.y = 0.24;
+    chest.add(body);
+    for (const x of [-0.43, 0.43]) {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.49, 0.72), metal);
+      band.position.set(x, 0.24, 0);
+      chest.add(band);
+      for (const y of [0.09, 0.38]) {
+        const bolt = new THREE.Mesh(new THREE.SphereGeometry(0.018, 8, 6), metal);
+        bolt.position.set(x, y, 0.37);
+        chest.add(bolt);
+      }
+    }
+    const lid = new THREE.Group();
+    lid.position.set(0, 0.48, -0.35);
+    const lidMesh = new THREE.Mesh(new THREE.BoxGeometry(1.14, 0.16, 0.74), metal);
+    lidMesh.position.set(0, 0.08, 0.35);
+    lid.add(lidMesh);
+    for (const x of [-0.43, 0.43]) {
+      const strip = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.02, 0.75), bodyMat);
+      strip.position.set(x, 0.17, 0.35);
+      lid.add(strip);
+    }
+    lid.rotation.x = State.townGateOpen ? -Math.PI / 2 : 0;
+    chest.add(lid);
+    const latch = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.2, 0.04), metal);
+    latch.position.set(0, 0.43, 0.37);
+    chest.add(latch);
+    const lock = townPadlock(chest, 0, 0.37, 0.41);
+    lock.scale.setScalar(1.5);
+    if (State.townGateOpen) hideObj(lock);
+    map.group.add(chest);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 192;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#222820';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffe6a0';
+    ctx.font = 'bold 34px sans-serif';
+    ctx.fillText('CODE DU COFFRE', 256, 45);
+    ctx.font = 'bold 105px monospace';
+    ctx.fillText(CONFIG.townCode, 256, 155);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    const clue = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.675),
+      new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide }));
+    clue.rotation.x = -Math.PI / 2;
+    clue.position.set(map.entry[0] + 1, 0.7 * mapScale + 0.04, map.entry[1] + 1.3);
+    clue.raycast = () => {};
+    map.group.add(clue);
+
+    Actions.register('town_chest', async () => {
+      const p = chest.getWorldPosition(new THREE.Vector3());
+      if (Math.hypot(p.x - rig.pos.x, p.z - rig.pos.z) > 3.5)
+        return say('Approchez-vous du coffre.', 2500);
+      if (State.townGateOpen) return say('Le coffre est ouvert et la porte est déverrouillée.', 2500);
+      if (!await askCode('CADENAS DU COFFRE', CONFIG.townCode.length, CONFIG.townCode)) return;
+      State.townGateOpen = true;
+      hideObj(lock);
+      SND.play('unlock');
+      tween(1, (k) => {
+        lid.rotation.x = -Math.PI / 2 * k;
+        doors.forEach(({ hinge, side }) => { hinge.rotation.y = -side * Math.PI / 2 * k; });
+      });
+      setObjective(objectiveNow());
+      say('Coffre ouvert : la porte et la carte sont déverrouillées.', 5000);
+    });
+  }
+  function townMedkits(map) {
+    if (!townKits.length) {
+      const ordered = townPopulation.slice().sort((a, b) => a.x - b.x);
+      for (let i = 0; i < 12; i++) {
+        const p = ordered[Math.floor((i + 0.5) * ordered.length / 12)];
+        townKits.push({ x: p.x, y: p.y, z: p.z - offset, taken: false });
+      }
+    }
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xd9e1d5, roughness: 0.65 });
+    const crossMaterial = new THREE.MeshBasicMaterial({ color: 0xe23333 });
+    townKits.forEach((kit, i) => {
+      const group = new THREE.Group();
+      group.position.set(kit.x, kit.y, kit.z);
+      group.visible = !kit.taken;
+      interactive(group, 'town_medkit_' + i, 'Prendre une trousse de soin', 'pickup');
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.45, 0.3), bodyMaterial);
+      body.position.y = 0.35;
+      group.add(body);
+      const badge = new THREE.Group();
+      badge.position.set(0, 0.36, 0.16);
+      badge.add(new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.02), crossMaterial));
+      badge.add(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.02), crossMaterial));
+      group.add(badge);
+      const icon = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xff4a3d }));
+      icon.position.y = 1.2;
+      icon.scale.set(0.22, 0.22, 1);
+      icon.raycast = () => {};
+      group.add(icon);
+      map.group.add(group);
+      if (kit.taken) hideObj(group);
+      Actions.register('town_medkit_' + i, () => {
+        if (kit.taken) return;
+        if (State.hp >= 100) return say('Votre vie est déjà au maximum.', 2500);
+        if (healingRemaining > 0) return say('Un soin est déjà en cours.', 2500);
+        healingRemaining = Math.min(40, 100 - State.hp);
+        kit.taken = true;
+        hideObj(group);
+        SND.play('paper');
+        say('Trousse utilisée : votre vie remonte progressivement.', 3000);
+      });
+    });
   }
   function navigation() {
     if (api.active !== 'town') return null;
@@ -340,18 +674,6 @@ const MapScenes = (() => {
     nav.updated = now;
     return nav;
   }
-  api.spawnPoint = () => {
-    const nav = navigation();
-    if (!nav) return null;
-    const candidates = [];
-    for (let i = 0; i < nav.field.length; i++) {
-      if (nav.field[i] < 0) continue;
-      const [x, z] = cellPosition(nav, i), d = Math.hypot(x - rig.pos.x, z - rig.pos.z);
-      if (d >= 16 && d <= 48 && !api.safe(x, z, 2))
-        candidates.push([x, 0.7 * mapScale, z]);
-    }
-    return candidates.length ? candidates[Math.floor(Math.random() * candidates.length)] : null;
-  };
   api.zombieTarget = (x, z) => {
     const nav = navigation();
     if (!nav) return null;
@@ -375,24 +697,61 @@ const MapScenes = (() => {
     if (!pos) throw new Error('Aucun emplacement libre pour le casier de Zombie Town.');
     const locker = new THREE.Group();
     locker.position.set(pos[0], pos[1], pos[2]);
-    locker.scale.setScalar(sceneScale);
+    locker.rotation.y = Math.atan2(entry[0] - pos[0], entry[1] - pos[2]);
     interactive(locker, 'town_locker', 'Prendre son arme dans le casier', 'use');
-    const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.55),
-      new THREE.MeshStandardMaterial({ color: 0x455b52, metalness: 0.5, roughness: 0.6 }));
+    const cabinetMat = new THREE.MeshStandardMaterial({ color: 0x455b52, metalness: 0.55, roughness: 0.7 });
+    const trimMat = new THREE.MeshStandardMaterial({ color: 0x202923, metalness: 0.65, roughness: 0.65 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.55), cabinetMat);
     body.position.y = 1;
+    body.position.z = -0.275;
     locker.add(body);
+    const door = new THREE.Group();
+    door.position.set(-0.49, 0, 0.01);
+    const face = new THREE.Mesh(new THREE.BoxGeometry(0.98, 1.96, 0.05), cabinetMat);
+    face.position.set(0.49, 1, 0);
+    door.add(face);
+    for (let i = 0; i < 6; i++) {
+      const vent = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.025, 0.02), trimMat);
+      vent.position.set(0.45, 1.72 - i * 0.055, 0.035);
+      door.add(vent);
+    }
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.22, 0.05), trimMat);
+    handle.position.set(0.85, 1.04, 0.05);
+    door.add(handle);
+    const lock = townPadlock(door, 0.85, 0.9, 0.09);
+    door.rotation.y = State.armed ? -1.35 : 0;
+    if (State.armed) hideObj(lock);
+    locker.add(door);
     map.group.add(locker);
     Actions.register('town_locker', () => {
       const p = locker.getWorldPosition(new THREE.Vector3());
       if (Math.hypot(p.x - rig.pos.x, p.z - rig.pos.z) > 3.5 * sceneScale) return say('Approchez-vous du casier.', 2500);
-      if (State.armed) return say('Votre arme est déjà équipée.', 2500);
+      if (State.armed) {
+        if (AV.stats && AV.stats.mag && State.ammo < AV.stats.mag) {
+          State.ammo = AV.stats.mag;
+          hud();
+          SND.play('reload');
+          return say('Chargeur rempli.', 2500);
+        }
+        return say('Votre arme et vos munitions sont prêtes.', 2500);
+      }
       if (!equipWeapon()) return;
+      hideObj(lock);
+      tween(0.7, (k) => { door.rotation.y = -1.35 * k; });
       SND.play('locker');
       setObjective(objectiveNow());
       say('Arme équipée. Quittez la zone sûre pour affronter les infectés.', 5000);
     });
   }
   api.drawMap = (ctx, width, height) => {
+    if (api.active === 'town' && !State.townGateOpen) {
+      ctx.fillStyle = '#07100a';
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = '#ffd070';
+      ctx.font = 'bold 18px monospace';
+      ctx.fillText('CARTE VERROUILLÉE', 15, 25);
+      return;
+    }
     const b = current.definition.bounds, top = 36;
     const scale = Math.min((width - 30) / current.plan.width, (height - top - 20) / current.plan.height);
     const left = (width - current.plan.width * scale) / 2;
@@ -410,9 +769,10 @@ const MapScenes = (() => {
     });
     if (api.active === 'town') {
       ctx.fillStyle = '#ff3b2a';
-      zRoots.forEach((zombie) => {
-        if (zombie.userData.state !== 'walk') return;
-        const [x, y] = point(zombie.position.x, zombie.position.z - offset);
+      townPopulation.forEach((zombie) => {
+        if (zombie.dead) return;
+        const position = zombie.root ? zombie.root.position : zombie;
+        const [x, y] = point(position.x, position.z - offset);
         ctx.beginPath();
         ctx.arc(x, y, 3, 0, Math.PI * 2);
         ctx.fill();
@@ -530,11 +890,24 @@ const MapScenes = (() => {
       const entry = findClearPoint(map, start[0], start[1]);
       if (!entry) throw new Error('Point d’entrée inaccessible.');
       map.entry = [entry[0], entry[2]];
+      if (id === 'town') townStairs(map);
       definition.portals.forEach((p) => portal(map, p));
       if (id === 'town') townLocker(map);
       progress('Analyse du terrain…', 0, 1);
       await nextFrame();
       map.plan = await makePlan(map, (stage, done, total) => progress(stage + '…', done, total));
+      if (id === 'town') {
+        progress('Chargement des infectés…');
+        await ZombieAssets.loadZombies();
+        if (!townPopulation.length) {
+          progress('Vérification des chemins accessibles…');
+          await nextFrame();
+          const reachable = await reachableTown(map, (stage) => progress(stage + '…'));
+          prepareTownPopulation(map, reachable);
+        }
+        townChest(map, townCage(map));
+        townMedkits(map);
+      }
       clearTownZombies();
       disposeMap(current);
       current = map;
@@ -548,7 +921,8 @@ const MapScenes = (() => {
       rig.vy = rig.vp = 0;
       hud();
       setObjective(objectiveNow());
-      say(id === 'town' && !State.armed ? 'Prenez votre arme dans le casier près de l’entrée.' :
+      say(id === 'town' && !State.townGateOpen ? 'Lisez le code au sol et ouvrez le coffre pour sortir.' :
+        id === 'town' && !State.armed ? 'Prenez votre arme dans le casier près de l’entrée.' :
         'Carte chargée : ' + definition.name + '.', 5000);
     } catch (error) {
       disposeMap(map);

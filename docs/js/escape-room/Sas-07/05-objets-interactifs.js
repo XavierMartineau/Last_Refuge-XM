@@ -36,6 +36,7 @@ const State = {
   door1: false,
   locker3: false,
   room: 1,
+  townGateOpen: false,
   seq: [],
   solved: false,
   doorExit: false,

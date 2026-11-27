@@ -17,6 +17,9 @@ function canAim() {
 function isAiming() {
   return canAim() && (mouseAim || padAim);
 }
+function hasMagnifyingOptic() {
+  return !!(AV.state && (AV.state.wOptic === 3 || AV.state.wOptic === 4));
+}
 function updateAim(dt) {
   if (!canAim()) mouseAim = padAim = false;
   const target = isAiming() ? 1 : 0;
@@ -280,7 +283,9 @@ function objectiveNow() {
   if (MapScenes.active && rig.pos.z < -900)
     return MapScenes.active === 'city'
       ? 'Explorez la ville et trouvez le passage vers Zombie Town.'
-      : State.zDone
+      : !State.townGateOpen
+        ? 'Lisez le code au sol et ouvrez le coffre pour déverrouiller la porte.'
+        : State.zDone
         ? 'Rejoignez le téléporteur de sortie.'
         : State.armed
           ? 'Éliminez les infectés : ' + State.kills + ' / ' + CONFIG.zombieTarget + '.'

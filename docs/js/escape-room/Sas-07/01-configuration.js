@@ -29,7 +29,6 @@ const AV = {
    1. CONFIGURATION (tout ce qu’on peut vouloir ajuster est ici)
    Pièce 1 : sas, centrée en (0,0,0)   — Pièce 2 : salle de contrôle, centrée en (0,0,-8)
    ════════════════════════════════════════════════════════════════ */
-const ZOMBIE_WAVE_SIZES = [10, 15, 20, 25, 30];
 const CONFIG = {
   W: 8,
   H: 3.4,
@@ -57,11 +56,12 @@ const CONFIG = {
   bureauCode: '418',
   quitUrl: '../../../../index.html', // retour à l'accueil depuis la page du jeu
   camCode: '4719', // code de l’armoire à munitions : peint sur un mur, visible UNIQUEMENT via la caméra n°2 (poste de surveillance)                         // cadenas du bureau (complexe) : indiqué sur la note de la mezzanine
-  zombieTarget: ZOMBIE_WAVE_SIZES.reduce((total, count) => total + count, 0),
-  zombies: { waveSizes: ZOMBIE_WAVE_SIZES, maxAlive: 7, spawnEvery: 2.2, hitDamage: 5 },
+  zombieTarget: 80,
+  zombies: { maxAlive: 7, spawnEvery: 0.5, hitDamage: 10 },
   // centre (z) de chacune des 4 pièces
   wareCode: ['3', '0', '7', '1'], // entrepôt : un chiffre sur chacune des 4 affiches (allées 1 à 4) = code du digicode
   safeCode: '5294', // coffre de la pièce 3 = numéros des lits de la rangée EST (de l’entrée vers le fond)
+  townCode: '4827',
   breakers: [1, 0, 1, 1], // pièce 4 : position des 4 disjoncteurs (1 = ON) — même motif peint sur le mur
   light: {
     ambient: 0.05, // lumière ambiante (très faible : on est dans le noir)

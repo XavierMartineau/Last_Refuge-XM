@@ -23,6 +23,11 @@ const FP = (() => {
     reducedMotion: typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
   };
 })();
+const scopeOverlay = document.createElement('div');
+scopeOverlay.id = 'scope-overlay';
+scopeOverlay.setAttribute('aria-hidden', 'true');
+scopeOverlay.innerHTML = '<div class="scope-lens"><i></i><b></b></div>';
+document.body.appendChild(scopeOverlay);
 function firstPersonFire(melee) {
   if (!AV.tp && !(FP.reducedMotion && FP.reducedMotion.matches)) {
     FP.kick = 1;
@@ -150,7 +155,7 @@ function camCollide(x, z) {
 function avatarFrame(dt, t) {
   const o = AV.obj;
   const fp = !!o && State.armed && !AV.tp && !State.focus && !State.doorExit && FP.model.children.length > 0;
-  firstPersonPass.enabled = fp;
+  firstPersonPass.enabled = fp && !(hasMagnifyingOptic() && aimBlend > 0.6);
   if (fp) {
     if (FP.camera.fov !== rig.fov || FP.camera.aspect !== camera.aspect) {
       FP.camera.fov = rig.fov;
@@ -213,14 +218,19 @@ function applyRig(t) {
       Math.min(Math.max(hy - sp * d, fl + 0.35), rh - 0.25),
       hz + cy * cp * d
     );
-    AV.vis = AV.k > 0.4;
+    if (hasMagnifyingOptic() && aimBlend > 0)
+      camera.position.lerp(new THREE.Vector3(rig.pos.x, rig.pos.y, rig.pos.z), aimBlend);
+    AV.vis = AV.k > 0.4 && !(hasMagnifyingOptic() && aimBlend > 0.6);
     camera.rotation.set(rig.pitch, rig.yaw, 0);
   } else {
     AV.vis = true;
     camera.position.set(rig.pos.x, rig.pos.y + (rig.bob || 0) + Math.sin(t * 1.3) * 0.004, rig.pos.z);
     camera.rotation.set(rig.pitch, rig.yaw, 0);
   }
-  const fov = rig.fov * (1 - 0.3 * aimBlend);
+  const scoped = hasMagnifyingOptic();
+  scopeOverlay.style.opacity = scoped ? String(aimBlend) : '0';
+  const zoom = scoped ? (AV.state.wOptic === 4 ? 0.72 : 0.55) : 0.3;
+  const fov = rig.fov * (1 - zoom * aimBlend);
   if (Math.abs(camera.fov - fov) > 0.01) {
     camera.fov = fov;
     camera.updateProjectionMatrix();

@@ -78,8 +78,8 @@
           desc: "Volume des bruitages : pas, portes, tirs, infectés." }
       ]},
       { title: "Interface", rows: [
-        { id: "homeMusic", label: "Ambiance de l’accueil", type: "choice", def: true, options: [[false, "Non"], [true, "Oui"]], scope: "site",
-          desc: "Ambiance sonore de la page d’accueil. Elle démarre après votre première interaction avec la page." },
+        { id: "homeMusic", label: "Ambiance des menus", type: "choice", def: true, options: [[false, "Non"], [true, "Oui"]], scope: "site",
+          desc: "Ambiance sonore des menus. Si le navigateur bloque la lecture automatique, elle démarre à la première interaction." },
         { id: "sound", label: "Retours sonores", type: "choice", def: false, options: [[false, "Non"], [true, "Oui"]],
           desc: "Petits clics mécaniques lorsque vous utilisez les menus du site." }
       ]}

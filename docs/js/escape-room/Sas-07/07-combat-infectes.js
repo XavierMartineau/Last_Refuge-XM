@@ -20,75 +20,58 @@ const partM = new THREE.MeshBasicMaterial({ color: 0x7a0d0a }),
 const mFlash = new THREE.PointLight(0xffc880, 0, 9, 2);
 scene.add(mFlash);
 const inSafeZone = (x, z, padding = 0) => MapScenes.safe(x, z, padding);
-let spawnWarning = false;
-function waveIndex() {
-  let total = 0;
-  for (let i = 0; i < ZC.waveSizes.length; i++) {
-    total += ZC.waveSizes[i];
-    if (State.kills < total) return i;
-  }
-  return ZC.waveSizes.length - 1;
-}
-function waveStats(stats, index) {
+const townPopulation = [];
+function zombieStats(stats) {
   if (!stats || !Number.isFinite(stats.dmg) || stats.dmg <= 0 || !Number.isFinite(stats.rate))
-    throw new Error('Statistiques de l’arme indisponibles pour la vague de zombies.');
+    throw new Error('Statistiques de l’arme indisponibles pour les infectés.');
   const power = Math.min(1, Math.log2(1 + stats.dmg / 25) / 5);
   const ranged = stats.mag > 0 ? 0.38 + 0.3 * Math.sqrt(Math.min(stats.rate, 3000) / 3000) : 0;
-  return { hp: Math.ceil(stats.dmg * (3 + index)), speed: (0.72 + 0.16 * power + ranged + index * 0.1) * MapScenes.zombieScale() };
+  return { hp: Math.ceil(stats.dmg * 4), speed: (0.72 + 0.16 * power + ranged) * 1.4 };
 }
 function rebalanceZombies() {
   for (const z of zRoots) {
     const u = z.userData;
     if (u.state !== 'walk') continue;
-    const stats = waveStats(AV.stats, u.wave);
+    const stats = zombieStats(AV.stats);
     u.hp = (u.hp / u.maxHp) * stats.hp;
     u.maxHp = stats.hp;
     u.speed = stats.speed;
     if (u.model.bar.visible) ZombieAssets.setZombieHealth(u.model, u.hp / u.maxHp);
   }
 }
-function makeZombie(index) {
-  const stats = waveStats(AV.stats, index);
-  const model = ZombieAssets.createZombie(State.spawned);
+function makeZombie(record) {
+  const weapon = (AV.state && AV.state.weapon) || 2;
+  const stats = zombieStats(AV.stats || CL.weaponStats({ ...AV.state, weapon }));
+  const model = ZombieAssets.createZombie(record.id);
   const root = model.root;
-  root.scale.setScalar(MapScenes.zombieScale());
   root.userData = {
     zombie: true,
     model,
-    hp: stats.hp,
+    record,
+    hp: stats.hp * record.health,
     maxHp: stats.hp,
-    wave: index,
     state: 'walk',
     speed: stats.speed,
     nextHit: 0,
     dieT: 0
   };
+  if (record.health < 1) ZombieAssets.setZombieHealth(model, record.health);
   return root;
 }
-function spawnZombie(index = waveIndex()) {
-  if (!ZombieAssets.zombiesReady()) return false;
-  const spawn = MapScenes.spawnPoint();
-  if (!spawn) {
-    if (!spawnWarning) {
-      console.error('Aucun point accessible pour les infectés près du joueur.');
-      say('Aucun point d’apparition accessible. Déplacez-vous dans la ville.', 4000);
-      spawnWarning = true;
-    }
-    return false;
-  }
-  spawnWarning = false;
-  const z = makeZombie(index);
-  z.position.set(spawn[0], spawn[1], spawn[2]);
+function spawnZombie(record) {
+  const z = makeZombie(record);
+  z.position.set(record.x, record.y, record.z);
+  record.root = z;
   scene.add(z);
   zRoots.push(z);
-  State.spawned++;
-  SND.play('zgroan');
-  return true;
 }
 function killZombie(z, t) {
   const u = z.userData;
   if (u.state === 'dead') return;
   u.state = 'dead';
+  u.record.dead = true;
+  u.record.root = null;
+  u.record.health = 0;
   u.dieT = t;
   u.animatedDeath = ZombieAssets.killZombieModel(u.model);
   State.kills++;
@@ -113,7 +96,7 @@ function hud() {
   const fighting = State.armed && MapScenes.active === 'town';
   c.style.display = fighting ? 'flex' : 'none';
   document.getElementById('ammo-panel').style.display = fighting ? 'flex' : 'none';
-  document.getElementById('wave').textContent = 'VAGUE ' + (State.wave || 1) + ' / ' + ZC.waveSizes.length;
+  document.getElementById('wave').textContent = 'INFECTÉS RESTANTS : ' + (CONFIG.zombieTarget - State.kills);
   const st = AV.stats;
   document.getElementById('ammo-state').textContent = State.reloading ? 'RECHARGEMENT…' : 'CHARGEUR';
   document.getElementById('ammo').textContent = st && st.mag ? State.ammo + ' / ' + st.mag : 'ARME BLANCHE';
@@ -133,10 +116,6 @@ function equipWeapon() {
   State.ammo = AV.stats.mag;
   State.hp = 100;
   State.spawnT = 1.5;
-  ZombieAssets.loadZombies().catch((error) => {
-    console.error('Chargement des infectés impossible :', error);
-    say('Chargement des infectés impossible. Rechargez la page pour réessayer.', 10000);
-  });
   hud();
   return true;
 }
@@ -183,6 +162,8 @@ function hitZombie(z, dmg, head, p, t) {
   if (u.hp <= 0) killZombie(z, t);
 }
 let fireT = 0,
+  lastFireRequest = -Infinity,
+  lastShotSound = -Infinity,
   hurtT = 0,
   healingRemaining = 0,
   wasInSafeZone = false;
@@ -201,9 +182,18 @@ function fire(e) {
     return;
   const t = clock.elapsedTime,
     st = AV.stats;
-  if (!st) return;
+  if (!st || !Number.isFinite(st.rate) || st.rate <= 0) return;
+  const interval = Math.min(3, 60 / st.rate);
+  if (t - lastFireRequest > 0.2) fireT = Math.max(fireT, t);
+  lastFireRequest = t;
   if (t < fireT) return;
-  fireT = t + Math.min(3, Math.max(0.07, 60 / st.rate));
+  fireT = Math.max(fireT, t - interval * 2);
+  while (fireT <= t + 0.000001) {
+    fireT += interval;
+    if (!fireShot(e, st, t)) break;
+  }
+}
+function fireShot(e, st, t) {
   const k = AV.state.weapon;
   if (e) {
     const r = el.getBoundingClientRect();
@@ -228,25 +218,30 @@ function fire(e) {
         !MapScenes.obstruction(new THREE.Ray(origin, toward.clone().normalize()), toward.length()))
         hitZombie(z, st.dmg, false, target, t);
     });
-    return;
+    return true;
   }
   if (st.mag && State.ammo <= 0) {
     SND.play('empty');
     reload();
-    return;
+    return false;
   }
   State.ammo--;
   firstPersonFire(false);
   hud();
-  SND.play('shot', k);
+  if (k !== 6 || t - lastShotSound >= 0.08) {
+    SND.play('shot', k);
+    lastShotSound = t;
+  }
   mFlash.position.copy(muzzlePos());
   mFlash.intensity = 7;
   gameTimeout(() => (mFlash.intensity = 0), 55);
   const pellets = k === 3 ? 8 : 1,
-    spread = ((100 - st.acc) / 100) * (k === 3 ? 0.09 : 0.05);
+    spread = ((100 - st.acc) / 100) * (k === 3 ? 0.09 : 0.05) * (1 - 0.7 * aimBlend),
+    origin = zRay.ray.origin.clone(),
+    direction = zRay.ray.direction.clone();
   for (let i = 0; i < pellets; i++) {
-    const o = zRay.ray.origin.clone(),
-      d = zRay.ray.direction.clone();
+    const o = origin.clone(),
+      d = direction.clone();
     d.x += (Math.random() - 0.5) * spread;
     d.y += (Math.random() - 0.5) * spread;
     d.z += (Math.random() - 0.5) * spread;
@@ -254,9 +249,9 @@ function fire(e) {
     zRay.set(o, d);
     zRay.far = st.range + 4;
     let hit = zRay.intersectObjects(alive.flatMap((z) => z.userData.model.hitboxes), false)[0];
-    const obstruction = MapScenes.obstruction(zRay.ray, hit ? hit.distance : Math.min(st.range, 40));
+    const obstruction = MapScenes.obstruction(zRay.ray, hit ? hit.distance : st.range);
     if (obstruction) hit = null;
-    const end = obstruction ? obstruction.position : hit ? hit.point : o.clone().addScaledVector(d, Math.min(st.range, 40));
+    const end = obstruction ? obstruction.position : hit ? hit.point : o.clone().addScaledVector(d, st.range);
     tracer(muzzlePos(), end);
     if (k === 12) {
       // roquette : dégâts de zone autour du point d’impact
@@ -279,6 +274,7 @@ function fire(e) {
     }
   }
   if (k !== 12 && st.recoil) rig.pitch = Math.max(-1, Math.min(1, rig.pitch + st.recoil * 0.00012));
+  return true;
 }
 function reload() {
   const st = AV.stats;
@@ -319,11 +315,17 @@ function playerHurt(n) {
 }
 function clearTownZombies() {
   zRoots.forEach((z) => {
+    const u = z.userData;
+    if (!u.record.dead) {
+      u.record.x = z.position.x;
+      u.record.z = z.position.z;
+      u.record.health = Math.max(0, u.hp / u.maxHp);
+      u.record.root = null;
+    }
     scene.remove(z);
-    ZombieAssets.disposeZombie(z.userData.model);
+    ZombieAssets.disposeZombie(u.model);
   });
   zRoots.length = 0;
-  State.spawned = State.kills;
 }
 function combatFrame(dt, t) {
   if (healingRemaining > 0) {
@@ -344,19 +346,16 @@ function combatFrame(dt, t) {
     hurtT = Math.max(0, hurtT - dt);
     hurt.style.opacity = hurtT * 1.6;
   }
-  if (State.armed && !State.zDone && MapScenes.active === 'town' && !State.doorExit) {
+  if (!State.zDone && MapScenes.active === 'town' && !State.doorExit) {
     State.spawnT = (State.spawnT || 0) - dt;
     const aliveN = zRoots.filter((z) => z.userData.state === 'walk').length;
-    const index = waveIndex();
-    const limit = ZC.waveSizes.slice(0, index + 1).reduce((total, count) => total + count, 0);
-    if (ZombieAssets.zombiesReady() && State.spawnT <= 0 && aliveN < ZC.maxAlive && State.spawned < limit) {
-      if (State.wave !== index + 1) {
-        State.wave = index + 1;
-        say('Vague ' + State.wave + ' / ' + ZC.waveSizes.length + ' : ' + ZC.waveSizes[index] + ' infecté(s).', 3500);
-      }
-      spawnZombie(index);
+    if (ZombieAssets.zombiesReady() && State.spawnT <= 0 && aliveN < ZC.maxAlive) {
+      const nearby = townPopulation
+        .filter((record) => !record.dead && !record.root &&
+          Math.hypot(record.x - rig.pos.x, record.z - rig.pos.z) <= 35)
+        .sort((a, b) => Math.hypot(a.x - rig.pos.x, a.z - rig.pos.z) - Math.hypot(b.x - rig.pos.x, b.z - rig.pos.z));
+      if (nearby.length) spawnZombie(nearby[0]);
       State.spawnT = ZC.spawnEvery;
-      hud();
     }
   }
   for (let i = zRoots.length - 1; i >= 0; i--) {
@@ -365,6 +364,16 @@ function combatFrame(dt, t) {
       scale = MapScenes.zombieScale();
     if (u.state === 'walk') {
       const d = Math.hypot(rig.pos.x - z.position.x, rig.pos.z - z.position.z);
+      if (d > 45) {
+        u.record.x = z.position.x;
+        u.record.z = z.position.z;
+        u.record.health = Math.max(0, u.hp / u.maxHp);
+        u.record.root = null;
+        scene.remove(z);
+        ZombieAssets.disposeZombie(u.model);
+        zRoots.splice(i, 1);
+        continue;
+      }
       if (!u.waypoint || Math.hypot(u.waypoint[0] - z.position.x, u.waypoint[1] - z.position.z) < 0.2)
         u.waypoint = MapScenes.zombieTarget(z.position.x, z.position.z);
       const goal = u.waypoint;

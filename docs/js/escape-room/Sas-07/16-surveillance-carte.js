@@ -245,9 +245,34 @@ const CCTV = (function () {
   ov.height = 720;
   document.body.appendChild(ov);
   const octx = ov.getContext('2d');
+  const oldMini = document.getElementById('town-minimap');
+  if (oldMini) oldMini.remove();
   let mapOn = false,
-    mapT = 0;
+    mapT = 0,
+    mapScene = null;
+  const updateMapScene = () => {
+    const town = MapScenes.active === 'town';
+    if (mapScene === MapScenes.active) return;
+    mapScene = MapScenes.active;
+    Object.assign(ov.style, town ? {
+      left: '0', top: '0', translate: 'none', width: '100vw', height: '100vh',
+      aspectRatio: 'auto', border: '0', boxShadow: 'none', opacity: '0.68'
+    } : {
+      left: '50%', top: '50%', translate: '-50% -50%', width: 'min(92vw,170vh)', height: 'auto',
+      aspectRatio: '16 / 9', border: '2px solid #3a3326', boxShadow: '0 10px 40px #000c', opacity: '0.96'
+    });
+    mb.style.display = town ? 'none' : '';
+    if (town) {
+      mapOn = false;
+      ov.style.display = 'none';
+    }
+  };
   const toggleMap = () => {
+    updateMapScene();
+    if (MapScenes.active === 'town' && !State.townGateOpen) {
+      say('Ouvrez le coffre pour déverrouiller la carte.', 3000);
+      return;
+    }
     mapOn = !mapOn;
     ov.style.display = mapOn ? 'block' : 'none';
     SND.play('paper');
@@ -495,6 +520,15 @@ const CCTV = (function () {
     mapAt = 0;
   function frame(dt, t) {
     const near = Math.hypot(rig.pos.x - W.x, rig.pos.z - W.z) < 22 && Math.abs(rig.pos.y - (Y + 1.6)) < 2.5;
+    updateMapScene();
+    if (performance.now() > mapAt) {
+      mapAt = performance.now() + 250;
+      if (near || active()) {
+        drawMap(mapCtx, 480, 270, false);
+        mapTex.needsUpdate = true;
+      }
+      if (mapOn) drawMap(octx, 1280, 720, true);
+    }
     if (!active() && hud.style.display !== 'none') hud.style.display = 'none';
     if (!near && !active()) return;
     fr++;
@@ -515,12 +549,6 @@ const CCTV = (function () {
       const i = rr++ % N;
       if (!(active() && i === sel.i && false)) renderFeed(i, rts[i], true);
     } // vignettes : une caméra à la fois
-    if (performance.now() > mapAt) {
-      mapAt = performance.now() + 250;
-      drawMap(mapCtx, 480, 270, false);
-      mapTex.needsUpdate = true;
-      if (mapOn) drawMap(octx, 1280, 720, true);
-    }
   }
   /* ── Caméras de surveillance dans CHAQUE salle : elles suivent le joueur des yeux (quand il est dans leur salle) ── */
   const RC_Y = {

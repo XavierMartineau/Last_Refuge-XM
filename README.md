@@ -36,15 +36,15 @@ Si le jeu ralentit, le contour lumineux des objets peut être temporairement dé
 
 Le menu des réglages met la partie en pause : le temps, les animations, les combats et leurs délais reprennent à sa fermeture.
 
-L’accueil propose une ambiance sonore générée en direct, démarrée à la première interaction avec la page. **Options → Audio → Ambiance de l’accueil** permet de la couper ; les volumes général et musique s’appliquent également.
+Les menus proposent une ambiance sonore générée en direct. Si le navigateur bloque la lecture automatique, elle démarre à la première interaction. **Options → Audio → Ambiance des menus** permet de la couper ; les volumes général et musique s’appliquent également.
 
 Les réglages d’accessibilité proposent une correction ou une simulation des couleurs et une intensité ajustable. Les planches proposées sont des repères visuels, pas un test médical. Les coiffures longues se balancent pendant les mouvements du personnage ; cet effet est réduit avec la préférence de réduction des animations.
 
-Le HUD affiche le portrait et le nom du détenu, avec la police, la couleur et le style choisis, ainsi que sa vie sur 100. Une attaque d’infecté inflige 5 PV avant la réduction accordée par l’équipement renforcé.
+Le HUD affiche le portrait et le nom du détenu, avec la police, la couleur et le style choisis, ainsi que sa vie sur 100. Une attaque d’infecté inflige 10 PV avant la réduction accordée par l’équipement renforcé.
 
 En première personne, les mains et l'arme équipée reprennent l'apparence et les accessoires du personnage. Le compteur en bas à droite indique les balles restantes dans le chargeur et sa capacité, y compris pendant le rechargement ; les armes blanches sont indiquées séparément.
 
-Après la ligne de coupure, la porte principale mène à **Post-Apocalyptic City**, puis un téléporteur animé conduit à **Zombie Town**. Les deux cartes sont agrandies deux fois et chargées à l’arrivée, avec un écran indiquant les étapes de chargement ; leurs passages permettent aussi de revenir en arrière. Le personnage conserve sa taille habituelle et se déplace deux fois plus vite sur ces cartes. Dans Zombie Town, prenez votre arme dans le casier de la zone sûre, puis éliminez les 100 infectés, deux fois plus grands, en cinq vagues pour déverrouiller la sortie. Sept infectés au maximum sont présents simultanément ; leur barre de vie apparaît lorsqu’ils sont touchés. La progression des éliminations est conservée après une défaite ou un retour à la ville.
+Après la ligne de coupure, la porte principale mène à **Post-Apocalyptic City**, puis un téléporteur animé conduit à **Zombie Town**. Les deux cartes sont chargées à l’arrivée, avec un écran indiquant les étapes de chargement ; leurs passages permettent aussi de revenir en arrière. Le personnage conserve sa taille habituelle et se déplace deux fois plus vite sur ces cartes. Dans Zombie Town, lisez le code au sol et ouvrez le coffre de l’enclos pour déverrouiller sa porte et la carte. Prenez votre arme et vos munitions dans le casier de la zone sûre, puis éliminez les 80 infectés répartis dans la ville pour déverrouiller le téléporteur au sommet des marches, au fond de la carte. La carte portable semi-transparente s’ouvre et se ferme en plein écran avec M et indique les infectés en rouge ; des trousses de soin sont dispersées sur le parcours. Pour limiter la charge, sept modèles au maximum sont affichés près du joueur, sans réapparition des infectés éliminés. La vie des infectés blessés, les éliminations et l’ouverture de l’enclos sont conservées après une défaite ou un retour à la ville.
 
 ## Ajouter une escape room
 

@@ -436,7 +436,7 @@
       wantMenu = true;
       document.exitPointerLock();
     }
-    cross.classList.toggle('on', (on && freeLook()) || isAiming());
+    cross.classList.toggle('on', ((on && freeLook()) || isAiming()) && !(hasMagnifyingOptic() && aimBlend > 0.6));
     hint.classList.toggle('on', auto() && !on && freeLook() && !document.body.classList.contains('pad'));
     if ((on || (window.LastRefugeManette && window.LastRefugeManette.active)) && freeLook() && t - hoverT > 90) {
       hoverT = t;
