@@ -327,10 +327,26 @@ const DEV = (function () {
     });
   });
 } // moins de reflets éblouissants sur les métaux
-try {
-  renderer.compile(scene, camera);
-} catch (e) {}
-loop();
+window.prepareSas07 = async (progress) => {
+  modalOpen = true;
+  await MapScenes.preload(progress);
+  progress('Chargement des modèles et animations des infectés…');
+  await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+  await ZombieAssets.loadZombies();
+  progress('Préparation des matériaux et du rendu 3D…');
+  await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+  applyRig(0);
+  avatarFrame(0, 0);
+  await renderer.compileAsync(scene, camera);
+  await renderer.compileAsync(FP.scene, FP.camera);
+  progress('Chargement des textures visibles…');
+  await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+  renderGame();
+};
+window.startSas07 = () => {
+  modalOpen = false;
+  loop();
+};
 
 /* API publique pour étendre le prototype depuis la console ou votre propre code */
 window.EscapeRoom = {

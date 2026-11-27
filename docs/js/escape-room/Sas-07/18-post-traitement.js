@@ -249,6 +249,43 @@ function perfApply() {
     flash.castShadow = false;
   }
 } // dernier recours : plus d’ombre pour la lampe
+function batchLowEndBarrels() {
+  const cells = new Map(), originals = [];
+  for (const object of scene.children) {
+    const p = object.geometry && object.geometry.parameters;
+    if (!object.isMesh || object.material !== mats.rustpipe || !object.visible ||
+        !p || object.geometry.type !== 'CylinderGeometry' ||
+        p.radiusTop !== 0.32 || p.radiusBottom !== 0.32 || p.height !== 0.95 || p.radialSegments !== 20) continue;
+    const key = Math.floor(object.position.x / 20) + ':' + Math.floor(object.position.z / 20);
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push(object);
+  }
+  const hiddenMaterial = new THREE.MeshBasicMaterial({ visible: false, side: mats.rustpipe.side });
+  const batches = [];
+  for (const objects of cells.values()) {
+    if (objects.length < 2) continue;
+    const batch = new THREE.InstancedMesh(objects[0].geometry, mats.rustpipe, objects.length);
+    batch.raycast = () => {};
+    objects.forEach((object, index) => {
+      object.updateMatrix();
+      batch.setMatrixAt(index, object.matrix);
+      originals.push(object);
+      object.material = hiddenMaterial;
+    });
+    batch.computeBoundingSphere();
+    scene.add(batch);
+    batches.push(batch);
+  }
+  return { originals, batches, hiddenMaterial };
+}
+function restoreLowEndBarrels(batch) {
+  batch.originals.forEach((object) => { object.material = mats.rustpipe; });
+  batch.batches.forEach((object) => {
+    scene.remove(object);
+    object.dispose();
+  });
+  batch.hiddenMaterial.dispose();
+}
 function setLowEndMode(enabled) {
   enabled = !!enabled;
   if (perf.lowEnd === enabled) return;
@@ -259,6 +296,7 @@ function setLowEndMode(enabled) {
       shadows: renderer.shadowMap.enabled, bloom: bloom.enabled, outline: outline.enabled,
       lights: reducedLights.map((light) => [light, light.visible]), cameraFar: camera.far,
       materials: [...levelMaterials].map((material) => [material, material.bumpMap, material.roughnessMap]),
+      barrels: null,
       localLights: scene.children.filter((object) => object.isLight && object.distance > 0)
     };
     perf.lowEnd = true;
@@ -271,11 +309,13 @@ function setLowEndMode(enabled) {
       material.bumpMap = null;
       material.roughnessMap = null;
     });
+    perf.beforeLowEnd.barrels = batchLowEndBarrels();
     reducedLights.forEach((light) => { light.visible = false; });
     camera.far = Math.min(camera.far, MapScenes.active ? 100 : roomOf(rig.pos.z) <= 4 ? 20 : 60);
   } else {
     const previous = perf.beforeLowEnd;
     perf.lowEnd = false;
+    restoreLowEndBarrels(previous.barrels);
     perf.s = previous.s;
     perfApply();
     perf.cut = previous.cut;

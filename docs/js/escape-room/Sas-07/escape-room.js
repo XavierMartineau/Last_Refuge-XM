@@ -35,19 +35,24 @@ Object.assign(window, {
   ZombieAssets
 });
 
-if (document.fonts)
-  await Promise.race([
-    Promise.all(
-      [
-        '700 30px Caveat',
-        '30px "Special Elite"',
-        '30px "Rock Salt"',
-        '700 30px "Stardos Stencil"',
-        '30px VT323'
-      ].map((f) => document.fonts.load(f))
-    ),
-    new Promise((r) => setTimeout(r, 3500))
-  ]).catch(() => {});
+const loading = document.getElementById('game-loading');
+const loadingStatus = document.getElementById('game-load-status');
+const loadingProgress = document.getElementById('game-load-progress');
+function progress(label, done, total) {
+  loadingStatus.textContent = label;
+  if (Number.isFinite(done) && Number.isFinite(total) && total > 0) {
+    loadingProgress.max = total;
+    loadingProgress.value = Math.min(done, total);
+  } else loadingProgress.removeAttribute('value');
+}
+const waitForPaint = () => new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+function blockGameKeys(event) {
+  if (loading.contains(event.target)) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+}
+window.addEventListener('keydown', blockGameKeys, true);
+window.addEventListener('keyup', blockGameKeys, true);
 
 export const FICHIERS = [
   '01-configuration.js',
@@ -87,21 +92,63 @@ export const FICHIERS = [
   '22-reglages-manette.js'
 ];
 
+try {
+  progress('Chargement des polices et des éléments d’interface…');
+  await waitForPaint();
+  if (document.fonts) await Promise.race([
+    Promise.all(
+      [
+        '700 30px Caveat',
+        '30px "Special Elite"',
+        '30px "Rock Salt"',
+        '700 30px "Stardos Stencil"',
+        '30px VT323'
+      ].map((f) => document.fonts.load(f))
+    ),
+    new Promise((r) => setTimeout(r, 3500))
+  ]);
+
 // Les fichiers sont lus puis exécutés comme un seul script, dans l’ordre :
 // les fonctions déclarées plus loin restent utilisables plus haut (comme dans le fichier d’origine).
 const base = new URL('./', import.meta.url);
 const version = new URL(import.meta.url).searchParams.get('v');
+let loaded = 0;
+progress('Téléchargement des fichiers du jeu…', 0, FICHIERS.length);
 const sources = await Promise.all(
   FICHIERS.map(async (f) => {
     const url = new URL(f, base);
     if (version) url.searchParams.set('v', version);
     const r = await fetch(url);
     if (!r.ok) throw new Error('Chargement impossible : ' + f + ' (' + r.status + ')');
-    return '\n/* ===== ' + f + ' ===== */\n' + (await r.text());
+    const source = await r.text();
+    progress('Fichiers du jeu : ' + ++loaded + ' / ' + FICHIERS.length + ' · ' + f, loaded, FICHIERS.length);
+    return '\n/* ===== ' + f + ' ===== */\n' + source;
   })
 );
+progress('Construction du bunker, des objets et des textures…');
+await waitForPaint();
 const jeu = document.createElement('script');
 jeu.textContent =
   "'use strict';" + sources.join('\n') + '\n//# sourceURL=' + new URL('sas-07-jeu.js', base).href;
-document.body.appendChild(jeu);
+let startupError = null;
+const captureStartupError = (event) => { startupError = event.error || new Error(event.message); };
+window.addEventListener('error', captureStartupError);
+try {
+  document.body.appendChild(jeu);
+} finally {
+  window.removeEventListener('error', captureStartupError);
+}
+if (startupError) throw startupError;
+if (typeof window.prepareSas07 !== 'function' || typeof window.startSas07 !== 'function')
+  throw new Error('Initialisation du jeu incomplète.');
+await window.prepareSas07(progress);
+loading.hidden = true;
+window.removeEventListener('keydown', blockGameKeys, true);
+window.removeEventListener('keyup', blockGameKeys, true);
+window.startSas07();
 document.documentElement.dataset.ready = '1';
+} catch (error) {
+  console.error('Chargement du jeu impossible :', error);
+  progress('Chargement impossible : ' + error.message + '. Vérifiez la connexion et réessayez.');
+  document.getElementById('game-load-retry').hidden = false;
+}

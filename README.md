@@ -17,7 +17,7 @@ three.js est chargé depuis le CDN jsDelivr (connexion Internet requise).
 3. `docs/html/info/info.html` — plan d’évasion en 3 étapes verrouillées :
    - **01 Fiche d’écrou** : créateur 3D intégré ; son dernier bouton « Trouver sa salle d’évasion » débloque l’étape 02 ;
    - **02 Salle d’évasion** : ouvre `docs/html/choix-salle/choix-salle.html` (catalogue classé par difficulté, nombre de salles et durée, avec description et rapport de situation) ;
-   - **03 Lancement** : débloquée quand une salle est choisie, lance le jeu dans toute la fenêtre du navigateur.
+   - **03 Lancement** : débloquée quand une salle est choisie, prépare le bunker, les deux cartes, leurs collisions et les infectés avant de lancer le jeu dans toute la fenêtre du navigateur. Le chargement initial utilise davantage de mémoire et de données ; certaines étapes des cartes restent préparées au moment du transfert.
 4. `docs/html/escape-room/Sas-07/escape-room.html` — escape room 3D « Sas 07 » (12 salles).
 
 Autres pages : `docs/html/createur-personnage/createur-personnage.html` (créateur seul), `docs/html/options/options.html` (réglages, bouton ✕ qui ramène à la page d’origine), `docs/html/dev/dev.html` (poste de garde / DEV), `404.html`.
