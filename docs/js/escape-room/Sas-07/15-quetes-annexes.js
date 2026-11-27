@@ -751,10 +751,10 @@ const BOOK = (function () {
     'Distribution électrique',
     'Hangar principal',
     'Hangar sud',
-    'Entrepôt (silo)',
-    'Commandement',
-    'Quartiers',
-    'Blocs cellulaires',
+    'Couloir provisoire (ex-salle 7)',
+    'Couloir provisoire (ex-salle 8)',
+    'Couloir provisoire (ex-salle 9)',
+    'Couloir provisoire (ex-salle 10)',
     'Ligne de coupure',
     'Zone d’évacuation'
   ];

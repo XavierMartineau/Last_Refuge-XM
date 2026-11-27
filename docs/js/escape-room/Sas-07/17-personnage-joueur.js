@@ -200,7 +200,7 @@ function applyRig(t) {
     const dtc = Math.min(0.1, Math.max(0, t - (AV.lt || t)));
     AV.lt = t;
     const rh = MapScenes.active ? Infinity :
-      ([0, 3.4, 3.4, 3.4, 3.4, 6.5, 4.8, 10, 9.6, 8.6, 4.6, 9.6, 8.6][roomOf(rig.pos.z)] || 3.4),
+      ([0, 3.4, 3.4, 3.4, 3.4, 6.5, 4.8, 3.8, 3.8, 3.8, 3.8, 9.6, 8.6][roomOf(rig.pos.z)] || 3.4),
       fl = rig.pos.y - 1.6 + rig.dip;
     const onMap = MapScenes.active && rig.pos.z < -900;
     const pathBlocked = onMap ? MapScenes.cameraWallBlocked : camCollide;

@@ -67,10 +67,10 @@ const DEV = (function () {
     'Distribution électrique',
     'Hangar principal',
     'Hangar sud',
-    'Silo',
-    'Salle de commandement',
-    'Aire d’évacuation',
-    'Bloc cellulaire',
+    'Couloir provisoire (ex-salle 7)',
+    'Couloir provisoire (ex-salle 8)',
+    'Couloir provisoire (ex-salle 9)',
+    'Couloir provisoire (ex-salle 10)',
     'Ligne de coupure',
     'Post-Apocalyptic City'
   ];

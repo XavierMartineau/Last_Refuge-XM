@@ -4,31 +4,31 @@
 /* ═══════════════ POSTE DE SURVEILLANCE (poste de contrôle de la mezzanine, salle 11, fermé à clé) + CARTE (touche M) ═══════════════
    • 6 écrans : 5 caméras (rendues en direct dans des textures basse résolution) + 1 écran « PLAN » (carte avec votre position).
    • Cliquez un écran pour entrer en mode caméra : la caméra mobile SUIT LA SOURIS, 1-6 changent d’écran.
-   • Le code de l’armoire à munitions est peint sur UN seul mur (cellule est n°2) : il n’est affiché QUE dans l’image de la caméra n°2.
+   • Le code de l’armoire à munitions est peint sur UN seul mur (hangar sud) : il n’est affiché QUE dans l’image de la caméra n°2.
    Tout est réglable dans CCTV_CFG ci-dessous. */
 const CCTV = (function () {
   const CCTV_CFG = {
     // pos = position de la caméra · yaw = direction de base (0 = vers -z, -π/2 = vers l’est) · range = amplitude de rotation (rad) si mobile
     cams: [
-      { name: 'CELLULES · COULOIR', pos: [0, 4.5, -224.5], yaw: 0, tilt: -0.12, pan: false },
+      { name: 'HANGAR SUD · OUEST', pos: [-30, 5.5, -73], yaw: 0, tilt: -0.15, pan: false },
       {
-        name: 'CELLULES · MOBILE',
-        pos: [3.25, 2.9, -240], // fixée sur la vitre est de la tour de garde
-        yaw: -1.13,
+        name: 'HANGAR SUD · MOBILE',
+        pos: [0, 5.6, -74],
+        yaw: 0,
         tilt: -0.1,
         pan: true,
-        range: 1.9,
+        range: 1.3,
         reveal: true
       },
       { name: 'HANGAR · MOBILE', pos: [0, 4.6, -34], yaw: 0, tilt: -0.12, pan: true, range: 1.3 },
-      { name: 'ENTREPÔT', pos: [0, 9, -104], yaw: 0, tilt: -0.25, pan: false },
+      { name: 'HANGAR SUD · EST', pos: [30, 5.5, -73], yaw: 0, tilt: -0.15, pan: false },
       { name: 'SAS D’ENTRÉE', pos: [0, 2.9, -3.4], yaw: Math.PI, tilt: -0.08, pan: false }
     ],
     wall: { x: -50.2, z: -304, y: PLAT.y + 1.9 }, // centre du mur d’écrans (mur est du poste de contrôle)
     camRes: [320, 180],
     mainRes: [640, 360], // résolution des textures de caméra
-    codeWall: { x: 14.82, y: 1.7, z: -245.5 }
-  }; // où est peint le code (cellule est n°2)
+    codeWall: { x: 6, y: 3.4, z: -101.82, ry: 0 }
+  }; // où est peint le code : mur nord du hangar sud, à droite de la porte (visible par la caméra mobile)
   const NAMES = [
     'Sas d’entrée',
     'Salle de contrôle',
@@ -36,10 +36,10 @@ const CCTV = (function () {
     'Distribution électrique',
     'Hangar principal',
     'Hangar sud',
-    'Entrepôt (silo)',
-    'Commandement',
-    'Quartiers',
-    'Blocs cellulaires',
+    'Couloir provisoire (ex-salle 7)',
+    'Couloir provisoire (ex-salle 8)',
+    'Couloir provisoire (ex-salle 9)',
+    'Couloir provisoire (ex-salle 10)',
     'Ligne de coupure',
     'Zone d’évacuation'
   ];
@@ -50,10 +50,10 @@ const CCTV = (function () {
     4: 17.9,
     5: 59.9,
     6: 59.9,
-    7: 19.9,
-    8: 24.9,
-    9: 24.9,
-    10: 14.9,
+    7: 3.9, // salles 7 à 10 : couloir provisoire
+    8: 3.9,
+    9: 3.9,
+    10: 3.9,
     11: 59.9
   };
   const ZR = {
@@ -463,7 +463,7 @@ const CCTV = (function () {
     })
   );
   codeMesh.position.set(cw.x, cw.y, cw.z);
-  codeMesh.rotation.y = -Math.PI / 2;
+  codeMesh.rotation.y = cw.ry ?? -Math.PI / 2;
   codeMesh.visible = false;
   codeMesh.raycast = () => {};
   scene.add(codeMesh);
@@ -566,6 +566,7 @@ const CCTV = (function () {
   };
   const roomCams = [];
   for (let r = 1; r <= 11; r++) {
+    if (r >= 7 && r <= 10) continue; // salles 7 à 10 supprimées (couloir provisoire)
     const zT = ZR[r][0],
       zw = r === 1 ? zT - 0.5 : zT - 0.5,
       x = r === 1 ? 4 : 4.5,
