@@ -89,6 +89,12 @@ const DEV = (function () {
     const D = DOORS.find((d) => d.z === wall[0]);
     if (!D) return;
     const o = scene.getObjectByName(D.id);
+    if (r === 6) {
+      // porte de sortie de la salle 6 : même effet qu’en jeu (fin de la partie)
+      State.wareCode = true;
+      Actions.handlers.door_ware(o);
+      return;
+    }
     if (o && !State[D.flag]) {
       State[D.flag] = true;
       SND.play('door');
