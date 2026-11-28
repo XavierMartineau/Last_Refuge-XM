@@ -17,8 +17,8 @@ three.js est chargé depuis le CDN jsDelivr (connexion Internet requise).
 3. `docs/html/info/info.html` — plan d’évasion en 3 étapes verrouillées :
    - **01 Fiche d’écrou** : créateur 3D intégré ; son dernier bouton « Trouver sa salle d’évasion » débloque l’étape 02 ;
    - **02 Salle d’évasion** : ouvre `docs/html/choix-salle/choix-salle.html` (catalogue classé par difficulté, nombre de salles et durée, avec description et rapport de situation) ;
-   - **03 Lancement** : débloquée quand une salle est choisie, prépare le bunker avant de lancer le jeu dans toute la fenêtre du navigateur. Les cartes et leurs collisions sont chargées à l’entrée ; les infectés sont chargés à l’arrivée dans Zombie Town.
-4. `docs/html/escape-room/Sas-07/escape-room.html` — escape room 3D « Sas 07 » (12 salles).
+   - **03 Lancement** : débloquée quand une salle est choisie, prépare le bunker avant de lancer le jeu dans toute la fenêtre du navigateur.
+4. `docs/html/escape-room/Sas-07/escape-room.html` — escape room 3D « Sas 07 » (6 salles ; la porte du fond de la salle 6 est la sortie et termine la partie).
 
 Autres pages : `docs/html/createur-personnage/createur-personnage.html` (créateur seul), `docs/html/options/options.html` (réglages, bouton ✕ qui ramène à la page d’origine), `docs/html/dev/dev.html` (poste de garde / DEV), `404.html`.
 
@@ -28,15 +28,15 @@ La progression (fiche terminée, salle choisie) est enregistrée dans le navigat
 
 `docs/js/commun/reglages.js` + `docs/css/commun/reglages.css` forment la console de réglages commune à la page Options et au menu Échap du jeu : affichage, audio, clavier & souris, manette, accessibilité (et « Partie » en jeu). Toutes les touches clavier et tous les boutons de manette sont **réaffectables** ; les indices du jeu affichent les touches choisies.
 
-Par défaut : **WASD** pour marcher, souris pour regarder (un clic initial autorise la capture du curseur, puis il n’est plus nécessaire de maintenir le clic ; Échap libère le curseur). Après avoir récupéré une arme, **1** équipe l’arme et **2** la lampe ; F allume ou éteint la lampe. Maintenez le **clic droit** pour viser, puis le clic gauche pour tirer ; les lunettes ACOG et longue portée affichent leur réticule et leur zoom. Le navigateur doit autoriser le verrouillage du pointeur. À la manette : sticks pour marcher / regarder, A interagir, B s’accroupir, X recharger, Y lampe, RT équiper et tirer, LT viser, L3 courir, LB inventaire, RB carnet, View carte, R3 vue, Menu réglages. `docs/js/commun/manette-menus.js` gère la navigation des menus à la manette.
+Par défaut : **WASD** pour marcher, souris pour regarder (un clic initial autorise la capture du curseur, puis il n’est plus nécessaire de maintenir le clic ; Échap libère le curseur). F allume ou éteint la lampe. Le navigateur doit autoriser le verrouillage du pointeur. À la manette : sticks pour marcher / regarder, A interagir, B s’accroupir, Y lampe, L3 courir, LB inventaire, RB carnet, View carte, R3 vue, Menu réglages. `docs/js/commun/manette-menus.js` gère la navigation des menus à la manette.
 
 Dans le créateur, « Continuer » déverrouille l’étape suivante ; les étapes déjà visitées restent accessibles. La croix ou le stick gauche navigue entre les choix, A valide, B revient et le stick droit tourne l’aperçu. Les manettes compatibles avec la disposition standard de l’API Gamepad sont prises en charge ; leur disponibilité dépend du navigateur et de la console.
 
 Si le jeu ralentit, le contour lumineux des objets peut être temporairement désactivé avant de réduire la résolution ; le cadre de sélection reste visible.
 
-Le menu des réglages met la partie en pause : le temps, les animations, les combats et leurs délais reprennent à sa fermeture.
+Le menu des réglages met la partie en pause : le temps, les animations et leurs délais reprennent à sa fermeture.
 
-**Options → Affichage → Mode PC peu puissant** adapte la résolution et réduit la distance d’affichage, le relief et la rugosité des textures du bunker, les lumières et la fréquence des caméras de surveillance ; il désactive les ombres, le halo et le contour 3D en jeu. La sélection des objets reste visible ; désactiver ce mode rétablit les réglages graphiques précédents.
+**Options → Affichage → Mode PC peu puissant** adapte la résolution et réduit la distance d’affichage, le relief et la rugosité des textures du bunker, les lumières ; il désactive les ombres, le halo et le contour 3D en jeu. La sélection des objets reste visible ; désactiver ce mode rétablit les réglages graphiques précédents.
 Le compteur **FPS** s’affiche dès le lancement ; le bouton **FPS** en jeu ou **Échap → Partie → Compteur FPS** permet de le masquer temporairement.
 En cas d’erreur non gérée, d’échec de chargement ou de perte du contexte WebGL, le jeu tente de télécharger localement `crash.txt` avec les détails disponibles ; un lien permet de le télécharger si le navigateur bloque l’opération automatique. Vérifiez son contenu avant de le partager. Un arrêt complet du navigateur ou de la console ne permet pas de produire ce rapport.
 Le moteur demande au navigateur un GPU haute performance et réutilise les géométries identiques du bunker. Le choix du GPU reste toutefois contrôlé par le navigateur et le système.
@@ -45,11 +45,9 @@ Les menus proposent une ambiance sonore générée en direct. Si le navigateur b
 
 Les réglages d’accessibilité proposent une correction ou une simulation des couleurs et une intensité ajustable. Les planches proposées sont des repères visuels, pas un test médical. Les coiffures longues se balancent pendant les mouvements du personnage ; cet effet est réduit avec la préférence de réduction des animations.
 
-Le HUD affiche le portrait et le nom du détenu, avec la police, la couleur et le style choisis, ainsi que sa vie sur 100. Une attaque d’infecté inflige 10 PV avant la réduction accordée par l’équipement renforcé.
+Le HUD affiche le portrait et le nom du détenu, avec la police, la couleur et le style choisis.
 
-En première personne, les mains et l'arme équipée reprennent l'apparence et les accessoires du personnage. Le compteur en bas à droite indique les balles restantes dans le chargeur et sa capacité, y compris pendant le rechargement ; les armes blanches sont indiquées séparément.
-
-Après la ligne de coupure, la porte principale mène à **Post-Apocalyptic City**, puis un téléporteur animé conduit à **Zombie Town**. Les deux cartes sont chargées à l’arrivée, avec un écran indiquant les étapes de chargement ; leurs passages permettent aussi de revenir en arrière. Le personnage conserve sa taille habituelle et se déplace deux fois plus vite sur ces cartes. Dans Zombie Town, lisez le code au sol et ouvrez le coffre de l’enclos pour déverrouiller sa porte et la carte. Prenez votre arme et vos munitions dans le casier de la zone sûre, puis éliminez les 80 infectés répartis dans la ville pour déverrouiller le téléporteur au sommet des marches, au fond de la carte. La carte portable semi-transparente s’ouvre et se ferme en plein écran avec M et indique les infectés en rouge ; des trousses de soin sont dispersées sur le parcours. Pour limiter la charge, sept modèles au maximum sont affichés près du joueur, sans réapparition des infectés éliminés. La vie des infectés blessés, les éliminations et l’ouverture de l’enclos sont conservées après une défaite ou un retour à la ville.
+En première personne, les mains reprennent l'apparence et les accessoires du personnage. Le Sas 07 ne comporte ni arme ni combat.
 
 ## Ajouter une escape room
 
@@ -63,7 +61,6 @@ LAST-REFUGE-XM/
 └── docs/
     ├── assets/
     │   ├── creation-personnage/      bibliothèque 3D du détenu (partagée créateur + jeu)
-    │   ├── zombie/                   modèles et animations des infectés
     │   │   ├── personnage_armes.js   point d’entrée unique
     │   │   ├── donnees/              palettes.json, données, sélection/validation
     │   │   ├── outils/ · materiaux/ · tete/ · visage/ · cheveux/ · barbes/
@@ -78,21 +75,10 @@ LAST-REFUGE-XM/
         ├── commun/                   préférences, contenu, progression, catalogue des salles, réglages, manette
         ├── createur-personnage/      scène et interface du créateur
         └── escape-room/Sas-07/       chargeur escape-room.js + fichiers du jeu dans l’ordre
-            └── salles/               salle-01-sas.js … salle-12-armurerie-arene.js
+            └── salles/               salle-01-sas.js … salle-06-hangar-sud.js
 ```
 
 Les modèles du détenu sont **générés par le code**, ce qui permet toutes les combinaisons de couleurs et de pièces. Les détenus enregistrés restent disponibles dans le navigateur.
-
-### Crédits des infectés
-
-- "ANIMATION ZOMBIE" (https://skfb.ly/pNsAw) by MUD is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-- [Living Flesh Blob - Free Organic Horror Asset](https://skfb.ly/pGOHv), par Yury Misiyuk — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
-- [Animated Zombie Cop Running Loop](https://skfb.ly/o9xXZ), par LasquetiSpice — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
-
-### Crédits des cartes
-
-- "Zombie Town" (https://skfb.ly/ozw8L) by Atlas125 is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/). Modifications : textures de pierre, d'asphalte, de béton et de tôle ajoutées au modèle. Les images sont aussi disponibles dans `docs/assets/zombie-map/textures/`.
-- [Post-Apocalyptic City](https://sketchfab.com/3d-models/post-apocalyptic-city-2b9c7e8688ab454485bdab5d1432fec4), par golukumar — [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 Les fichiers du Sas 07 partagent la même portée : `escape-room.js` les lit dans l’ordre de sa liste `FICHIERS` et les exécute comme un seul script. Pour ajouter du code au jeu, créez un fichier dans `docs/js/escape-room/Sas-07/` et ajoutez-le à cette liste.
 

@@ -1,47 +1,17 @@
-/* LAST REFUGE · XM — Escape room « Sas 07 » · Poste de surveillance (caméras) et carte.
+/* LAST REFUGE · XM — Escape room « Sas 07 » · Carte du bunker et caméras de surveillance des salles.
    Fichier chargé dans l’ordre par escape-room.js : il partage la portée globale des autres fichiers. */
 'use strict';
-/* ═══════════════ POSTE DE SURVEILLANCE (poste de contrôle de la mezzanine, salle 11, fermé à clé) + CARTE (touche M) ═══════════════
-   • 6 écrans : 5 caméras (rendues en direct dans des textures basse résolution) + 1 écran « PLAN » (carte avec votre position).
-   • Cliquez un écran pour entrer en mode caméra : la caméra mobile SUIT LA SOURIS, 1-6 changent d’écran.
-   • Le code de l’armoire à munitions est peint sur UN seul mur (hangar sud) : il n’est affiché QUE dans l’image de la caméra n°2.
-   Tout est réglable dans CCTV_CFG ci-dessous. */
+/* ═══════════════ CARTE (touche M) + CAMÉRAS DE SURVEILLANCE ═══════════════
+   • Carte plein écran : plan 2D de la salle courante avec votre position.
+   • Une caméra au plafond de chaque salle suit le joueur des yeux. */
 const CCTV = (function () {
-  const CCTV_CFG = {
-    // pos = position de la caméra · yaw = direction de base (0 = vers -z, -π/2 = vers l’est) · range = amplitude de rotation (rad) si mobile
-    cams: [
-      { name: 'HANGAR SUD · OUEST', pos: [-30, 5.5, -73], yaw: 0, tilt: -0.15, pan: false },
-      {
-        name: 'HANGAR SUD · MOBILE',
-        pos: [0, 5.6, -74],
-        yaw: 0,
-        tilt: -0.1,
-        pan: true,
-        range: 1.3,
-        reveal: true
-      },
-      { name: 'HANGAR · MOBILE', pos: [0, 4.6, -34], yaw: 0, tilt: -0.12, pan: true, range: 1.3 },
-      { name: 'HANGAR SUD · EST', pos: [30, 5.5, -73], yaw: 0, tilt: -0.15, pan: false },
-      { name: 'SAS D’ENTRÉE', pos: [0, 2.9, -3.4], yaw: Math.PI, tilt: -0.08, pan: false }
-    ],
-    wall: { x: -50.2, z: -304, y: PLAT.y + 1.9 }, // centre du mur d’écrans (mur est du poste de contrôle)
-    camRes: [320, 180],
-    mainRes: [640, 360], // résolution des textures de caméra
-    codeWall: { x: 6, y: 3.4, z: -101.82, ry: 0 }
-  }; // où est peint le code : mur nord du hangar sud, à droite de la porte (visible par la caméra mobile)
   const NAMES = [
     'Sas d’entrée',
     'Salle de contrôle',
     'Dortoir / chambre forte',
     'Distribution électrique',
     'Hangar principal',
-    'Hangar sud',
-    'Couloir provisoire (ex-salle 7)',
-    'Couloir provisoire (ex-salle 8)',
-    'Couloir provisoire (ex-salle 9)',
-    'Couloir provisoire (ex-salle 10)',
-    'Ligne de coupure',
-    'Zone d’évacuation'
+    'Hangar sud'
   ];
   const HW = {
     1: 13.9,
@@ -49,12 +19,7 @@ const CCTV = (function () {
     3: 17.9,
     4: 17.9,
     5: 59.9,
-    6: 59.9,
-    7: 3.9, // salles 7 à 10 : couloir provisoire
-    8: 3.9,
-    9: 3.9,
-    10: 3.9,
-    11: 59.9
+    6: 59.9
   };
   const ZR = {
     1: [23.4, -4],
@@ -62,12 +27,7 @@ const CCTV = (function () {
     3: [-12, -22],
     4: [-22, -32],
     5: [-32, -72],
-    6: [-72, -102],
-    7: [-102, -132],
-    8: [-132, -172],
-    9: [-172, -222],
-    10: [-222, -262],
-    11: [-262, -312]
+    6: [-72, -102]
   };
   /* ── Carte : plan 2D de LA SALLE où vous êtes (murs et meubles à l’échelle, portes, objets présents, votre position et direction) ── */
   let _ints = [],
@@ -91,10 +51,6 @@ const CCTV = (function () {
       )
       .slice(0, 22);
   function drawMap(g, W, H, big) {
-    if (MapScenes.active && rig.pos.z < -900) {
-      MapScenes.drawMap(g, W, H);
-      return;
-    }
     const r = roomOf(rig.pos.z),
       hw = HW[r],
       zr = ZR[r],
@@ -245,34 +201,8 @@ const CCTV = (function () {
   ov.height = 720;
   document.body.appendChild(ov);
   const octx = ov.getContext('2d');
-  const oldMini = document.getElementById('town-minimap');
-  if (oldMini) oldMini.remove();
-  let mapOn = false,
-    mapT = 0,
-    mapScene = null;
-  const updateMapScene = () => {
-    const town = MapScenes.active === 'town';
-    if (mapScene === MapScenes.active) return;
-    mapScene = MapScenes.active;
-    Object.assign(ov.style, town ? {
-      left: '0', top: '0', translate: 'none', width: '100vw', height: '100vh',
-      aspectRatio: 'auto', border: '0', boxShadow: 'none', opacity: '0.68'
-    } : {
-      left: '50%', top: '50%', translate: '-50% -50%', width: 'min(92vw,170vh)', height: 'auto',
-      aspectRatio: '16 / 9', border: '2px solid #3a3326', boxShadow: '0 10px 40px #000c', opacity: '0.96'
-    });
-    mb.style.display = town ? 'none' : '';
-    if (town) {
-      mapOn = false;
-      ov.style.display = 'none';
-    }
-  };
+  let mapOn = false;
   const toggleMap = () => {
-    updateMapScene();
-    if (MapScenes.active === 'town' && !State.townGateOpen) {
-      say('Ouvrez le coffre pour déverrouiller la carte.', 3000);
-      return;
-    }
     mapOn = !mapOn;
     ov.style.display = mapOn ? 'block' : 'none';
     SND.play('paper');
@@ -295,260 +225,12 @@ const CCTV = (function () {
     'pointer-events:auto;right:14px;top:58px;padding:6px 8px;font:700 12px var(--stencil);letter-spacing:.1em;color:#b9bca8;background:#0a0c0a8c;border:1px solid #ffffff1c;border-radius:6px';
   mb.onclick = toggleMap;
   document.body.appendChild(mb);
-  /* ── Écrans 3D ── */
-  const Y = PLAT.y,
-    W = CCTV_CFG.wall,
-    cams = CCTV_CFG.cams,
-    N = cams.length;
-  const mkRT = (w, h) => {
-    const r = new THREE.WebGLRenderTarget(w, h);
-    r.texture.colorSpace = THREE.SRGBColorSpace;
-    return r;
-  };
-  const rts = cams.map(() => mkRT(...CCTV_CFG.camRes)),
-    mainRT = mkRT(...CCTV_CFG.mainRes);
-  const mapC = document.createElement('canvas');
-  mapC.width = 480;
-  mapC.height = 270;
-  const mapCtx = mapC.getContext('2d'),
-    mapTex = new THREE.CanvasTexture(mapC);
-  mapTex.colorSpace = THREE.SRGBColorSpace;
-  const cam = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 140),
-    fill = new THREE.PointLight(0xbfffd0, 0, 45, 1.6);
-  scene.add(fill); // lampe qui n’éclaire que pendant le rendu d’une caméra
-  // modèles de caméras fixés au plafond (elles tournent réellement)
-  cams.forEach((c) => {
-    const g = new THREE.Group();
-    g.position.set(...c.pos);
-    scene.add(g);
-    c.model = g;
-    c.off = 0;
-    c.offT = 0;
-    cyl(0.03, 0.25, mats.steel, 0, 0.2, 0, g, 8);
-    const body = box(0.22, 0.2, 0.45, mats.dark, 0, 0, -0.12, g);
-    const lens = box(0.1, 0.1, 0.04, glow(0xff2a1a, 2), 0, 0, -0.36, g);
-    g.rotation.set(c.tilt || 0, c.yaw, 0, 'YXZ');
-    body.castShadow = false;
-  });
-  // mur d’écrans : 1 grand écran central + 6 vignettes, sur une table de surveillance
-  const grpW = new THREE.Group();
-  grpW.position.set(W.x, Y, W.z);
-  grpW.rotation.y = -Math.PI / 2;
-  scene.add(grpW); // repère local : +x = vers le sud (z croissant)... faces vers l’ouest
-  box(14.6, 0.1, 1.2, mats.dark, 0, 0.85, 0.55, grpW);
-  box(15, 0.8, 1.2, mats.lockerA, 0, 0.4, 0.55, grpW);
-  pushC(W.x - 0.55, W.z, 0.6, 7.5);
-  const scr = (w, h, x, y, mat) => {
-    box(w + 0.1, h + 0.1, 0.06, mats.dark, x, y, -0.02, grpW);
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
-    m.position.set(x, y, 0.02);
-    grpW.add(m);
-    return m;
-  };
-  const mainMat = new THREE.MeshBasicMaterial({ map: mainRT.texture, toneMapped: false }),
-    thumbs = [];
-  const mainScr = scr(3.0, 1.7, 0, 1.95, mainMat);
-  const lbl = (t, x, y) => {
-    const m = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.4, 0.18),
-      new THREE.MeshBasicMaterial({
-        map: cvTex(256, 32, (g, w, h) => {
-          g.fillStyle = '#050805';
-          g.fillRect(0, 0, w, h);
-          g.fillStyle = '#9fd8a8';
-          g.font = 'bold 22px monospace';
-          g.fillText(t, 6, 24);
-        }),
-        toneMapped: false
-      })
-    );
-    m.position.set(x, y, 0.025);
-    grpW.add(m);
-  };
-  const xs = [-5.6, -4.0, -2.4, 2.4, 4.0, 5.6]; // 3 vignettes de chaque côté de l’écran principal (x local ; sera -z monde après rotation)
-  for (let i = 0; i <= N; i++) {
-    const x = xs[i],
-      mat = new THREE.MeshBasicMaterial({ map: i < N ? rts[i].texture : mapTex, toneMapped: false });
-    const m = scr(1.5, 0.84, x, 1.9, mat);
-    m.userData.idx = i;
-    thumbs.push(m);
-    lbl(i < N ? i + 1 + ' · ' + cams[i].name : i + 1 + ' · PLAN', x, 1.38);
-  }
-  const sel = { i: 1 };
-  function setSel(i) {
-    sel.i = i;
-    mainMat.map = i < N ? mainRT.texture : mapTex;
-    mainMat.needsUpdate = true;
-  }
-  // le point de visée / la position d’observation (on recule pour voir tout le mur)
-  const focusPt = () => new THREE.Vector3(W.x, W.y, W.z),
-    focusFn = (c) => new THREE.Vector3(W.x - 7.6, W.y - 0.15, W.z);
-  const hud = document.createElement('div');
-  hud.id = 'camhud';
-  hud.className = 'hud';
-  hud.style.cssText =
-    'left:50%;translate:-50% 0;top:12px;display:none;pointer-events:auto;text-align:center;padding:8px 14px;background:linear-gradient(180deg,#1b1d19f2,#0a0b09f2);border:2px solid #3a3326;font:600 15px var(--stencil);color:#e6e0c8;z-index:12';
-  hud.innerHTML =
-    '<div id="camtt"></div><div style="font:400 12px monospace;color:#8d907f;margin-top:4px">Bougez la souris : la caméra mobile vous suit · 1-6 pour changer d’écran · bouton « Quitter le zoom » pour sortir</div>';
-  const mouse = { x: 0, y: 0 };
-  addEventListener('pointermove', (e) => {
-    mouse.x = (e.clientX / innerWidth) * 2 - 1;
-    mouse.y = (e.clientY / innerHeight) * 2 - 1;
-  });
-  addEventListener('keydown', (e) => {
-    if (!active()) return;
-    const n = +e.key;
-    if (n >= 1 && n <= N + 1) select(n - 1);
-  });
-  const active = () => !!(State.focus && State.focus.userData && State.focus.userData.cctv);
-  function select(i) {
-    setSel(i);
-    SND.play('click');
-    title();
-  }
-  function title() {
-    const t = document.getElementById('camtt');
-    if (t)
-      t.textContent =
-        sel.i < N
-          ? 'CAMÉRA ' +
-            (sel.i + 1) +
-            ' · ' +
-            cams[sel.i].name +
-            (cams[sel.i].pan ? ' · ORIENTABLE' : ' · FIXE')
-          : 'PLAN DU BUNKER · position en direct';
-  }
-  // éléments interactifs : chaque vignette sélectionne son écran (on entre d’abord en mode caméra)
-  const enter = async (o) => {
-    if (!State.focus) {
-      await focusOn(o);
-    }
-    hud.style.display = 'block';
-    title();
-  };
-  thumbs.forEach((m) => {
-    const idx = m.userData.idx,
-      hb = box(1.5, 0.84, 0.3, mats.dark, 0, 0, 0, m);
-    hb.visible = false;
-    interactive(m, 'cctv_' + idx, 'Écran de surveillance ' + (idx + 1), 'use', { cctv: 1, focusPt, focusFn });
-    R('cctv_' + idx, async (o) => {
-      await enter(o);
-      select(idx);
-    });
-  });
-  interactive(mainScr, 'cctv_main', 'Écran principal de surveillance', 'use', { cctv: 1, focusPt, focusFn });
-  R('cctv_main', async (o) => {
-    await enter(o);
-    title();
-  });
-  // le code : peint sur UN mur, invisible hors caméra (affiché seulement pendant le rendu de la caméra qui possède reveal:true)
-  const cw = CCTV_CFG.codeWall,
-    code = CONFIG.camCode.split('').join('  ');
-  const codeMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.2, 1.0),
-    new THREE.MeshBasicMaterial({
-      map: cvTex(512, 230, (g, w, h) => {
-        g.fillStyle = '#3c3f38';
-        g.fillRect(0, 0, w, h);
-        g.fillStyle = '#d8ccb0';
-        g.font = 'bold 120px Georgia';
-        g.textAlign = 'center';
-        g.fillText(code, w / 2, 150);
-        g.strokeStyle = '#8a1c14';
-        g.lineWidth = 6;
-        g.strokeRect(10, 10, w - 20, h - 20);
-      }),
-      toneMapped: false,
-      transparent: true
-    })
-  );
-  codeMesh.position.set(cw.x, cw.y, cw.z);
-  codeMesh.rotation.y = cw.ry ?? -Math.PI / 2;
-  codeMesh.visible = false;
-  codeMesh.raycast = () => {};
-  scene.add(codeMesh);
-  // armoire à munitions (poste de contrôle) : s’ouvre avec le code vu en caméra
-  {
-    const g = new THREE.Group();
-    g.position.set(W.x - 5.1, Y + 1.3, W.z - 7.7);
-    scene.add(g);
-    box(0.9, 1.2, 0.25, mats.lockerA, 0, 0, 0, g);
-    box(0.7, 0.35, 0.03, mats.dark, 0, 0.25, 0.14, g);
-    box(0.2, 0.2, 0.03, glow(0xff2a1a, 2), 0, -0.2, 0.14, g);
-    hitBox(1, 1.3, 0.4, 0, 0, 0.05, g);
-    interactive(g, 'ammo_safe', 'Armoire à munitions (code à 4 chiffres)', 'use', { focusDist: 1.4 });
-    R('ammo_safe', async (o) => {
-      if (State.ammoCache) return say('Armoire déjà vidée.', 2500);
-      if (!State.focus) await focusOn(o);
-      if (
-        await askCode('ARMOIRE À MUNITIONS', 4, CONFIG.camCode, {
-          note: ['INDICE', 'Le code est peint sur un mur… visible seulement par caméra']
-        })
-      ) {
-        State.ammoCache = true;
-        State.ammo = (State.ammo || 0) + 30;
-        SND.play('success');
-        say('L’armoire s’ouvre : 30 cartouches 9 mm.', 5000);
-        renderInv();
-      } else say('Code refusé.', 3000);
-      await release();
-    });
-  }
-  /* ── rendu des caméras (appelé par la boucle) ── */
-  function renderFeed(i, rt, showCode) {
-    const c = cams[i];
-    c.model.visible = false;
-    cam.position.set(...c.pos);
-    cam.rotation.set(c.tilt || 0, c.yaw + c.off, 0, 'YXZ');
-    fill.position.copy(cam.position);
-    fill.intensity = 60;
-    codeMesh.visible = !!(showCode && c.reveal);
-    const old = renderer.getRenderTarget(),
-      sm = renderer.shadowMap.needsUpdate;
-    renderer.shadowMap.needsUpdate = false;
-    renderer.setRenderTarget(rt);
-    renderer.render(scene, cam);
-    renderer.setRenderTarget(old);
-    renderer.shadowMap.needsUpdate = sm;
-    fill.intensity = 0;
-    codeMesh.visible = false;
-    c.model.visible = true;
-    c.model.rotation.set(c.tilt || 0, c.yaw + c.off, 0, 'YXZ');
-  }
-  let rr = 0,
-    fr = 0,
-    mapAt = 0;
-  function frame(dt, t) {
-    const near = Math.hypot(rig.pos.x - W.x, rig.pos.z - W.z) < 22 && Math.abs(rig.pos.y - (Y + 1.6)) < 2.5;
-    updateMapScene();
-    if (performance.now() > mapAt) {
-      mapAt = performance.now() + 250;
-      if (near || active()) {
-        drawMap(mapCtx, 480, 270, false);
-        mapTex.needsUpdate = true;
-      }
-      if (mapOn) drawMap(octx, 1280, 720, true);
-    }
-    if (!active() && hud.style.display !== 'none') hud.style.display = 'none';
-    if (!near && !active()) return;
-    fr++;
-    if (active()) {
-      const c = sel.i < N ? cams[sel.i] : null; // pilotage de la caméra choisie
-      if (c && c.pan) {
-        if (c.baseTilt === undefined) c.baseTilt = c.tilt || 0; // la caméra SUIT LA SOURIS du joueur (souris à droite → regarde à droite, en bas → regarde en bas)
-        const tx = -mouse.x * c.range,
-          ty = Math.max(-0.7, Math.min(0.2, c.baseTilt - mouse.y * 0.35)),
-          k = Math.min(1, dt * 5);
-        c.off += (tx - c.off) * k;
-        c.tilt = (c.tilt || 0) + (ty - (c.tilt || 0)) * k;
-      }
-
-      if (sel.i < N && fr % (perf.lowEnd ? 4 : 2) === 0) renderFeed(sel.i, mainRT, true);
-    }
-    if (fr % (perf.lowEnd ? 12 : 3) === 0) {
-      const i = rr++ % N;
-      if (!(active() && i === sel.i && false)) renderFeed(i, rts[i], true);
-    } // vignettes : une caméra à la fois
+  /* ── rafraîchissement de la carte plein écran (appelé par la boucle) ── */
+  let mapAt = 0;
+  function frame() {
+    if (!mapOn || performance.now() < mapAt) return;
+    mapAt = performance.now() + 250;
+    drawMap(octx, 1280, 720, true);
   }
   /* ── Caméras de surveillance dans CHAQUE salle : elles suivent le joueur des yeux (quand il est dans leur salle) ── */
   const RC_Y = {
@@ -557,16 +239,10 @@ const CCTV = (function () {
     3: 2.8,
     4: 2.8,
     5: 4.4,
-    6: 4.4,
-    7: 7,
-    8: 4.4,
-    9: 4.4,
-    10: 4.3,
-    11: 4.3
+    6: 4.4
   };
   const roomCams = [];
-  for (let r = 1; r <= 11; r++) {
-    if (r >= 7 && r <= 10) continue; // salles 7 à 10 supprimées (couloir provisoire)
+  for (let r = 1; r <= 6; r++) {
     const zT = ZR[r][0],
       zw = r === 1 ? zT - 0.5 : zT - 0.5,
       x = r === 1 ? 4 : 4.5,
@@ -610,19 +286,8 @@ const CCTV = (function () {
         h.rotation.x += (-0.3 - h.rotation.x) * dt;
       }
     }); // sinon : balayage lent
-    cams.forEach((c) => {
-      if (c.pan || roomOf(c.pos[2]) !== cur) return;
-      const dx = rig.pos.x - c.pos[0],
-        dz = rig.pos.z - c.pos[2],
-        yaw = Math.atan2(-dx, -dz),
-        pitch = Math.max(-0.7, Math.min(0.2, Math.atan2(rig.pos.y - 0.25 - c.pos[1], Math.hypot(dx, dz))));
-      c.off += _ang(yaw - c.yaw - c.off) * k;
-      c.tilt = (c.tilt || 0) + (pitch - (c.tilt || 0)) * k;
-      c.model.rotation.set(c.tilt, c.yaw + c.off, 0, 'YXZ');
-    });
-  } // les caméras fixes du poste de surveillance suivent aussi le joueur
-  setSel(1);
-  return { frame, track, cfg: CCTV_CFG };
+  }
+  return { frame, track };
 })();
 
 R('panel_blood_01', async (o) => {
@@ -927,14 +592,6 @@ const DOORS = [
     ok: () => State.wareCode,
     locked: M.wareLocked,
     open: M.wareOpen
-  },
-  {
-    id: 'door_exit3',
-    z: -312,
-    flag: 'doorExit3',
-    ok: () => State.breaker,
-    locked: M.exit3Locked,
-    open: M.exit3Open
   }
 ];
 DOORS.forEach((D) =>
@@ -954,6 +611,24 @@ DOORS.forEach((D) =>
     passDoor(D.z);
   })
 );
+// porte du fond de la salle 6 : c’est la sortie du bunker, elle termine la partie
+R('door_ware', (o) => {
+  if (State.doorExit) return;
+  if (!State.wareCode) {
+    SND.play('locked');
+    return say(M.wareLocked);
+  }
+  State.doorWare = true;
+  State.doorExit = true; // fige les contrôles et lance la musique de sortie
+  SND.play('door');
+  openDoorAnim(o, 1.6);
+  say(M.wareOpen, 4000);
+  gameTimeout(() => {
+    SND.play('success');
+    document.getElementById('end').classList.add('on');
+    modalOpen = true;
+  }, 1800);
+});
 
 // porte du sas : il faut d’abord le code (terminal), puis le saisir sur le digicode de la porte
 {
@@ -1184,101 +859,4 @@ R('keypad_ware', async (o) => {
     setObjective(TEXTS.objectives.openWare);
   } else say(M.wareBad);
   release();
-});
-// Salles 7 à 10 : leur logique est définie dans leur propre fichier (salles/salle-07 … salle-10).
-// ── Complexe à étages (salle 11) ──
-R('note_stairs', async (o) => {
-  SND.play('paper');
-  await focusOn(o);
-  say(fmt(M.stairsNote, { d: CONFIG.bureauCode.split('').join(' ') }), 8000);
-});
-R('door_bureau', async (o) => {
-  if (o.userData.opened) return say(M.doorAlready);
-  if (!State.bureauOpen) {
-    await focusOn(o);
-    if (await askCode(M.bureauTitle, 3, CONFIG.bureauCode)) {
-      State.bureauOpen = true;
-      SND.play('success');
-      o.userData.led.material = glow(0x30ff70, 3);
-      say(M.bureauOpen);
-      await release();
-      openInner(o);
-    } else {
-      say(M.bureauBad);
-      await release();
-    }
-    return;
-  }
-  openInner(o);
-});
-R('crowbar', (o) => {
-  State.crowbar = true;
-  hideObj(o);
-  SND.play('click');
-  renderInv();
-  say(M.crowbarTaken);
-  setObjective(objectiveNow());
-});
-R('bar_depot', (o) => {
-  if (State.barDone) return;
-  if (!State.crowbar) {
-    SND.play('locked');
-    return say(M.barNeed);
-  }
-  State.barDone = true;
-  SND.play('lever');
-  gameTimeout(() => SND.play('clank'), 400);
-  const y0 = o.position.y;
-  tween(0.7, (k) => {
-    o.position.y = y0 - 1.0 * k * k;
-    o.rotation.z = 0.9 * k;
-  }).then(() => hideObj(o));
-  doorDepot.userData.led.material = glow(0x30ff70, 3);
-  say(M.barOk, 5000);
-  setObjective(objectiveNow());
-});
-R('door_depot', (o) => {
-  if (o.userData.opened) return say(M.doorAlready);
-  if (!State.barDone) {
-    SND.play('locked');
-    return say(M.barNeed);
-  }
-  openInner(o);
-});
-R('key_ctrl', (o) => {
-  State.keyCtrl = true;
-  hideObj(o);
-  SND.play('key');
-  renderInv();
-  say(M.keyCtrlTaken);
-  doorCtrl.userData.led.material = glow(0x30ff70, 3);
-  setObjective(objectiveNow());
-});
-R('door_ctrl', (o) => {
-  if (o.userData.opened) return say(M.doorAlready);
-  if (!State.keyCtrl) {
-    SND.play('locked');
-    return say(M.ctrlLocked);
-  }
-  say(M.ctrlOpen);
-  openInner(o);
-});
-R('breaker', (o) => {
-  if (State.breaker) return say(M.breakerDone);
-  State.breaker = true;
-  SND.play('lever');
-  gameTimeout(() => {
-    SND.play('success');
-    SND.play('genstart');
-  }, 350);
-  const a = o.userData.arm,
-    f = a.rotation.x;
-  tween(0.6, (k) => {
-    a.rotation.x = f + (-0.7 - f) * k;
-  });
-  o.userData.led.material = glow(0x30ff70, 3);
-  doorExit3.userData.led.material = glow(0x30ff70, 3);
-  doorExit3.userData.hint = Hn.door_exit3_unlocked;
-  say(M.breakerOk, 7000);
-  setObjective(objectiveNow());
 });

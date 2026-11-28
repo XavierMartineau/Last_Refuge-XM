@@ -11,12 +11,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Octree } from 'three/addons/math/Octree.js';
-import { Capsule } from 'three/addons/math/Capsule.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import * as CL from '../../../assets/creation-personnage/personnage_armes.js?v=20261126l';
-import * as ZombieAssets from '../../../assets/zombie/zombie.js';
 
 Object.assign(window, {
   THREE,
@@ -28,13 +23,7 @@ Object.assign(window, {
   ShaderPass,
   RoomEnvironment,
   RoundedBoxGeometry,
-  GLTFLoader,
-  Octree,
-  Capsule,
-  MeshoptDecoder,
-  zombieMapBase: new URL('../../../assets/zombie-map/', import.meta.url).href,
-  CL,
-  ZombieAssets
+  CL
 });
 
 const loading = document.getElementById('game-loading');
@@ -69,10 +58,6 @@ export const FICHIERS = [
   'salles/salle-04-distribution.js',
   'salles/salle-05-hangar.js',
   'salles/salle-06-hangar-sud.js',
-  'salles/zone-provisoire-07-10.js', // salles 7 à 10 supprimées : couloir provisoire
-  'salles/sol-escaliers.js',
-  'salles/salle-11-ligne-de-coupure.js',
-  '07-combat-infectes.js',
   '08-camera.js',
   '09-son.js',
   '10-controles.js',
@@ -82,7 +67,6 @@ export const FICHIERS = [
   '14-enigmes.js',
   '15-quetes-annexes.js',
   '16-surveillance-carte.js',
-  '23-cartes.js',
   '17-personnage-joueur.js',
   '18-post-traitement.js',
   '19-boucle.js',

@@ -133,19 +133,7 @@ const roomOf = (z) =>
           ? 4
           : z > -72
             ? 5
-            : z > -102
-              ? 6
-              : z > -132
-                ? 7
-                : z > -172
-                  ? 8
-                  : z > -222
-                    ? 9
-                    : z > -262
-                      ? 10
-                      : z > -312
-                        ? 11
-                        : 12; // numéro de pièce selon la profondeur z
+            : 6; // numéro de salle (1 à 6) selon la profondeur z
 async function passDoor(z) {
   // traverse une porte ouverte (dans un sens ou dans l’autre)
   const dir = rig.pos.z > z ? -1 : 1,

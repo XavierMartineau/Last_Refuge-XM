@@ -73,7 +73,7 @@
     TEXTS.ui.flashOn = `🔦 Lampe : ON (${K('flashlight')})`;
     TEXTS.ui.flashOff = `🔦 Lampe : OFF (${K('flashlight')})`;
     TEXTS.msg.pressE = `Appuyez sur ${K('take')} (ou A à la manette) pour le prendre.`;
-    TEXTS.ui.help = `Souris : regarder · ${move} : marcher · ${K('turnLeft')} ${K('turnRight')} : tourner · ${K('sprint')} : courir · ${K('crouch')} : s’accroupir · ${K('inventory')} : inventaire · ${K('objectives')} : objectifs · ${K('flashlight')} : lampe torche · ${K('view')} : vue 1re/3e personne · ${K('fire')} : tirer · Clic droit : viser · ${K('reload')} : recharger · Clic : interagir · Échap : menu`;
+    TEXTS.ui.help = `Souris : regarder · ${move} : marcher · ${K('turnLeft')} ${K('turnRight')} : tourner · ${K('sprint')} : courir · ${K('crouch')} : s’accroupir · ${K('inventory')} : inventaire · ${K('objectives')} : objectifs · ${K('flashlight')} : lampe torche · ${K('view')} : vue 1re/3e personne · Clic : interagir · Échap : menu`;
   }
   try {
     keyTexts();
@@ -175,7 +175,6 @@
     document.body.appendChild(toast);
     const cursor = { x: innerWidth / 2, y: innerHeight / 2 };
     let sprint = false,
-      lastHp = State.hp,
       toastT;
     const padKeys = new Set();
     const free = () => !rig.locked && !State.focus && !modalOpen && !State.doorExit;
@@ -193,9 +192,6 @@
       clearTimeout(toastT);
       toastT = setTimeout(() => toast.classList.remove('on'), 2600);
     };
-    const rumble = (a, b, ms) => {
-      if (S.padVibration !== false) PAD.vibrate(a, b, ms);
-    };
     const clickAt = (x, y) => {
       const e = { clientX: x, clientY: y };
       hover(e);
@@ -210,10 +206,7 @@
     PAD.attach({
       menuActive: () => {
         const active = modalOpen || menuOn();
-        if (active) {
-          releaseKeys();
-          padAim = false;
-        }
+        if (active) releaseKeys();
         return active;
       },
       spatial: () => !menuOn() || topModal() !== menuEl,
@@ -227,7 +220,6 @@
         if (menuOn()) $g('menuok').click();
       },
       onPad: (on) => {
-        if (!on) padAim = false;
         document.body.classList.toggle('pad', on);
         if (ui) ui.setPad(on);
         releaseKeys();
@@ -246,8 +238,7 @@
           return i >= 0 && pressed(i);
         };
         const dl = (S.padDeadL ?? 12) / 100,
-          dr = (S.padDeadR ?? 10) / 100,
-          trig = (S.padTrigger ?? 35) / 100;
+          dr = (S.padDeadR ?? 10) / 100;
         const lx = dz(pad.axes[0] || 0, dl),
           ly = dz(pad.axes[1] || 0, dl);
         const rx = dz(pad.axes[2] || 0, dr),
@@ -256,7 +247,6 @@
         reticle.classList.toggle('on', zoom);
 
         if (zoom) {
-          padAim = false;
           // vue rapprochée : viseur libre au stick gauche (ou droit), A = clic
           releaseKeys();
           cursor.x = Math.min(innerWidth - 4, Math.max(4, cursor.x + (lx + rx) * 900 * dt));
@@ -300,19 +290,7 @@
             else takeNearest();
           }
           if (hit('crouch', 'B')) touchCrouch = !touchCrouch;
-          if (hit('reload', 'X')) reload();
           if (hit('flashlight', 'Y') && !modalOpen) toggleFlash();
-          const fi = P('fire', 'RT'),
-            fb = pad.buttons[fi],
-            ai = P('aim', 'LT'),
-            ab = pad.buttons[ai];
-          padAim = !!(ab && free() && (ab.value > trig || (ab.pressed && ai !== B.LT && ai !== B.RT)));
-          if (fb && (fb.value > trig || (fb.pressed && fi !== B.LT && fi !== B.RT))) {
-            if (State.armed && AV.heldItem !== 'weapon') selectHeldItem('weapon');
-            const before = State.ammo;
-            fire();
-            if (State.ammo !== before) rumble(0.35, 0.6, 70);
-          }
           const tapAction = (name) => {
             const c = CONTROLS.keys[name] && CONTROLS.keys[name][0];
             if (c) PAD.tap(c);
@@ -323,8 +301,6 @@
           if (hit('view', 'R3')) tapAction('view');
         }
         if (pressed(B.MENU)) $g('menub').click();
-        if (State.hp < lastHp) rumble(0.9, 0.5, 220);
-        lastHp = State.hp;
       }
     });
     addEventListener('gamepaddisconnected', () => {
@@ -463,7 +439,7 @@
       wantMenu = true;
       document.exitPointerLock();
     }
-    cross.classList.toggle('on', ((on && freeLook()) || isAiming()) && !(hasMagnifyingOptic() && aimBlend > 0.6));
+    cross.classList.toggle('on', on && freeLook());
     hint.classList.toggle('on', auto() && !on && freeLook() && !document.body.classList.contains('pad'));
     if ((on || (window.LastRefugeManette && window.LastRefugeManette.active)) && freeLook() && t - hoverT > 90) {
       hoverT = t;

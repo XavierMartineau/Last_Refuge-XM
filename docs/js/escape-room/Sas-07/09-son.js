@@ -256,7 +256,7 @@ const SND = (() => {
     o.stop(t + d + 0.05);
   }
   // ── MUSIQUE générative (réglages : SOUND.music = volume, SOUND.musicOn = activer) ──
-  // L’ambiance change selon la situation : sas (nappe sombre) · grandes salles (pouls industriel) · armurerie (angoisse) · combat (rythme rapide) · sortie (accords lumineux).
+  // L’ambiance change selon la situation : sas (nappe sombre) · grandes salles (pouls industriel) · sortie (accords lumineux).
   let musBus,
     mNext = 0,
     mStep = 0,
@@ -367,41 +367,6 @@ const SND = (() => {
         if (i % 16 === 0 && bar % 2 === 1) mtone(root + 36, 2.5, { type: 'triangle', vol: 0.035, send: 0.7 });
       }
     },
-    dread: {
-      bpm: 48,
-      f(i, bar) {
-        if (i % 16 === 0) mtone(28, 9, { type: 'sawtooth', vol: 0.07, lp: 200 });
-        if (i % 16 === 0) mtone(40, 9, { type: 'sine', vol: 0.05 });
-        if (i % 8 === 0) {
-          mdrum('kick', 0.1);
-          mdrum('kick', 0.07, 0.32);
-        } // battement de cœur
-        if (i % 16 === 8 && Math.random() < 0.7)
-          mtone(64 + ((Math.random() * 6) | 0), 4, { type: 'sine', vol: 0.04, send: 0.9, slide: 0.97 });
-      }
-    },
-    combat: {
-      bpm: 156,
-      f(i, bar) {
-        const root = [28, 28, 31, 26][bar % 4],
-          s = i % 16;
-        mtone(root + (s % 4 === 3 ? 12 : 0), 0.16, {
-          type: 'sawtooth',
-          vol: 0.09,
-          lp: 420 + (s % 8 === 0 ? 700 : 0)
-        });
-        if (s % 4 === 0) mdrum('kick', 0.16);
-        if (s === 4 || s === 12) mdrum('snare', 0.09);
-        mdrum('hat', s % 2 ? 0.03 : 0.015);
-        if (s % 8 === 6)
-          mtone(root + 31 + [0, 3, 7, 10][(Math.random() * 4) | 0], 0.3, {
-            type: 'square',
-            vol: 0.03,
-            lp: 2200,
-            send: 0.3
-          });
-      }
-    },
     victory: {
       bpm: 72,
       f(i, bar) {
@@ -439,22 +404,6 @@ const SND = (() => {
       if (i % 16 === 8 && bar % 2 === 0)
         mtone(r + 36, 1.6, { type: 'sawtooth', vol: 0.04, lp: 1400, send: 0.5 });
     },
-    dread: (i, bar) => {
-      if (i % 16 === 4)
-        mtone(52 + PENTA[(bar * 2) % 5], 5, { type: 'triangle', vol: 0.05, send: 0.9, slide: 0.94 });
-      if (i % 16 === 12 && bar % 2) mtone(76, 3, { type: 'sine', vol: 0.035, send: 0.9 });
-    },
-    combat: (i, bar) => {
-      const r = [28, 28, 31, 26][bar % 4],
-        s = i % 16;
-      if (s % 2 === 0)
-        mtone(r + 24 + PENTA[(s / 2 + bar) % 5 | 0], 0.12, {
-          type: 'square',
-          vol: 0.04,
-          lp: 2600,
-          send: 0.2
-        });
-    },
     victory: (i, bar) => {
       const c = [48, 43, 45, 41][bar % 4];
       if (i % 4 === 0)
@@ -471,17 +420,7 @@ const SND = (() => {
     };
   });
   function moodNow() {
-    return State.doorExit || State.zDone
-      ? 'victory'
-      : State.room === 12
-        ? State.armed
-          ? 'combat'
-          : 'dread'
-        : State.room === 10
-          ? 'dread'
-          : State.room >= 5
-            ? 'industrial'
-            : 'ambient';
+    return State.doorExit ? 'victory' : State.room >= 5 ? 'industrial' : 'ambient';
   }
   function musicTick(t, n) {
     if (sfxBus) sfxBus.gain.setTargetAtTime(SOUND.sfx, n, 0.1);
@@ -564,39 +503,6 @@ const SND = (() => {
     locker() {
       creak(0.9, 0.1);
       noise(0.08, { f: 500, vol: 0.3, at: 0.85 });
-    },
-    shot(k) {
-      const big = k === 4 || k === 5 || k === 6 || k === 9 || k === 10;
-      noise(0.18, { type: 'lowpass', f: big ? 1800 : 2600, vol: 0.45, send: 0.25 });
-      tone(big ? 95 : 140, 0.14, { type: 'square', vol: 0.22, slide: 45, lp: 900 });
-      if (k === 3) noise(0.3, { type: 'lowpass', f: 1200, vol: 0.4, send: 0.3 });
-    },
-    empty() {
-      tone(900, 0.04, { type: 'square', vol: 0.08, lp: 2000 });
-      noise(0.03, { f: 3000, vol: 0.1 });
-    },
-    reload() {
-      noise(0.08, { type: 'bandpass', f: 2400, q: 2, vol: 0.2 });
-      noise(0.1, { type: 'bandpass', f: 1500, q: 2, vol: 0.22, at: 0.55 });
-      tone(420, 0.05, { type: 'square', vol: 0.07, at: 1.0 });
-    },
-    zhit() {
-      noise(0.1, { type: 'lowpass', f: 700, vol: 0.3 });
-      tone(110, 0.1, { type: 'sine', vol: 0.2, slide: 60 });
-    },
-    zgroan() {
-      tone(85, 0.8, { type: 'sawtooth', vol: 0.09, slide: 55, lp: 500, send: 0.2 });
-    },
-    zdie() {
-      tone(120, 0.6, { type: 'sawtooth', vol: 0.12, slide: 40, lp: 420, send: 0.2 });
-      noise(0.2, { type: 'lowpass', f: 500, vol: 0.25 });
-    },
-    hurt() {
-      tone(180, 0.25, { type: 'square', vol: 0.12, slide: 70, lp: 600 });
-      noise(0.15, { type: 'lowpass', f: 900, vol: 0.3 });
-    },
-    swing() {
-      noise(0.2, { type: 'bandpass', f: 1800, q: 0.8, vol: 0.2 });
     },
     boom() {
       noise(0.9, { type: 'lowpass', f: 500, vol: 0.6, send: 0.4 });
@@ -773,13 +679,7 @@ const SND = (() => {
         !State.vaultUnlocked,
         !State.power4,
         !State.power5,
-        !State.wareCode,
-        false, // salles 7 à 10 : zone provisoire
-        false,
-        false,
-        false,
-        !State.breaker,
-        !State.zDone
+        !State.wareCode
       ][State.room - 1];
     alarmG.gain.setTargetAtTime(alarmOn && Math.sin(t * 4) > 0 ? 0.004 : 0, n, 0.02);
     const k = Math.max(0, 1 - Math.hypot(rig.pos.x + 2.8, rig.pos.z + 10.2) / 7);
@@ -794,22 +694,16 @@ const SND = (() => {
           3: ['moan', 'creak'],
           4: ['chain', 'slamfar', 'drip'],
           5: ['wind', 'slamfar', 'beepfar'],
-          6: ['wind', 'slamfar', 'chain'],
-          7: ['chain', 'creak', 'beepfar'],
-          8: ['beepfar', 'radio', 'creak'],
-          9: ['beepfar', 'radio', 'slamfar'],
-          10: ['moan', 'creak', 'wind'],
-          11: ['chain', 'moan', 'drip'],
-          12: ['moan', 'slamfar', 'wind']
+          6: ['wind', 'slamfar', 'chain']
         }[r] || ['creak'];
-      SND._env = t + (r >= 10 ? 5 : 8) + Math.random() * 9;
+      SND._env = t + 8 + Math.random() * 9;
       const k = P[Math.floor(Math.random() * P.length)];
       try {
         lib[k] && lib[k]();
       } catch (e) {}
     }
     if (wet && ctx) {
-      const rv = State.room <= 4 ? 0.22 : State.room <= 9 ? 0.5 : State.room <= 11 ? 0.16 : 0.42;
+      const rv = State.room <= 4 ? 0.22 : 0.5;
       wet.gain.setTargetAtTime(rv, ctx.currentTime, 1.2);
     }
     if (t > nextDrip) {

@@ -36,7 +36,6 @@ const State = {
   door1: false,
   locker3: false,
   room: 1,
-  townGateOpen: false,
   seq: [],
   solved: false,
   doorExit: false,
@@ -54,22 +53,7 @@ const State = {
   power5: false,
   fuses: 0,
   fusesIn: 0,
-  wareCode: false,
-  crowbar: false,
-  keyCtrl: false,
-  barDone: false,
-  bureauOpen: false,
-  breaker: false,
-  doorExit3: false,
-  armed: false,
-  zDone: false,
-  kills: 0,
-  spawned: 0,
-  wave: 0,
-  hp: 100,
-  ammo: 0,
-  reloading: false,
-  spawnT: 0
+  wareCode: false
 };
 const Actions = {
   handlers: {},

@@ -8,12 +8,12 @@ window.LAST_REFUGE_ESCAPE_ROOMS = [
     name: "Bunker nord",
     sector: "Sous-sol du bloc C · Bunker de commandement",
     difficulty: 4,
-    rooms: 12,
-    minutes: [60, 90],
+    rooms: 6,
+    minutes: [40, 60],
     url: "../escape-room/Sas-07/escape-room.html",
-    tags: ["3D", "Combat", "Énigmes", "Électricité"],
-    description: "Traversez les 12 salles du bunker sous le pénitencier : relancez le générateur, forcez la chambre forte et atteignez la zone d’évacuation.",
-    narration: "Vous reprenez conscience dans un sas plongé dans le noir. Les sirènes se sont tues depuis longtemps ; seul le grésillement d’une radio vous rappelle que le bunker de commandement devait servir de dernier refuge aux gardiens. Votre lampe torche fonctionne encore. Derrière la porte blindée, l’électricité est coupée, les cellules sont ouvertes et quelque chose gratte contre les murs. Pour rejoindre la zone d’évacuation, il faudra rétablir le courant, trouver les codes des gardiens… et ne pas rester trop longtemps au même endroit."
+    tags: ["3D", "Énigmes", "Électricité"],
+    description: "Traversez les 6 salles du bunker sous le pénitencier : relancez le générateur, forcez la chambre forte et atteignez la sortie.",
+    narration: "Vous reprenez conscience dans un sas plongé dans le noir. Les sirènes se sont tues depuis longtemps ; seul le grésillement d’une radio vous rappelle que le bunker de commandement devait servir de dernier refuge aux gardiens. Votre lampe torche fonctionne encore. Derrière la porte blindée, l’électricité est coupée, les cellules sont ouvertes et quelque chose gratte contre les murs. Pour rejoindre la sortie, il faudra rétablir le courant, trouver les codes des gardiens… et ne pas rester trop longtemps au même endroit."
   },
   {
     id: "bloc-c",

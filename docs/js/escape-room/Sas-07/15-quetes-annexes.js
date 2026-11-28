@@ -1,7 +1,7 @@
 /* LAST REFUGE · XM — Escape room « Sas 07 » · Quêtes annexes (3 par salle).
    Fichier chargé dans l’ordre par escape-room.js : il partage la portée globale des autres fichiers. */
 'use strict';
-/* ═════════ QUÊTES ANNEXES : 3 par salle (livraison, collection, réparation). Chaque quête terminée donne +1 « équipement renforcé » (−6 % de dégâts subis par les zombies).
+/* ═════════ QUÊTES ANNEXES : 3 par salle (livraison, collection, réparation).
    Réglages : QDATA (textes, noms, objets) et QZ (zones où les objets sont placés au hasard, mais toujours au même endroit) ═════════ */
 const QDATA = {
   1: {
@@ -105,40 +105,6 @@ const QDATA = {
       ['Clé de contact', 'Fusible 30 A'],
       'Le chariot tousse, démarre, puis cale. Mais pendant quelques secondes, il a vécu.'
     ]
-  },
-  11: {
-    f: [
-      'Pièce de monnaie',
-      'Distributeur de café',
-      'Le distributeur avale la pièce et sort un café tiède, sans goût. Vous n’avez jamais rien bu d’aussi bon.',
-      'coin'
-    ],
-    c: [
-      'Badge de visiteur',
-      'Les badges réunis : « VISITEUR : accès interdit à tous les niveaux. » Quelqu’un a barré « interdit » et écrit « tant pis ».'
-    ],
-    r: [
-      'Ascenseur de service',
-      ['Câble d’acier', 'Contrepoids'],
-      'L’ascenseur gémit, descend d’un étage, puis remonte à vide. Rassurant, probablement.'
-    ]
-  },
-  12: {
-    f: [
-      'Chiffon à huile',
-      'Fusil rouillé',
-      'Vous astiquez : sous la rouille, un nom gravé, « Capitaine Morel ». Il vous aurait remercié.',
-      'cloth'
-    ],
-    c: [
-      'Douille dorée',
-      'Les douilles alignées forment un message en morse : « SOS… SOS… ils sont déjà là. »'
-    ],
-    r: [
-      'Coffre de munitions',
-      ['Clé du coffre', 'Code du coffre'],
-      'Le coffre s’ouvre : vide, sauf un mot : « Trop tard. Désolé. — M. »'
-    ]
   }
 };
 const QZ = {
@@ -165,14 +131,6 @@ const QZ = {
   6: [
     [-45, 45],
     [-76, -98]
-  ],
-  11: [
-    [-2, 45],
-    [-268, -308]
-  ],
-  12: [
-    [-40, 40],
-    [-318, -356]
   ]
 };
 const QS = [],
@@ -230,7 +188,6 @@ function qdir(room, x, z) {
 }
 function qDone(q) {
   q.done = true;
-  State.bonus = (State.bonus || 0) + 1;
   SND.play('success');
   renderInv();
   setObjective(objectiveNow());
@@ -238,10 +195,7 @@ function qDone(q) {
     'Quête annexe terminée : ' +
       q.title.replace('Annexe — ', '') +
       '.  ' +
-      q.final +
-      '   [Équipement renforcé +' +
-      State.bonus +
-      ']',
+      q.final,
     9000
   );
 }
@@ -300,8 +254,7 @@ function qTarget(q) {
   });
 }
 (function buildQuests() {
-  for (let rm = 1; rm <= 12; rm++) {
-    if (!QDATA[rm]) continue; // salles 7 à 10 supprimées : pas de quêtes annexes
+  for (let rm = 1; rm <= 6; rm++) {
     const D = QDATA[rm],
       zn = QZ[rm],
       rnd = qrng(rm * 977 + 13),
@@ -363,7 +316,6 @@ function qInvList() {
     if (q.type === 'collect') a.push(q.items[0].name + ' ×' + got.length);
     else got.forEach((i) => a.push(i.name));
   });
-  if (State.bonus) a.push('Équipement renforcé +' + State.bonus);
   return a;
 }
 function questLines(rr) {
@@ -750,13 +702,7 @@ const BOOK = (function () {
     'Dortoir / chambre forte',
     'Distribution électrique',
     'Hangar principal',
-    'Hangar sud',
-    'Couloir provisoire (ex-salle 7)',
-    'Couloir provisoire (ex-salle 8)',
-    'Couloir provisoire (ex-salle 9)',
-    'Couloir provisoire (ex-salle 10)',
-    'Ligne de coupure',
-    'Zone d’évacuation'
+    'Hangar sud'
   ];
   const S = { open: false, sec: {} };
   // objet 3D : petite table + carnet fermé qui brille légèrement
@@ -820,7 +766,7 @@ const BOOK = (function () {
   #book .bk{width:min(900px,96vw);max-height:92vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#26241a,#14130d);border:2px solid #4a4128;box-shadow:0 20px 60px #000d,inset 0 0 80px #0008;color:var(--bone);font-family:'Special Elite','Courier New',monospace;position:relative}
   #book .bk::before{content:'';position:absolute;left:0;right:0;top:0;height:8px;background:var(--hazard)}
   #book header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 8px}#book h3{margin:0;font:700 22px var(--stencil);letter-spacing:.18em}#book small{color:var(--bloodb);letter-spacing:.2em;font-family:var(--stencil)}
-  #book .map{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;padding:6px 18px}
+  #book .map{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:6px 18px}
   #book .map button{padding:8px 0;font:600 14px var(--stencil);background:#0b0c09;color:#8d907f;border:1px solid #3a3326}
   #book .map button.cur{background:#3a2a0a;color:#ffd070;border-color:#b48a22}#book .map button.done{color:#3fdc72;border-color:#2a5a38}
   #book .tools{display:flex;gap:6px;padding:4px 18px}#book .tools button{padding:5px 12px;font:600 13px var(--stencil)}
@@ -832,8 +778,7 @@ const BOOK = (function () {
   #book ul{list-style:none;margin:0;padding:0}#book li{padding:2px 0 2px 20px;position:relative;font-size:14px;line-height:1.3}
   #book li::before{content:'';position:absolute;left:0;top:5px;width:11px;height:11px;border:1.5px solid #8d907f}#book li.d{color:#6f7566;text-decoration:line-through}#book li.d::before{background:#3fdc72;border-color:#3fdc72}
   #book .ob{margin:2px 0 4px;color:#ffd070}#book .tag{font-size:11px;letter-spacing:.12em;color:#8d907f}
-  #book footer{padding:6px 18px 12px;font-size:12px;color:#8d907f}
-  @media(max-width:600px){#book .map{grid-template-columns:repeat(6,1fr)}}`;
+  #book footer{padding:6px 18px 12px;font-size:12px;color:#8d907f}`;
   (document.head || document.body).appendChild(css);
   const root = document.createElement('div');
   root.id = 'book';
@@ -849,7 +794,7 @@ const BOOK = (function () {
     const cur = State.room;
     let m = '',
       h = '';
-    for (let r = 1; r <= 12; r++) {
+    for (let r = 1; r <= 6; r++) {
       const st = r < cur ? 'done' : r === cur ? 'cur' : '';
       m += '<button data-r="' + r + '" class="' + st + '">' + String(r).padStart(2, '0') + '</button>';
       const open = S.sec[r] === undefined ? r === cur : S.sec[r];
@@ -901,10 +846,10 @@ const BOOK = (function () {
     if (!t) return;
     if (t.id === 'bkx') api.close();
     else if (t.id === 'bkall') {
-      for (let r = 1; r <= 12; r++) S.sec[r] = true;
+      for (let r = 1; r <= 6; r++) S.sec[r] = true;
       paint();
     } else if (t.id === 'bkno') {
-      for (let r = 1; r <= 12; r++) S.sec[r] = false;
+      for (let r = 1; r <= 6; r++) S.sec[r] = false;
       paint();
     } else if (t.dataset.r) toggle(+t.dataset.r);
   });

@@ -77,7 +77,7 @@
         { id: "music", label: "Musique", type: "slider", def: 80, min: 0, max: 100, step: 5, format: pct,
           desc: "Volume de la musique d’ambiance générée en direct." },
         { id: "sfx", label: "Effets", type: "slider", def: 100, min: 0, max: 100, step: 5, format: pct,
-          desc: "Volume des bruitages : pas, portes, tirs, infectés." }
+          desc: "Volume des bruitages : pas, portes, machines." }
       ]},
       { title: "Interface", rows: [
         { id: "homeMusic", label: "Ambiance des menus", type: "choice", def: true, options: [[false, "Non"], [true, "Oui"]], scope: "site",
@@ -109,8 +109,6 @@
       ]},
       { title: "Actions", rows: [
         kb("take", "Interagir / prendre", ["KeyE"]),
-        kb("fire", "Tirer", ["Space"]),
-        kb("reload", "Recharger", ["KeyR"]),
         kb("flashlight", "Lampe torche", ["KeyF"]),
         kb("inventory", "Inventaire", ["KeyH"]),
         kb("objectives", "Carnet de mission", ["KeyO"]),
@@ -132,25 +130,18 @@
         { id: "padLookY", label: "Sensibilité verticale", type: "slider", def: 4, min: 1, max: 10, step: 1, format: (v) => String(v),
           desc: "Vitesse du regard haut / bas au stick droit." },
         { id: "padInvertY", label: "Inverser l’axe vertical", type: "choice", def: false, options: [[false, "Non"], [true, "Oui"]],
-          desc: "Inverse le regard haut / bas au stick droit." },
-        { id: "padVibration", label: "Vibrations", type: "choice", def: true, options: [[false, "Non"], [true, "Oui"]],
-          desc: "Retour de force lors des tirs, des coups reçus et des portes qui s’ouvrent (si la manette le permet)." }
+          desc: "Inverse le regard haut / bas au stick droit." }
       ]},
       { title: "Zone morte de la manette", rows: [
         { id: "padDeadL", label: "Zone morte du stick gauche", type: "slider", def: 12, min: 0, max: 40, step: 1, format: pct,
           desc: "Inclinaison minimale du stick gauche avant que le détenu ne commence à marcher. Augmentez-la si le personnage avance tout seul." },
         { id: "padDeadR", label: "Zone morte du stick droit", type: "slider", def: 10, min: 0, max: 40, step: 1, format: pct,
-          desc: "Inclinaison minimale du stick droit avant que la caméra ne tourne." },
-        { id: "padTrigger", label: "Seuil des gâchettes", type: "slider", def: 35, min: 5, max: 90, step: 5, format: pct,
-          desc: "Pression nécessaire sur LT / RT pour déclencher l’action. Les valeurs basses réagissent plus vite mais déclenchent plus facilement par accident." }
+          desc: "Inclinaison minimale du stick droit avant que la caméra ne tourne." }
       ]},
       { title: "Boutons de la manette", rows: [
         pb("interact", "Interagir / prendre", "A"),
         pb("crouch", "S’accroupir (bascule)", "B"),
-        pb("reload", "Recharger", "X"),
         pb("flashlight", "Lampe torche", "Y"),
-        pb("fire", "Tirer (maintenir)", "RT"),
-        pb("aim", "Viser (maintenir)", "LT"),
         pb("sprint", "Courir (bascule)", "L3"),
         pb("inventory", "Inventaire", "LB"),
         pb("objectives", "Carnet de mission", "RB"),
@@ -432,7 +423,7 @@
       const visual = row.visual === "daltonien"
         ? `<img class="rg-plates" src="${plates()}" alt="Six planches de test à pastilles : un cadenas apparaît au centre de chaque cercle."> ${keycards()}`
         : tab.id === "manette"
-        ? padSvg(row.type === "keys" ? row.keys : row.type === "bind" ? [values[row.id]] : ({ padLookX: ["RS"], padLookY: ["RS"], padInvertY: ["RS"], padDeadL: ["LS"], padDeadR: ["RS"], padTrigger: ["LT", "RT"], padVibration: [], padModel: [] })[row.id])
+        ? padSvg(row.type === "keys" ? row.keys : row.type === "bind" ? [values[row.id]] : ({ padLookX: ["RS"], padLookY: ["RS"], padInvertY: ["RS"], padDeadL: ["LS"], padDeadR: ["RS"], padModel: [] })[row.id])
         : `<div class="rg-emblem">${ICONS[tab.icon || tab.id] || ICONS.partie}</div>`;
       const state = row.id ? (same(values[row.id], row.def) ? "<span class='rg-tag'>PAR DÉFAUT</span>" : "<span class='rg-tag rg-tag--mod'>MODIFIÉ</span>") : "";
       $(".rg-info").innerHTML = `

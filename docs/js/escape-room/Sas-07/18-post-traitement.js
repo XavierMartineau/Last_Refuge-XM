@@ -298,7 +298,7 @@ function setLowEndMode(enabled) {
     perf.beforeLowEnd = {
       s: perf.s, cut: perf.cut, flashShadow: flash.castShadow,
       shadows: renderer.shadowMap.enabled, bloom: bloom.enabled, outline: outline.enabled,
-      lights: reducedLights.map((light) => [light, light.visible || MapScenes.hidesLight(light)]), cameraFar: camera.far,
+      lights: reducedLights.map((light) => [light, light.visible]), cameraFar: camera.far,
       materials: [...levelMaterials].map((material) => [material, material.bumpMap, material.roughnessMap]),
       barrels: null,
       localLights: scene.children.filter((object) => object.isLight && object.distance > 0)
@@ -315,7 +315,7 @@ function setLowEndMode(enabled) {
     });
     perf.beforeLowEnd.barrels = batchLowEndBarrels();
     reducedLights.forEach((light) => { light.visible = false; });
-    camera.far = Math.min(camera.far, MapScenes.active ? 100 : roomOf(rig.pos.z) <= 4 ? 20 : 60);
+    camera.far = Math.min(camera.far, roomOf(rig.pos.z) <= 4 ? 20 : 60);
   } else {
     const previous = perf.beforeLowEnd;
     perf.lowEnd = false;
@@ -349,7 +349,7 @@ function renderGame() {
     return;
   }
   const far = Math.min(perf.beforeLowEnd.cameraFar,
-    MapScenes.active ? 100 : roomOf(rig.pos.z) <= 4 ? 20 : 60);
+    roomOf(rig.pos.z) <= 4 ? 20 : 60);
   if (camera.far !== far) {
     camera.far = far;
     camera.updateProjectionMatrix();

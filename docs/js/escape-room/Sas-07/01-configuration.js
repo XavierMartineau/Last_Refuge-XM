@@ -52,16 +52,10 @@ const CONFIG = {
   doorCode: '482915', // code à 6 chiffres de la porte du sas (révélé par le terminal quand l’énigme de la pièce 1 est résolue)
   code: '4719', // code du terminal (47 sur le panneau + 19 dans la note)
   sequence: ['green', 'red', 'blue'], // ordre des boutons de la salle 2
-  roomZ: [0, -8, -17, -27, -52, -87, -117, -152, -197, -242, -287],
-  bureauCode: '418',
+  roomZ: [0, -8, -17, -27, -52, -87], // centre (z) de chacune des 6 salles
   quitUrl: '../../../../index.html', // retour à l'accueil depuis la page du jeu
-  camCode: '4719', // code de l’armoire à munitions : peint sur un mur, visible UNIQUEMENT via la caméra n°2 (poste de surveillance)                         // cadenas du bureau (complexe) : indiqué sur la note de la mezzanine
-  zombieTarget: 80,
-  zombies: { maxAlive: 7, spawnEvery: 0.5, hitDamage: 10 },
-  // centre (z) de chacune des 4 pièces
   wareCode: ['3', '0', '7', '1'], // entrepôt : un chiffre sur chacune des 4 affiches (allées 1 à 4) = code du digicode
   safeCode: '5294', // coffre de la pièce 3 = numéros des lits de la rangée EST (de l’entrée vers le fond)
-  townCode: '4827',
   breakers: [1, 0, 1, 1], // pièce 4 : position des 4 disjoncteurs (1 = ON) — même motif peint sur le mur
   light: {
     ambient: 0.05, // lumière ambiante (très faible : on est dans le noir)
@@ -126,8 +120,6 @@ const CONTROLS = {
     map: ['KeyM'],
     flashlight: ['KeyF'],
     view: ['KeyV'],
-    fire: ['Space'],
-    reload: ['KeyR'],
     take: ['KeyE']
   }
 };
@@ -155,7 +147,7 @@ const SOUND = {
 const TEXTS = {
   ui: {
     objective: 'OBJECTIF',
-    help: 'Clic-glisser : regarder · ZQSD / WASD : marcher · ← → : tourner · Maj : courir · Ctrl / C : s’accroupir · H : inventaire · O : objectifs · F : lampe torche · V : vue 1re/3e personne · Espace : tirer · R : recharger · Clic : interagir · Échap : quitter le zoom · M : son',
+    help: 'Clic-glisser : regarder · ZQSD / WASD : marcher · ← → : tourner · Maj : courir · Ctrl / C : s’accroupir · H : inventaire · O : objectifs · F : lampe torche · V : vue 1re/3e personne · Clic : interagir · Échap : quitter le zoom · M : son',
     back: '← Quitter le zoom',
     validate: 'Valider',
     cancel: 'Annuler',
@@ -171,9 +163,7 @@ const TEXTS = {
     inventory: 'Inventaire',
     items: {
       card: 'Carte d’accès',
-      fuse: 'Fusible',
-      crowbar: 'Pied-de-biche',
-      keyctrl: 'Clé du poste de contrôle'
+      fuse: 'Fusible'
     },
     safeTitle: 'CODE DU COFFRE'
   },
@@ -196,13 +186,7 @@ const TEXTS = {
     openHangar: 'Le courant revient dans le hangar. Ouvrez la porte du fond.',
     room6:
       'Entrepôt : lisez les 4 affiches des allées (1 à 4) et composez le code au digicode, près de la porte du fond.',
-    openWare: 'Le digicode est validé. Ouvrez la porte du fond.',
-    room11:
-      'Complexe : montez l’escalier, lisez la note de la mezzanine, puis trouvez le moyen d’ouvrir les pièces du rez-de-chaussée.',
-    useBar: 'Vous avez le pied-de-biche. Faites sauter la barre qui bloque la porte du dépôt.',
-    getKey: 'La porte du dépôt est libre. Entrez et récupérez la clé du poste de contrôle.',
-    useCtrl: 'Montez à la mezzanine, ouvrez le poste de contrôle et abaissez le disjoncteur.',
-    exitComplex: 'La porte principale est alimentée. Ouvrez-la.'
+    openWare: 'Le digicode est validé. Ouvrez la porte du fond pour vous échapper.'
   },
   hints: {
     door_room1: 'Examiner la porte du sas',
@@ -249,15 +233,13 @@ const TEXTS = {
     fusebox_01: 'Utiliser la boîte à fusibles',
     door_hangar: 'Examiner la porte du hangar',
     door_hangar_unlocked: 'Ouvrir la porte du hangar',
-    door_ware: 'Examiner la porte de l’entrepôt',
-    door_ware_unlocked: 'Ouvrir la porte de l’entrepôt',
+    door_ware: 'Examiner la porte de sortie',
+    door_ware_unlocked: 'Sortir du bunker',
     poster_1: 'Lire l’affiche de l’allée 1',
     poster_2: 'Lire l’affiche de l’allée 2',
     poster_3: 'Lire l’affiche de l’allée 3',
     poster_4: 'Lire l’affiche de l’allée 4',
-    keypad_ware: 'Utiliser le digicode',
-    door_exit3: 'Examiner la porte principale',
-    door_exit3_unlocked: 'Ouvrir la porte principale'
+    keypad_ware: 'Utiliser le digicode'
   },
   msg: {
     panel1: 'Des chiffres tracés dans le sang séché : « 4 7 ». La suite a été effacée.',
@@ -346,30 +328,11 @@ const TEXTS = {
     hangarOpen: 'La porte s’ouvre sur un entrepôt aux rayonnages interminables.',
     poster: 'Affiche « ALLÉE {n} » : un chiffre a été tracé au sang… « {d} ».',
     wareTitle: 'CODE DE L’ENTREPÔT',
-    wareOk: 'Bip. Le verrou de la porte de l’entrepôt se désengage.',
+    wareOk: 'Bip. Le verrou de la porte de sortie se désengage.',
     wareBad: 'Code incorrect.',
     wareDone: 'Le digicode est au vert.',
     wareLocked: 'Verrouillée. Un digicode est fixé au mur à côté.',
-    wareOpen: 'La porte s’ouvre sur un silo vertigineux.',
-    zDead: 'Vous êtes tombé… Vous vous réveillez à l’entrée de Zombie Town. Le décompte est conservé.',
-    stairsNote:
-      '« Bureau (rez-de-chaussée) : cadenas {d}. Le pied-de-biche est resté dessus. Dépôt : la barre est à faire sauter. »',
-    doorAlready: 'Cette porte est déjà ouverte.',
-    bureauTitle: 'CADENAS DU BUREAU (3 CHIFFRES)',
-    bureauBad: 'Le cadenas ne cède pas.',
-    bureauOpen: 'Clac. Le cadenas s’ouvre : la porte du bureau est libre.',
-    crowbarTaken: 'Vous prenez le pied-de-biche.',
-    barNeed: 'Une lourde barre de fer bloque la porte du dépôt. Il faut un outil pour la faire sauter.',
-    barOk: 'Vous faites sauter la barre avec le pied-de-biche. La porte du dépôt est libre.',
-    keyCtrlTaken: 'Vous prenez la clé du poste de contrôle.',
-    ctrlLocked: 'Verrouillée. Il faut la clé du poste de contrôle.',
-    ctrlOpen: 'Le verrou cède : le poste de contrôle est ouvert.',
-    breakerDone: 'Le disjoncteur principal est déjà abaissé.',
-    breakerOk:
-      'Vous abaissez le disjoncteur principal. Un grondement, puis un déclic : la porte principale, en bas, est alimentée !',
-    exit3Locked:
-      'La porte principale est hors tension. Le disjoncteur se trouve au poste de contrôle, à l’étage.',
-    exit3Open: 'La porte principale s’ouvre sur l’armurerie.',
+    wareOpen: 'La porte s’ouvre : un courant d’air froid… la sortie, enfin.',
     pressE: 'Appuyez sur E pour le prendre.',
     tooFar: 'Trop loin : approchez-vous.'
   },

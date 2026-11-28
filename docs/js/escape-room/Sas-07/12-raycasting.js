@@ -73,13 +73,9 @@ function setHover(o) {
 }
 function click(e) {
   if (rig.locked || modalOpen) return;
-  if (isAiming()) return fire();
   const o = pick(e);
   if (onZoomCooldown(o)) return; // objet quitté il y a moins de 2 s
-  if (!o) {
-    if (!State.focus && State.armed) fire(e);
-    return;
-  }
+  if (!o) return;
   if (State.focus && State.focus !== o && !['btn_green', 'btn_red', 'btn_blue'].includes(o.userData.id)) {
     release();
     return;

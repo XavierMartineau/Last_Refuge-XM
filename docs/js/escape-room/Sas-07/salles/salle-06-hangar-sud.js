@@ -4,7 +4,7 @@
 shell(-87, { south: false, w: 120, d: 30, h: 6 });
 wallWithDoor(-102, 120, 12);
 const _r6 = scene.children.length;
-const doorWare = makeDoor('door_ware', 0, -101.85, 'Examiner la porte de l’entrepôt');
+const doorWare = makeDoor('door_ware', 0, -101.85, 'Examiner la porte de sortie'); // sortie du bunker : fin de la partie
 [-14, -5, 5, 14].forEach((x) => [-77, -86, -95].forEach((z) => addNeon(6, x, z, 4, 5.6)));
 function shelf(x0, x1, z) {
   const L = x1 - x0,
@@ -69,4 +69,3 @@ beacon(-19, 5, -75, () => !State.wareCode);
 beacon(19, 5, -100, () => !State.wareCode);
 
 widenRoom(_r6, { room: 6, hw: 20, thr: 5, zs: [-72, -102], y: 5.6, fill: 22, kinds: ['crates', 'pallet', 'workbench', 'machine'] });
-/* ── Pièce 7 : le silo ── */

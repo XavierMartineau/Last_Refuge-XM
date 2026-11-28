@@ -17,25 +17,11 @@ const FP = (() => {
     scene,
     camera,
     model,
-    kick: 0,
-    melee: false,
     reducedMotion: typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
   };
 })();
-const scopeOverlay = document.createElement('div');
-scopeOverlay.id = 'scope-overlay';
-scopeOverlay.setAttribute('aria-hidden', 'true');
-scopeOverlay.innerHTML = '<div class="scope-lens"><i></i><b></b></div>';
-document.body.appendChild(scopeOverlay);
-function firstPersonFire(melee) {
-  if (!AV.tp && !(FP.reducedMotion && FP.reducedMotion.matches)) {
-    FP.kick = 1;
-    FP.melee = melee;
-  }
-}
 function setFirstPersonAvatar(avatar) {
   FP.model.clear();
-  FP.kick = 0;
   const parts = avatar.userData.getFirstPersonParts();
   if (!parts.length) return;
   const body = new THREE.Group();
@@ -43,7 +29,7 @@ function setFirstPersonAvatar(avatar) {
   body.rotation.y = Math.PI;
   body.scale.copy(avatar.scale);
   parts.forEach((part, i) => {
-    if (i < 2 || AV.heldItem === 'weapon') body.add(part.clone());
+    if (i < 2) body.add(part.clone()); // bras seulement : aucune arme dans le Sas 07
   });
   FP.model.add(body);
 }
@@ -104,8 +90,7 @@ function updatePortrait(avatar, state) {
 }
 function loadAvatar(json) {
   try {
-    let st = CL.sanitize(json || {});
-    if (State.armed && !st.weapon) st = CL.sanitize({ ...st, weapon: 2 });
+    const st = CL.sanitize(json || {});
     FP.model.clear();
     if (AV.obj) {
       scene.remove(AV.obj);
@@ -113,7 +98,7 @@ function loadAvatar(json) {
         AV.obj.userData.dispose && AV.obj.userData.dispose();
       } catch (e) {}
     }
-    const o = CL.buildCharacter(State.armed ? st : { ...st, weapon: 0 }); // l’arme n’apparaît qu’après le casier d’armes (salle finale)
+    const o = CL.buildCharacter({ ...st, weapon: 0 }); // pas d’arme dans le Sas 07
     const env = charEnv();
     o.traverse((m) => {
       m.castShadow = false;
@@ -132,17 +117,11 @@ function loadAvatar(json) {
     AV.state = st;
     o.userData.setHeldItem(AV.heldItem);
     setFirstPersonAvatar(o);
-    if (State.armed) {
-      AV.stats = CL.weaponStats(st);
-      State.ammo = Math.min(State.ammo, AV.stats.mag);
-      rebalanceZombies();
-    }
     try {
       updatePortrait(o, st);
     } catch (error) {
       console.error('Portrait du personnage impossible à afficher :', error);
     }
-    hud();
     return true;
   } catch (e) {
     console.warn('Personnage :', e);
@@ -150,29 +129,20 @@ function loadAvatar(json) {
     return false;
   }
 }
-function camCollide(x, z) {
-  if (MapScenes.active && rig.pos.z < -900) return MapScenes.walkHeight(x, z, MapScenes.height()) === null;
-  return blocked(x, z);
-}
+const camCollide = (x, z) => blocked(x, z);
 function avatarFrame(dt, t) {
   const o = AV.obj;
   const fp = !!o && !AV.tp && !State.focus && !State.doorExit && FP.model.children.length > 0;
-  firstPersonPass.enabled = fp && !(hasMagnifyingOptic() && aimBlend > 0.6);
+  firstPersonPass.enabled = fp;
   if (fp) {
     if (FP.camera.fov !== rig.fov || FP.camera.aspect !== camera.aspect) {
       FP.camera.fov = rig.fov;
       FP.camera.aspect = camera.aspect;
       FP.camera.updateProjectionMatrix();
     }
-    FP.kick = Math.max(0, FP.kick - dt * (FP.melee ? 3.5 : 8));
     const motion = FP.reducedMotion && FP.reducedMotion.matches ? 0 : 1,
       walk = rig.moving ? Math.sin(walkD * 4.2) : 0;
-    const body = FP.model.children[0],
-      weapon = body.children[2];
-    body.position.x = weapon ? THREE.MathUtils.lerp(0.23, weapon.position.x * body.scale.x, aimBlend) : 0.23;
-    body.position.y = THREE.MathUtils.lerp(-1.55, -1.43, aimBlend) * body.scale.y;
-    FP.model.position.set(walk * 0.008 * motion, Math.abs(walk) * 0.006 * motion, FP.kick * 0.06);
-    FP.model.rotation.set(-FP.kick * (FP.melee ? 0.35 : 0.1), 0, FP.kick * (FP.melee ? 0.18 : 0.025));
+    FP.model.position.set(walk * 0.008 * motion, Math.abs(walk) * 0.006 * motion, 0);
   }
   if (!o) return;
   const tp = AV.tp && !State.focus && !State.doorExit;
@@ -199,75 +169,41 @@ function applyRig(t) {
     const hy = rig.pos.y + 0.18; // point visé : tête, légèrement à droite
     const dtc = Math.min(0.1, Math.max(0, t - (AV.lt || t)));
     AV.lt = t;
-    const rh = MapScenes.active ? Infinity :
-      ([0, 3.4, 3.4, 3.4, 3.4, 6.5, 4.8, 3.8, 3.8, 3.8, 3.8, 9.6, 8.6][roomOf(rig.pos.z)] || 3.4),
+    const rh = [0, 3.4, 3.4, 3.4, 3.4, 6.5, 4.8][roomOf(rig.pos.z)] || 3.4, // hauteur sous plafond par salle
       fl = rig.pos.y - 1.6 + rig.dip;
-    const onMap = MapScenes.active && rig.pos.z < -900;
-    const pathBlocked = onMap ? MapScenes.cameraWallBlocked : camCollide;
     let k = 1;
     for (let step = 1; step <= 12; step++) {
       const part = step / 12,
         ex = rig.pos.x + (cy * AV.shoulder + sy * cp * AV.dist) * part,
         ez = rig.pos.z + (-sy * AV.shoulder + cy * cp * AV.dist) * part;
       if (
-        pathBlocked(ex, ez) ||
-        pathBlocked(ex + cy * 0.2, ez - sy * 0.2) ||
-        pathBlocked(ex - cy * 0.2, ez + sy * 0.2)
+        camCollide(ex, ez) ||
+        camCollide(ex + cy * 0.2, ez - sy * 0.2) ||
+        camCollide(ex - cy * 0.2, ez + sy * 0.2)
       ) {
         k = Math.max(0, part - 0.1);
         break;
-      }
-    }
-    if (onMap) {
-      for (; k > 0; k = Math.max(0, k - 0.05)) {
-        const x = rig.pos.x + (cy * AV.shoulder + sy * cp * AV.dist) * k,
-          z = rig.pos.z + (-sy * AV.shoulder + cy * cp * AV.dist) * k;
-        if (!camCollide(x, z) && !camCollide(x + cy * 0.2, z - sy * 0.2) &&
-          !camCollide(x - cy * 0.2, z + sy * 0.2)) break;
-      }
-      const start = rig.pos.clone(),
-        end = new THREE.Vector3(
-          rig.pos.x + (cy * AV.shoulder + sy * cp * AV.dist) * k,
-          hy - sp * AV.dist * k,
-          rig.pos.z + (-sy * AV.shoulder + cy * cp * AV.dist) * k
-        ),
-        direction = end.clone().sub(start),
-        distance = direction.length();
-      if (distance > 0) {
-        direction.normalize();
-        const rayStartK = k;
-        for (const side of [-0.2, 0, 0.2]) {
-          const origin = start.clone().add(new THREE.Vector3(cy * side, 0, -sy * side));
-          const hit = MapScenes.obstruction(new THREE.Ray(origin, direction), distance);
-          if (hit) k = Math.min(k, rayStartK * Math.max(0, (hit.distance - 0.2) / distance));
-        }
       }
     }
     AV.k = AV.k === undefined ? k : k < AV.k ? k : AV.k + (k - AV.k) * Math.min(1, dtc * 3); // se rapproche vite d'un mur, revient doucement
     const d = AV.dist * AV.k,
       hx = rig.pos.x + cy * AV.shoulder * AV.k,
       hz = rig.pos.z - sy * AV.shoulder * AV.k,
-      ceiling = MapScenes.active ? MapScenes.cameraCeiling(hx + sy * cp * d, hz + cy * cp * d) : rh;
+      ceiling = rh;
     camera.position.set(
       hx + sy * cp * d,
       Math.min(Math.max(hy - sp * d, fl + 0.35), ceiling - 0.25),
       hz + cy * cp * d
     );
-    if (hasMagnifyingOptic() && aimBlend > 0)
-      camera.position.lerp(new THREE.Vector3(rig.pos.x, rig.pos.y, rig.pos.z), aimBlend);
-    AV.vis = AV.k > 0.4 && !(hasMagnifyingOptic() && aimBlend > 0.6);
+    AV.vis = AV.k > 0.4;
     camera.rotation.set(rig.pitch, rig.yaw, 0);
   } else {
     AV.vis = true;
     camera.position.set(rig.pos.x, rig.pos.y + (rig.bob || 0) + Math.sin(t * 1.3) * 0.004, rig.pos.z);
     camera.rotation.set(rig.pitch, rig.yaw, 0);
   }
-  const scoped = hasMagnifyingOptic();
-  scopeOverlay.style.opacity = scoped ? String(aimBlend) : '0';
-  const zoom = scoped ? (AV.state.wOptic === 4 ? 0.72 : 0.55) : 0.3;
-  const fov = rig.fov * (1 - zoom * aimBlend);
-  if (Math.abs(camera.fov - fov) > 0.01) {
-    camera.fov = fov;
+  if (Math.abs(camera.fov - rig.fov) > 0.01) {
+    camera.fov = rig.fov;
     camera.updateProjectionMatrix();
   }
 }
@@ -301,8 +237,6 @@ function applyRig(t) {
     ['Carte du bunker', ['M']],
     ['Carnet de mission', ['O']],
     ['Vue 1re / 3e personne', ['V']],
-    ['Tirer', ['Espace']],
-    ['Recharger', ['R']],
     ['Quitter le zoom', ['Échap']],
     ['Couper le son', ['M']],
     ['Ouvrir ce menu', ['Échap']]
@@ -358,7 +292,6 @@ function applyRig(t) {
     modalOpen = o;
     if (o) {
       keysDown.clear();
-      mouseAim = padAim = false;
       SND.pause();
       viewLabel();
     } else SND.resume();

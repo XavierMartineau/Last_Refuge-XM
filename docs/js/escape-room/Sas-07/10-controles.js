@@ -7,51 +7,8 @@
    ════════════════════════════════════════════════════════════════ */
 let drag = null;
 const el = renderer.domElement;
-let mouseAim = false,
-  padAim = false,
-  aimBlend = 0,
-  aimedMouseShot = false;
-function canAim() {
-  return !!(State.armed && AV.heldItem === 'weapon' && AV.stats && AV.stats.mag &&
-    !State.focus && !modalOpen && !rig.locked && !State.doorExit);
-}
-function isAiming() {
-  return canAim() && (mouseAim || padAim);
-}
-function hasMagnifyingOptic() {
-  return !!(AV.heldItem === 'weapon' && AV.state && (AV.state.wOptic === 3 || AV.state.wOptic === 4));
-}
-function updateAim(dt) {
-  if (!canAim()) mouseAim = padAim = false;
-  const target = isAiming() ? 1 : 0;
-  aimBlend += (target - aimBlend) * Math.min(1, dt * 12);
-}
-el.addEventListener('mousedown', (e) => {
-  if (e.button === 2) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    mouseAim = canAim();
-  } else if (e.button === 0 && isAiming()) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    aimedMouseShot = true;
-    drag = null;
-    fire();
-  }
-}, true);
 el.addEventListener('contextmenu', (e) => e.preventDefault());
-el.addEventListener('pointerup', (e) => {
-  if (e.button === 0 && aimedMouseShot) e.stopImmediatePropagation();
-}, true);
-addEventListener('mouseup', (e) => {
-  if (e.button === 2) mouseAim = false;
-  if (e.button === 0) {
-    if (aimedMouseShot) drag = null;
-    aimedMouseShot = false;
-  }
-}, true);
-addEventListener('pointercancel', () => { mouseAim = aimedMouseShot = false; drag = null; });
-addEventListener('blur', () => { mouseAim = padAim = aimedMouseShot = false; });
+addEventListener('pointercancel', () => { drag = null; });
 el.addEventListener('pointerdown', (e) => {
   if (e.button !== 0) return;
   drag = { x: e.clientX, y: e.clientY, moved: false };
@@ -87,14 +44,8 @@ addEventListener('keydown', (e) => {
   if (K.exitZoom.includes(e.code)) release(true);
   if (K.mute.includes(e.code) && !e.repeat) SND.toggle();
   if (K.flashlight.includes(e.code) && !e.repeat && !modalOpen) toggleFlash();
-  if (!e.repeat && !modalOpen && !State.focus && !rig.locked) {
-    if (e.code === 'Digit1' || e.code === 'Numpad1') selectHeldItem('weapon');
-    if (e.code === 'Digit2' || e.code === 'Numpad2') selectHeldItem('flashlight');
-  }
   if (K.take.includes(e.code) && !e.repeat && !modalOpen && !State.focus && !rig.locked && !State.doorExit)
     takeNearest();
-  if (K.fire.includes(e.code) && !modalOpen) fire();
-  if (K.reload.includes(e.code) && !e.repeat && !modalOpen) reload();
   if (e.code.startsWith('Arrow') || e.code === 'Space') e.preventDefault();
 });
 addEventListener('keyup', (e) => keysDown.delete(e.code));
@@ -150,8 +101,6 @@ if (TOUCH) {
       const a = b.dataset.a;
       if (modalOpen) return;
       if (a === 'take') takeNearest();
-      else if (a === 'fire') fire();
-      else if (a === 'reload') reload();
       else if (a === 'inv') setInv(true);
       else if (a === 'crouch') {
         touchCrouch = !touchCrouch;
@@ -220,7 +169,7 @@ room1Colliders.forEach((c) => COLLIDERS.push(c));
       }
     })
   )
-); // salles agrandies : collisions suivent les objets déplacés (les salles 7 à 10 sont construites à leur taille réelle)
+); // salles agrandies : collisions suivent les objets déplacés
 fillCols.forEach((c) => EXTRA_COLLIDERS.push(c));
 const WALLS = [
   [-4, () => State.door1],
@@ -228,15 +177,9 @@ const WALLS = [
   [-22, () => State.door3],
   [-32, () => State.doorFinal],
   [-72, () => State.doorHangar],
-  [-102, () => State.doorWare],
-  [NaN, () => true], // salles 7 à 10 supprimées : pas de mur mitoyen dans le couloir provisoire
-  [NaN, () => true],
-  [NaN, () => true],
-  [-262, () => true], // mur sud du complexe : passage toujours ouvert
-  [-312, () => State.doorExit3]
+  [-102, () => false] // porte de sortie de la salle 6 : elle termine la partie, on ne la traverse pas
 ]; // murs mitoyens : passage seulement par la porte ouverte
 function blocked(x, z) {
-  if (MapScenes.active && rig.pos.z < -900) return MapScenes.blocked(x, z);
   const r = CONTROLS.walk.radius,
     hw =
       z > -3.8
@@ -245,18 +188,8 @@ function blocked(x, z) {
           ? 11.9
           : z > -32.15
             ? 17.9
-            : z > -102
-              ? 59.9
-              : z > -132
-                ? 3.9
-                : z > -222
-                  ? 3.9
-                  : z > -262
-                    ? 3.9
-                    : z > -312
-                      ? 59.9
-                      : 74.9;
-  if (Math.abs(x) > hw - r || z > 22.9 || z < -311.4) return true; // murs extérieurs
+            : 59.9;
+  if (Math.abs(x) > hw - r || z > 22.9 || z < -101.85) return true; // murs extérieurs
   for (const [wz, open] of WALLS)
     if (Math.abs(z - wz) < 0.15 + r && (Math.abs(x) > 0.9 - r || !open())) return true;
   for (const c of COLLIDERS) if (x > c[0] - r && x < c[1] + r && z > c[2] - r && z < c[3] + r) return true;
@@ -268,16 +201,6 @@ function blocked(x, z) {
 function objectiveNow() {
   const O = TEXTS.objectives,
     r = roomOf(rig.pos.z);
-  if (MapScenes.active && rig.pos.z < -900)
-    return MapScenes.active === 'city'
-      ? 'Explorez la ville et trouvez le passage vers Zombie Town.'
-      : !State.townGateOpen
-        ? 'Lisez le code au sol et ouvrez le coffre pour déverrouiller la porte.'
-        : State.zDone
-        ? 'Rejoignez le téléporteur de sortie.'
-        : State.armed
-          ? 'Éliminez les infectés : ' + State.kills + ' / ' + CONFIG.zombieTarget + '.'
-          : 'Prenez votre arme dans le casier près de l’entrée.';
   if (r === 1)
     return State.termOk
       ? O.openDoor
@@ -292,19 +215,7 @@ function objectiveNow() {
   if (r === 3) return State.vaultUnlocked ? O.openVault : State.card ? O.needCard : O.room3;
   if (r === 4) return State.power4 ? O.exitFinal : O.room4;
   if (r === 5) return State.power5 ? O.openHangar : O.room5;
-  if (r === 6) return State.wareCode ? O.openWare : O.room6;
-  if (r >= 7 && r <= 10) return 'Zone en reconstruction : suivez le couloir jusqu’au complexe.';
-  if (r === 11)
-    return State.breaker
-      ? O.exitComplex
-      : State.keyCtrl
-        ? O.useCtrl
-        : State.barDone
-          ? O.getKey
-          : State.crowbar
-            ? O.useBar
-            : O.room11;
-  return O.exitComplex;
+  return State.wareCode ? O.openWare : O.room6;
 }
 let walkD = 0,
   stepD = 0,
@@ -368,7 +279,7 @@ function updateControls(dt, t) {
       s = (down('right') ? 1 : 0) - (down('left') ? 1 : 0);
     if (f || s) {
       const sp =
-          (Wk.speed * MapScenes.movementScale() * (State.crouch ? Wk.crouchSpeed : down('sprint') ? Wk.sprintMultiplier : 1) * dt) /
+          (Wk.speed * (State.crouch ? Wk.crouchSpeed : down('sprint') ? Wk.sprintMultiplier : 1) * dt) /
           Math.hypot(f, s),
         sy = Math.sin(rig.yaw),
         cy = Math.cos(rig.yaw);
@@ -392,7 +303,7 @@ function updateControls(dt, t) {
   }
   rig.moving = moving;
   rig.dip += ((State.crouch ? 1.6 - Wk.crouchEye : 0) - rig.dip) * Math.min(1, dt * 10);
-  rig.pos.y += (1.6 - rig.dip + GH(rig.pos.x, rig.pos.z) - rig.pos.y) * Math.min(1, dt * 9); // escaliers : la hauteur suit le sol
+  rig.pos.y += (1.6 - rig.dip - rig.pos.y) * Math.min(1, dt * 9); // sol plat dans les 6 salles
   rig.bob = Wk.bob
     ? (rig.bob || 0) * 0.8 + (moving ? Math.sin(walkD * Wk.bobSpeed) * Wk.bobAmount : 0) * 0.2
     : 0; // léger balancement de la caméra

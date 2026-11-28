@@ -157,16 +157,6 @@ const ITEM3D = (function () {
       bx(0.22, 0.12, 0.1, steel(), -0.58, -0.15, 0, g);
       return g;
     },
-    crowbar() {
-      const g = new THREE.Group(),
-        m = M(0x3a3d40, 0.9, 0.4);
-      cy(0.05, 0.05, 1.5, m, 0, 0, 0, g).rotation.z = Math.PI / 2;
-      const c = bx(0.45, 0.08, 0.08, m, 0.82, 0.17, 0, g);
-      c.rotation.z = 0.9;
-      const c2 = bx(0.3, 0.08, 0.08, m, -0.78, -0.1, 0, g);
-      c2.rotation.z = -0.5;
-      return g;
-    },
     note() {
       const g = new THREE.Group(),
         t = tex(256, 320, (c, w, h) => {
@@ -191,14 +181,6 @@ const ITEM3D = (function () {
       bx(0.82, 1.12, 0.15, M(0xd8d0b0, 0, 0.9), 0.03, 0, 0.005, g);
       bx(0.06, 1.2, 0.2, M(0x2a3320, 0.1, 0.8), -0.43, 0, 0, g);
       bx(0.5, 0.3, 0.01, M(0xc9a24a, 0.6, 0.4), 0.05, 0.2, 0.095, g);
-      return g;
-    },
-    vest() {
-      const g = new THREE.Group();
-      bx(1, 1.1, 0.3, M(0x3a4030, 0.1, 0.8), 0, 0, 0, g);
-      bx(0.3, 0.4, 0.34, dark(), -0.25, -0.1, 0, g);
-      bx(0.3, 0.4, 0.34, dark(), 0.25, -0.1, 0, g);
-      bx(0.9, 0.1, 0.34, M(0x555a48), 0, 0.4, 0, g);
       return g;
     },
     crate() {
@@ -229,15 +211,11 @@ const ITEM3D = (function () {
                     ? 'drill'
                     : /câble|cable/.test(s)
                       ? 'cable'
-                      : /pied-de-biche/.test(s)
-                        ? 'crowbar'
-                        : /note/.test(s)
-                          ? 'note'
-                          : /carnet/.test(s)
-                            ? 'book'
-                            : /équipement/.test(s)
-                              ? 'vest'
-                              : 'crate';
+                      : /note/.test(s)
+                        ? 'note'
+                        : /carnet/.test(s)
+                          ? 'book'
+                          : 'crate';
   }
   function init() {
     const c = document.getElementById('ivc');

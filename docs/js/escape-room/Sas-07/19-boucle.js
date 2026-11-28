@@ -46,8 +46,8 @@ const loopMenu = document.getElementById('menu'),
 function loop() {
   requestAnimationFrame(loop);
   const delta = clock.getDelta();
-  // menu ouvert, onglet caché ou carte en cours de transfert : rien à dessiner, le temps de jeu est figé
-  if (loopMenu.classList.contains('on') || document.hidden || MapScenes.loading) {
+  // menu ouvert ou onglet caché : rien à dessiner, le temps de jeu est figé
+  if (loopMenu.classList.contains('on') || document.hidden) {
     clock.elapsedTime -= delta;
     fpsFrames = 0;
     fpsElapsed = 0;
@@ -76,15 +76,11 @@ function loop() {
     }
   }
   updateControls(dt, t);
-  updateAim(dt);
   applyRig(t);
   avatarFrame(dt, t);
-  MapScenes.animate(t);
-  combatFrame(dt, t);
-  if (State.armed && (down('fire') || (aimedMouseShot && isAiming()))) fire();
   updateFlash(dt, t);
   // néons : éteints tant que le courant n’est pas rétabli (levier → pièces 1-2, générateur → pièces 3-4), avec des étincelles rares
-  for (const r of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
+  for (const r of [1, 2, 3, 4, 5, 6]) {
     const on = r === 1 ? State.power : true; // salle 1 : levier ; les autres : toujours alimentées
     if (on && !neon.was[r]) {
       neon.was[r] = true;
@@ -119,10 +115,10 @@ function loop() {
     const k = neon.k[o.room];
     if (o.lastK === k) return;
     o.lastK = k;
-    o.m.emissiveIntensity = (o.room === 12 ? 0.8 : 3.2) * k;
+    o.m.emissiveIntensity = 3.2 * k;
     o.m.emissive.setHex(k > 0.6 ? 0xcfe4ff : 0x8e9296);
     if (o.hm) {
-      o.hm.opacity = (o.room === 12 ? 0 : 0.62) * k;
+      o.hm.opacity = 0.62 * k;
       o.hm.color.setHex(k > 0.6 ? 0xbcd6ff : 0x8e9296);
     }
   }); // plein feu : blanc-bleu · en flash : gris-blanc faible
@@ -136,27 +132,12 @@ function loop() {
   {
     const rr = roomOf(rig.pos.z),
       big = rr >= 5,
-      hh =
-        rr === 12
-          ? 8.6
-          : rr === 11
-            ? 9.6
-            : rr === 10
-              ? 3.6
-              : rr === 9
-                ? 3.6
-                : rr === 8
-                  ? 3.6
-                  : rr === 7
-                    ? 3.6
-                    : rr === 6
-                      ? 4.8
-                      : 6.5,
+      hh = rr === 6 ? 4.8 : 6.5,
       kk = big ? neon.k[rr] * CONFIG.light.neonPower : 0; // 3 lampes « suiveuses » éclairent les grandes salles
-    bloom.strength = rr === 12 ? 0.12 : 0.34;
+    bloom.strength = 0.34;
     bigLights.forEach((L, i) => {
-      L.position.set(rig.pos.x * 0.7, rr === 12 ? hh - 2 : hh, rig.pos.z + (i - 1) * 13);
-      L.intensity = kk * hh * hh * (i === 1 ? 2 : 1.2) * (rr === 12 ? 0.65 : 1);
+      L.position.set(rig.pos.x * 0.7, hh, rig.pos.z + (i - 1) * 13);
+      L.intensity = kk * hh * hh * (i === 1 ? 2 : 1.2);
     });
     neonPoolUpdate(rr, dt);
   }
@@ -175,13 +156,7 @@ function loop() {
           !State.vaultUnlocked,
           !State.power4,
           !State.power5,
-          !State.wareCode,
-          false, // salles 7 à 10 : zone provisoire
-          false,
-          false,
-          false,
-          !State.breaker,
-          !State.zDone
+          !State.wareCode
         ][State.room - 1],
       fx = loopAlarm,
       op = al ? (0.03 + 0.05 * (0.5 + 0.5 * Math.sin(t * 2))).toFixed(3) : '0';

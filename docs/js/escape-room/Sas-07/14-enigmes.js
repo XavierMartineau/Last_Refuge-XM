@@ -203,12 +203,6 @@ const B = {
     box(0.05, 0.012, 0.02, mats.dark, 0, 0.006, 0, g);
     box(0.02, 0.01, 0.015, mats.steel, 0.035, 0.006, 0, g);
   },
-  coffee: (g) => {
-    box(0.7, 1.5, 0.5, mats.dark, 0, 0.75, 0, g);
-    box(0.5, 0.35, 0.02, glow(0xff3a20, 1.6), 0, 1.15, 0.26, g);
-    box(0.4, 0.12, 0.3, mats.steel, 0, 0.45, 0.18, g);
-    box(0.2, 0.08, 0.02, mats.steel, 0.15, 0.85, 0.26, g);
-  },
   donut: (g) => {
     box(0.3, 0.07, 0.22, M0(0xe8e4d8), 0, 0.035, 0, g);
     plane(0.18, 0.04, sign(['BEIGNETS'], '#e8e4d8', '#a01818'), 0, 0.05, 0.112, g);
@@ -328,23 +322,4 @@ egg(
   -95,
   stele(['STOCK:', '0 ESPOIR'], '#4b5049', '#e8e2c8'),
   0.1
-);
-// salle 11 : complexe
-egg(
-  'egg_coffee',
-  'Examiner le distributeur',
-  'Distributeur de café : « Il manque 20 centimes. » Même l’apocalypse n’a pas de monnaie.',
-  10,
-  -292,
-  B.coffee,
-  -0.4
-);
-egg(
-  'egg_sign11',
-  'Lire le panneau',
-  '« EN CAS D’INCENDIE : ne pas paniquer. EN CAS DE ZOMBIES : paniquer, mais discrètement. »',
-  22,
-  -300,
-  stele(['PANIQUER', 'DISCRÈTEMENT'], '#d8b020', '#1a1a1a'),
-  0.3
 );

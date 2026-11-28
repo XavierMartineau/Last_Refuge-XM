@@ -25,8 +25,7 @@ const DEV = (function () {
       fz: 2
     },
     3: { card: true },
-    5: { fuses: 2 },
-    10: { crowbar: true, keyCtrl: true }
+    5: { fuses: 2 }
   };
   const MECH = {
     1: () => {
@@ -56,9 +55,7 @@ const DEV = (function () {
     3: { vaultUnlocked: true, safe: true, card: true },
     4: { power4: true, brk: [1, 1, 1, 1] },
     5: { power5: true, fuses: 2, fusesIn: 2 },
-    6: { wareCode: true },
-    10: { crowbar: true, keyCtrl: true, barDone: true, bureauOpen: true }, // objets du complexe (salle 11)
-    11: { breaker: true }
+    6: { wareCode: true }
   };
   const NAMES = [
     'Sas d’entrée',
@@ -66,13 +63,7 @@ const DEV = (function () {
     'Dortoir / chambre forte',
     'Distribution électrique',
     'Hangar principal',
-    'Hangar sud',
-    'Couloir provisoire (ex-salle 7)',
-    'Couloir provisoire (ex-salle 8)',
-    'Couloir provisoire (ex-salle 9)',
-    'Couloir provisoire (ex-salle 10)',
-    'Ligne de coupure',
-    'Post-Apocalyptic City'
+    'Hangar sud'
   ];
   // — Actions (chacune se termine par sync() : inventaire, objectif, panneau) —
   const sync = () => {
@@ -113,11 +104,6 @@ const DEV = (function () {
       genHide();
       document.getElementById('back').style.display = 'none';
     }
-    if (r === 12) {
-      MapScenes.enter('city');
-      return;
-    }
-    MapScenes.leave();
     rig.pos.set(0, 1.6, CONFIG.roomZ[r - 1]);
     rig.vy = 0;
     rig.yaw = 0;
@@ -147,7 +133,7 @@ const DEV = (function () {
     skip: () => {
       const r = State.room;
       complete(r);
-      if (r < 12) tp(r + 1);
+      if (r < 6) tp(r + 1);
       else sync();
     },
     prev: () => tp(Math.max(1, State.room - 1)),
@@ -157,15 +143,9 @@ const DEV = (function () {
       say('DEV : salle ' + State.room + ' complétée automatiquement.', 3500);
     },
     allRooms: () => {
-      for (let r = 1; r <= 12; r++) complete(r);
-      tp(12);
+      for (let r = 1; r <= 6; r++) complete(r);
+      tp(6);
       say('DEV : toutes les salles validées.', 3500);
-    },
-    heal: () => {
-      State.hp = 100;
-      State.ammo = Math.max(State.ammo || 0, 60);
-      hud();
-      sync();
     }
   };
   // — Interface —
@@ -204,7 +184,7 @@ const DEV = (function () {
       e.addEventListener(ev, (x) => x.stopPropagation(), { passive: true })
     )
   );
-  /* Pause : tant que le panneau ou la saisie du code est ouvert, le temps, les infectés et les
+  /* Pause : tant que le panneau ou la saisie du code est ouvert, le temps et les
      contrôles sont figés (la scène reste affichée pour voir l’effet des téléportations). */
   function updatePause() {
     const want = (S.open && S.unlocked) || c.classList.contains('on');
@@ -213,7 +193,6 @@ const DEV = (function () {
     if (want) {
       modalOpen = true;
       keysDown.clear();
-      mouseAim = padAim = false;
       if (document.pointerLockElement) document.exitPointerLock();
       SND.pause();
     } else {
@@ -237,8 +216,8 @@ const DEV = (function () {
       State.room +
       '</span><button data-a="close" style="padding:2px 8px">×</button></header><div class="body"><h6>RACCOURCIS</h6><div class="g">' +
       '<button class="full" data-a="auto">⚡ AUTO COMPLETE LEVEL</button><button data-a="skip">Salle suivante ▶</button><button data-a="prev">◀ Salle précédente</button>' +
-      '<button data-a="allRooms">Tout valider + fin</button><button data-a="heal">Soin + munitions</button></div><h6>SALLES</h6>';
-    for (let r = 1; r <= 12; r++) {
+      '<button class="full" data-a="allRooms">Tout valider</button></div><h6>SALLES</h6>';
+    for (let r = 1; r <= 6; r++) {
       const open = S.sec[r],
         cur = State.room === r;
       h +=
@@ -390,19 +369,10 @@ window.startSas07 = () => {
 window.EscapeRoom = {
   addVent,
   LOW,
-  Combat: {
-    GH,
+  World: {
     EXTRA_COLLIDERS,
-    fire,
-    reload,
-    zRoots,
-    spawnZombie,
-    killZombie,
-    combatFrame,
-    equipWeapon,
     rig,
     AV,
-    hud,
     roomOf,
     blocked
   },

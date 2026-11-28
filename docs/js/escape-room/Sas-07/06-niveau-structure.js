@@ -9,24 +9,11 @@ const W = CONFIG.W,
 const neon = {
   tubes: [],
   lights: [],
-  k: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 },
-  spark: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 },
-  nextSpark: { 1: 2, 2: 4, 3: 3, 4: 5, 5: 3, 6: 6, 7: 4, 8: 5, 9: 7, 10: 4, 11: 5, 12: 4 },
-  sw: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 },
-  was: {
-    1: false,
-    2: false,
-    3: false,
-    4: false,
-    5: false,
-    6: false,
-    7: false,
-    8: false,
-    9: false,
-    10: false,
-    11: false,
-    12: false
-  }
+  k: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+  spark: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+  nextSpark: { 1: 2, 2: 4, 3: 3, 4: 5, 5: 3, 6: 6 },
+  sw: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+  was: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false }
 }; // néons : éteints tant que le courant n’est pas rétabli
 const haloTex = (() => {
   const c = document.createElement('canvas');
@@ -116,7 +103,7 @@ function neonPoolUpdate(rr, dt) {
       if (a) {
         p.tube = a.tube;
         p.tx = a.x;
-        p.ty = a.y - (rr === 12 ? 2 : 0.35);
+        p.ty = a.y - 0.35;
         p.tz = a.z;
         p.ti = 1;
       } else {
@@ -136,7 +123,7 @@ function neonPoolUpdate(rr, dt) {
     p.L.position.z += (p.tz - p.L.position.z) * f;
     p.L.color.setHex(col);
     const y = Math.max(2.5, p.ty + 0.35);
-    p.L.intensity = p.ti * k * y * y * (rr >= 5 ? 3.1 : 1.2) * CONFIG.light.neonPower * (rr === 12 ? 0.4 : 1);
+    p.L.intensity = p.ti * k * y * y * (rr >= 5 ? 3.1 : 1.2) * CONFIG.light.neonPower;
   });
 }
 const blinkers = [],
