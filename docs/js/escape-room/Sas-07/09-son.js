@@ -51,14 +51,89 @@ const SND = (() => {
       })
     );
   }
+  /* ── lecture dynamique : les sons ne s’empilent pas ──
+     • gap : délai minimal entre deux départs du même son (un 2e départ trop rapproché est ignoré) ;
+     • max : nombre de copies du même son en même temps (au-delà, la plus ancienne s’efface en fondu) ;
+     • groupe « ambient » : un seul bruit d’ambiance à la fois ;
+     • 12 voix au total au maximum ; chaque lecture varie légèrement en hauteur et en volume ;
+     • les sons forts (porte, générateur…) baissent un instant l’ambiance (ducking). */
+  const SFX_RULES = {
+    tick: { gap: 0.06, max: 1 },
+    click: { gap: 0.05, max: 2 },
+    key: { gap: 0.03, max: 3 },
+    flash: { gap: 0.1, max: 1 },
+    paper: { gap: 0.2, max: 1 },
+    zoom: { gap: 0.15, max: 1 },
+    error: { gap: 0.25, max: 1 },
+    success: { gap: 0.2, max: 1 },
+    locked: { gap: 0.3, max: 1 },
+    unlock: { gap: 0.2, max: 1 },
+    step: { gap: 0.15, max: 2 },
+    door: { gap: 0.5, max: 1 },
+    locker: { gap: 0.4, max: 1 },
+    lockerdoor: { gap: 0.4, max: 1 },
+    lever: { gap: 0.3, max: 1 },
+    power: { gap: 1, max: 1 },
+    genstart: { gap: 1, max: 1 },
+    sputter: { gap: 0.3, max: 1 },
+    drill: { gap: 0.5, max: 1 },
+    pour: { gap: 0.5, max: 1 },
+    boom: { gap: 0.3, max: 1 },
+    drip: { gap: 0.4, max: 1 }
+  };
+  const SFX_DEFAULT = { gap: 0.06, max: 2 };
+  const SFX_LOUD = new Set(['door', 'power', 'genstart', 'boom', 'drill', 'lever', 'success']);
+  // bruits d’ambiance « évènements » : un seul à la fois (la goutte d’eau, discrète et fréquente, n’en fait pas partie)
+  const AMBIENT = new Set(['creak', 'wind', 'moan', 'chain', 'radio', 'beepfar', 'slamfar', 'clank']);
+  const MAX_VOICES = 12;
+  const voices = [],
+    lastStart = {};
+  function stopVoice(v, fade = 0.05) {
+    if (v.stopping) return;
+    v.stopping = true;
+    const t = now();
+    v.g.gain.cancelScheduledValues(t);
+    v.g.gain.setValueAtTime(v.g.gain.value, t);
+    v.g.gain.linearRampToValueAtTime(0.0001, t + fade);
+    try {
+      v.src.stop(t + fade + 0.01);
+    } catch (e) {}
+  }
+  function duck(depth = 0.45, hold = 0.6) {
+    if (!ambBus) return;
+    const t = now(),
+      base = SOUND.ambience;
+    ambBus.gain.cancelScheduledValues(t);
+    ambBus.gain.setTargetAtTime(base * depth, t, 0.03);
+    ambBus.gain.setTargetAtTime(base, t + hold, 0.4);
+  }
   function playFile(id) {
     const b = sfxBuf[id];
     if (!b) return false;
-    const src = ctx.createBufferSource();
+    const t = now(),
+      rule = SFX_RULES[id] || SFX_DEFAULT;
+    if (t - (lastStart[id] ?? -1e9) < rule.gap) return true; // trop rapproché : ignoré (pas d’empilement)
+    const live = voices.filter((v) => !v.stopping);
+    if (AMBIENT.has(id) && live.some((v) => AMBIENT.has(v.id))) return true; // une ambiance à la fois
+    const same = live.filter((v) => v.id === id);
+    if (same.length >= rule.max) stopVoice(same[0]); // la plus ancienne copie s’efface
+    if (live.length >= MAX_VOICES) stopVoice(live.find((v) => AMBIENT.has(v.id)) || live[0]);
+    lastStart[id] = t;
+    const src = ctx.createBufferSource(),
+      g = ctx.createGain();
     src.buffer = b;
-    if (SFX_VARY.has(id)) src.playbackRate.value = 0.92 + Math.random() * 0.16;
-    src.connect(sfxBus); // l’écho est déjà dans l’enregistrement
-    src.start();
+    src.playbackRate.value = SFX_VARY.has(id) ? 0.92 + Math.random() * 0.16 : 0.98 + Math.random() * 0.04;
+    g.gain.value = 0.88 + Math.random() * 0.12;
+    src.connect(g);
+    g.connect(sfxBus); // l’écho est déjà dans l’enregistrement
+    const v = { id, src, g, stopping: false };
+    voices.push(v);
+    src.onended = () => {
+      const i = voices.indexOf(v);
+      if (i >= 0) voices.splice(i, 1);
+    };
+    if (SFX_LOUD.has(id)) duck();
+    src.start(t);
     return true;
   }
   let ctx = null,
@@ -715,6 +790,8 @@ const SND = (() => {
   }
   // état du chargement des fichiers (diagnostic : SND.files() dans la console)
   const files = () => ({
+    voices: voices.filter((v) => !v.stopping).length,
+    playing: voices.filter((v) => !v.stopping).map((v) => v.id),
     total: Object.keys(SFX_FILES).length,
     loaded: Object.keys(sfxBuf).length,
     failed: [...sfxFailed]
@@ -799,10 +876,15 @@ function sndLabel() {
   document.getElementById('snd').textContent = SND.on ? TEXTS.ui.soundOn : TEXTS.ui.soundOff;
 }
 // Les navigateurs exigent un geste de l’utilisateur avant de lancer le son : on démarre au premier clic / touche.
+// Écoute en phase de capture : le clic sur la vue 3D (capture du curseur) ne doit pas l’intercepter.
 ['pointerdown', 'keydown'].forEach((ev) =>
-  addEventListener(ev, () => {
-    SND.init();
-    SND.resume();
-  })
+  addEventListener(
+    ev,
+    () => {
+      SND.init();
+      SND.resume();
+    },
+    true
+  )
 );
 document.getElementById('snd').onclick = () => SND.toggle();
