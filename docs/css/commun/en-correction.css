@@ -1,0 +1,51 @@
+/* Avis « en correction » : affiché à la place d’une page temporairement indisponible
+   (personnage 3D en refonte). Pour rétablir une page : retirer le bloc .en-correction
+   et décommenter son script marqué « EN CORRECTION ». */
+.en-correction {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+  background: radial-gradient(ellipse at center, #1d2419, #080b08 72%);
+  color: #e4e1cf;
+  font: 16px/1.55 "Special Elite", "Courier New", monospace;
+  text-align: center;
+}
+.en-correction__panel {
+  width: min(520px, 100%);
+  box-sizing: border-box;
+  padding: 30px 28px 26px;
+  border: 1px solid #6b5a3a;
+  border-top: 8px solid transparent;
+  border-image: repeating-linear-gradient(135deg, #b48a22 0 10px, #15171a 10px 20px) 8 0 0 0;
+  background: #0a0c0af2;
+  box-shadow: 0 20px 70px #000b;
+}
+.en-correction__panel small {
+  color: #c9a24a;
+  font: 700 13px "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: 0.2em;
+}
+.en-correction__panel h1 {
+  margin: 10px 0 14px;
+  color: #c4281c;
+  font: 700 clamp(28px, 6vw, 40px) "Stardos Stencil", Impact, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.en-correction__panel p { margin: 0 0 20px; color: #b8bba6; }
+.en-correction__back {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid #4a4536;
+  background: linear-gradient(180deg, #2b2d28, #171814);
+  color: #e6e0c8;
+  font: 600 16px "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.en-correction__back:hover, .en-correction__back:focus-visible { border-color: #c4281c; color: #fff; }

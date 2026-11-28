@@ -13,6 +13,7 @@
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Caveat:wght@500;700&family=Special+Elite&family=Rock+Salt&family=Stardos+Stencil:wght@400;700&family=VT323&display=swap">
 <link rel="stylesheet" href="../../../css/commun/reglages.css">
+<link rel="stylesheet" href="../../../css/commun/en-correction.css">
 <link rel="stylesheet" href="../../../css/escape-room/Sas-07/escape-room.css?v=20261128b">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
@@ -20,14 +21,23 @@
 <script src="../../../js/commun/reglages.js?v=20261128b"></script>
 <script src="../../../js/commun/manette-menus.js?v=20261126a"></script>
 <script src="../../../js/escape-room/Sas-07/rapport-crash.js?v=20261127a"></script>
+<!-- EN CORRECTION : chargement du jeu désactivé (personnage 3D en refonte). Décommenter pour rétablir.
 <script type="module" src="../../../js/escape-room/Sas-07/escape-room.js?v=20261128e" onerror="document.getElementById('game-load-status').textContent='Chargement impossible. Vérifiez la connexion puis rechargez la page.';document.getElementById('game-load-retry').hidden=false;window.reportGameCrash(new Error('Impossible de charger le moteur 3D ou une de ses dépendances.'),'Chargement du moteur')"></script>
+-->
 </head>
 <body>
+<!-- EN CORRECTION : personnage 3D en refonte. Retirer ce bloc pour rétablir la page. -->
+<div class="en-correction" role="alert"><div class="en-correction__panel">
+  <small>LAST REFUGE · XM</small>
+  <h1>En correction</h1>
+  <p>Le personnage 3D est en cours de refonte : l’escape room Sas 07 est temporairement indisponible. Revenez bientôt.</p>
+  <a class="en-correction__back" href="../../../../index.html" target="_top">Retour à l’accueil</a>
+</div></div>
 <div id="game-crash-notice" role="alert" hidden>
   <p>Une erreur a été détectée. Si le téléchargement automatique est bloqué, utilisez ce lien :</p>
   <a id="game-crash-download" download="crash.txt" hidden>Télécharger le rapport</a>
 </div>
-<div id="game-loading" role="status" aria-live="polite">
+<div id="game-loading" role="status" aria-live="polite" hidden>
   <div class="game-loading__panel">
     <small>LAST REFUGE · SAS 07</small>
     <h1>Préparation de l’évasion</h1>
