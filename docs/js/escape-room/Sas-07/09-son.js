@@ -1,12 +1,66 @@
-/* LAST REFUGE · XM — Escape room « Sas 07 » · Son généré en direct avec Web Audio.
+/* LAST REFUGE · XM — Escape room « Sas 07 » · Son : effets en fichiers WAV, ambiance et musique en Web Audio.
    Fichier chargé dans l’ordre par escape-room.js : il partage la portée globale des autres fichiers. */
 'use strict';
 /* ════════════════════════════════════════════════════════════════
-   7b. SON — tout est généré en direct avec Web Audio (aucun fichier audio externe).
+   7b. SON — les effets sont lus depuis docs/assets/audio/ (fichiers WAV, voir SFX_FILES ci-dessous) ;
+   l’ambiance continue et la musique restent générées en direct avec Web Audio.
    SND.play('nom', ...args) joue un effet ; les réglages sont dans SOUND (haut du fichier).
-   Pour ajouter un effet : ajoutez une fonction dans « lib » ci-dessous, puis appelez SND.play('mon_effet').
+   Si un fichier manque ou ne se charge pas, l’effet est synthétisé en direct par « lib » (même son).
+   Pour ajouter un effet : déposez le fichier dans le bon dossier et ajoutez-le à SFX_FILES.
    ════════════════════════════════════════════════════════════════ */
 const SND = (() => {
+  /* ── effets enregistrés : id utilisé par SND.play → fichier dans docs/assets/audio/ ── */
+  const SFX_BASE = new URL('../../../assets/audio/', location.href);
+  const SFX_FILES = {};
+  [
+    ['sound-effects/interface/', 'click tick key error success zoom flash paper'],
+    [
+      'sound-effects/mechanics/',
+      'locked lever power unlock door locker lockerdoor latch boom neonflick neonoff neonon sparkle sputter genstart step press-green press-red press-blue'
+    ],
+    ['sound-effects/tools/', 'cutlock padfall drill pour'],
+    ['ambient/', 'creak wind moan chain radio beepfar slamfar drip clank']
+  ].forEach(([dir, ids]) => ids.split(' ').forEach((id) => (SFX_FILES[id] = dir + id + '.wav')));
+  // effets naturellement variables : légère variation de hauteur à chaque lecture
+  const SFX_VARY = new Set(['drip', 'chain', 'sparkle', 'neonflick', 'radio', 'step', 'creak', 'moan', 'clank', 'wind', 'slamfar']);
+  const sfxData = {}, // fichiers téléchargés (ArrayBuffer), décodés à l’activation du son
+    sfxBuf = {},
+    sfxFailed = new Set();
+  Object.entries(SFX_FILES).forEach(([id, path]) => {
+    sfxData[id] = fetch(new URL(path, SFX_BASE))
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status + ' ' + path);
+        return r.arrayBuffer();
+      })
+      .catch((error) => {
+        sfxFailed.add(id);
+        console.warn('Son « ' + id + ' » indisponible, synthèse en direct :', error.message);
+      });
+  });
+  function decodeFiles() {
+    Object.entries(sfxData).forEach(([id, p]) =>
+      p.then((data) => {
+        if (!data || !ctx) return;
+        return ctx.decodeAudioData(data.slice(0)).then(
+          (b) => (sfxBuf[id] = b),
+          (error) => {
+            sfxFailed.add(id);
+            console.warn('Son « ' + id + ' » illisible, synthèse en direct :', error);
+          }
+        );
+      })
+    );
+  }
+  function playFile(id) {
+    const b = sfxBuf[id];
+    if (!b) return false;
+    const src = ctx.createBufferSource();
+    src.buffer = b;
+    if (SFX_VARY.has(id)) src.playbackRate.value = 0.92 + Math.random() * 0.16;
+    src.connect(sfxBus); // l’écho est déjà dans l’enregistrement
+    src.start();
+    return true;
+  }
   let ctx = null,
     master,
     sfxBus,
@@ -59,6 +113,7 @@ const SND = (() => {
     musBus.connect(master);
     mNext = ctx.currentTime + 0.3;
     buildAmbience();
+    decodeFiles();
     if (document.getElementById('menu').classList.contains('on')) pause();
   }
   function resume() {
@@ -652,11 +707,18 @@ const SND = (() => {
   };
   function play(name, ...a) {
     if (name === 'locked' && actObj) rattle(actObj);
-    if (!ctx || !on || !lib[name]) return;
+    if (!ctx || !on) return;
+    const id = name === 'press' ? 'press-' + a[0] : name;
     try {
-      lib[name](...a);
+      if (!playFile(id) && lib[name]) lib[name](...a); // fichier pas encore prêt ou absent : synthèse
     } catch (e) {}
   }
+  // état du chargement des fichiers (diagnostic : SND.files() dans la console)
+  const files = () => ({
+    total: Object.keys(SFX_FILES).length,
+    loaded: Object.keys(sfxBuf).length,
+    failed: [...sfxFailed]
+  });
   function update(t) {
     // appelé à chaque image : sons « vivants » liés à l’état du jeu
     if (!ctx || !on) return;
@@ -698,9 +760,7 @@ const SND = (() => {
         }[r] || ['creak'];
       SND._env = t + 8 + Math.random() * 9;
       const k = P[Math.floor(Math.random() * P.length)];
-      try {
-        lib[k] && lib[k]();
-      } catch (e) {}
+      play(k);
     }
     if (wet && ctx) {
       const rv = State.room <= 4 ? 0.22 : 0.5;
@@ -708,11 +768,11 @@ const SND = (() => {
     }
     if (t > nextDrip) {
       nextDrip = t + 1.2 + Math.random() * 4.5;
-      if (SOUND.drips) lib.drip();
+      if (SOUND.drips) play('drip');
     }
     if (t > nextClank) {
       nextClank = t + 14 + Math.random() * 22;
-      lib.clank();
+      play('clank');
     }
   }
   function toggle() {
@@ -727,6 +787,7 @@ const SND = (() => {
     resume,
     pause,
     play,
+    files,
     update,
     toggle,
     get on() {
