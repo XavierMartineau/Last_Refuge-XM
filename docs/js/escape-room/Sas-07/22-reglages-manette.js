@@ -297,7 +297,6 @@
           };
           if (hit('inventory', 'LB')) tapAction('inventory');
           if (hit('objectives', 'RB')) tapAction('objectives');
-          if (hit('map', 'View')) tapAction('map');
           if (hit('view', 'R3')) tapAction('view');
         }
         if (pressed(B.MENU)) $g('menub').click();
@@ -441,9 +440,15 @@
     }
     cross.classList.toggle('on', on && freeLook());
     hint.classList.toggle('on', auto() && !on && freeLook() && !document.body.classList.contains('pad'));
-    if ((on || (window.LastRefugeManette && window.LastRefugeManette.active)) && freeLook() && t - hoverT > 90) {
-      hoverT = t;
-      hover(center());
+    // survol rafraîchi ~30 fois par seconde : au centre (curseur capturé / manette) ou sous la souris quand on marche
+    if (freeLook() && t - hoverT > 33) {
+      if (on || (window.LastRefugeManette && window.LastRefugeManette.active)) {
+        hoverT = t;
+        hover(center());
+      } else if (lastPointer && rig.moving) {
+        hoverT = t;
+        hover(lastPointer);
+      }
     }
   })(0);
 }

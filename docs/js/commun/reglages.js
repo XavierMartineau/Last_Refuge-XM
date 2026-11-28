@@ -112,7 +112,6 @@
         kb("flashlight", "Lampe torche", ["KeyF"]),
         kb("inventory", "Inventaire", ["KeyH"]),
         kb("objectives", "Carnet de mission", ["KeyO"]),
-        kb("map", "Carte", ["KeyM"]),
         kb("view", "Vue 1re / 3e personne", ["KeyV"]),
         { type: "keys", label: "Regarder / cliquer", keys: ["Souris", "Clic"] },
         { type: "keys", label: "Menu / quitter le zoom", keys: ["Échap"] }
@@ -145,7 +144,6 @@
         pb("sprint", "Courir (bascule)", "L3"),
         pb("inventory", "Inventaire", "LB"),
         pb("objectives", "Carnet de mission", "RB"),
-        pb("map", "Carte", "View"),
         pb("view", "Vue 1re / 3e personne", "R3"),
         { type: "keys", label: "Marcher / regarder", keys: ["LS", "RS"] },
         { type: "keys", label: "Menu (réglages)", keys: ["Menu"] },

@@ -49,6 +49,7 @@ const CONFIG = {
     lookSpeed: 1.3, // multiplicateur de sensibilité du regard au doigt
     fovPortrait: 82
   }, // champ de vision quand l’écran est en hauteur
+  interactReach: 0.5, // distance max (m, au sol) entre le corps du joueur et un objet pour pouvoir l’activer ou le prendre
   doorCode: '482915', // code à 6 chiffres de la porte du sas (révélé par le terminal quand l’énigme de la pièce 1 est résolue)
   code: '4719', // code du terminal (47 sur le panneau + 19 dans la note)
   sequence: ['green', 'red', 'blue'], // ordre des boutons de la salle 2
@@ -117,7 +118,6 @@ const CONTROLS = {
     objectives: ['KeyO'],
     exitZoom: ['Escape'],
     mute: [],
-    map: ['KeyM'],
     flashlight: ['KeyF'],
     view: ['KeyV'],
     take: ['KeyE']
@@ -334,7 +334,7 @@ const TEXTS = {
     wareLocked: 'Verrouillée. Un digicode est fixé au mur à côté.',
     wareOpen: 'La porte s’ouvre : un courant d’air froid… la sortie, enfin.',
     pressE: 'Appuyez sur E pour le prendre.',
-    tooFar: 'Trop loin : approchez-vous.'
+    tooFar: 'Trop loin : approchez-vous à moins de {d} m.'
   },
   screens: {
     term_off: ['TERMINAL SAS 07', '', '> ALIMENTATION:', '  HORS LIGNE'],

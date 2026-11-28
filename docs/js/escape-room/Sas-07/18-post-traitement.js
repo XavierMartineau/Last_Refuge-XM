@@ -62,7 +62,8 @@ addEventListener('resize', resize);
 resize();
 var invOpen = false,
   INV_LAST = [];
-/* ── Cadre de visée autour de l'objet survolé (coins pulsés + distance), lisible de près comme de loin ── */
+/* ── Cadre de visée autour de l'objet survolé (coins pulsés), lisible de près comme de loin.
+   Le cadre glisse en douceur d'un objet à l'autre et apparaît / disparaît en fondu. ── */
 const _sb = new THREE.Box3(),
   _st = new THREE.Box3(),
   _sv = new THREE.Vector3();
@@ -76,33 +77,42 @@ function selBox(o) {
   });
   return _sb;
 }
-function selFrame(t) {
-  const s = document.getElementById('sel');
+const SEL = { el: null, on: false, x: 0, y: 0, w: 0, h: 0, last: 0, cls: '', obj: null, box: new THREE.Box3(), n: 0 };
+function selHide() {
+  if (SEL.on) {
+    SEL.on = false;
+    SEL.el.classList.remove('on');
+  }
+}
+function selFrame() {
+  const s = SEL.el || (SEL.el = document.getElementById('sel'));
   if (!s) return;
-  if (!hovered || modalOpen || State.focus) {
-    s.style.display = 'none';
-    return;
+  const now = performance.now(),
+    dt = Math.min(0.1, (now - (SEL.last || now)) / 1000);
+  SEL.last = now;
+  if (!hovered || modalOpen || State.focus) return selHide();
+  // boîte de l'objet : recalculée au changement d'objet puis toutes les 6 images (objets animés)
+  if (SEL.obj !== hovered || ++SEL.n % 6 === 0) {
+    SEL.obj = hovered;
+    SEL.box.copy(selBox(hovered));
   }
-  const b =
-    (selFrame.n = (selFrame.n || 0) + 1) % 6 === 1 || selFrame.o !== hovered
-      ? ((selFrame.o = hovered), (selFrame.b = selBox(hovered).clone()))
-      : selFrame.b;
-  if (b.isEmpty()) {
-    s.style.display = 'none';
-    return;
-  }
+  const b = SEL.box;
+  if (b.isEmpty()) return selHide();
   let x0 = 1e9,
     y0 = 1e9,
     x1 = -1e9,
     y1 = -1e9,
-    ok = true;
+    front = 0;
   const r = gameCanvasRect();
   for (let i = 0; i < 8; i++) {
     _sv.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z).project(camera);
     if (_sv.z > 1) {
-      ok = false;
-      break;
+      // coin derrière la caméra (objet tout proche) : le cadre s'étend jusqu'au bord de l'écran de ce côté
+      x0 = Math.min(x0, _sv.x < 0 ? r.right : r.left);
+      x1 = Math.max(x1, _sv.x < 0 ? r.right : r.left);
+      continue;
     }
+    front++;
     const px = (_sv.x * 0.5 + 0.5) * r.width + r.left,
       py = (-_sv.y * 0.5 + 0.5) * r.height + r.top;
     x0 = Math.min(x0, px);
@@ -110,21 +120,34 @@ function selFrame(t) {
     y0 = Math.min(y0, py);
     y1 = Math.max(y1, py);
   }
-  if (!ok || x1 - x0 > r.width * 0.9) {
-    s.style.display = 'none';
-    return;
+  if (!front) return selHide();
+  // objet très proche (il peut remplir l'écran) : le cadre reste visible, collé aux bords de l'écran
+  const m = 10;
+  x0 = Math.max(r.left + m, x0);
+  y0 = Math.max(r.top + m, y0);
+  x1 = Math.min(r.right - m - 14, x1);
+  y1 = Math.min(r.bottom - m - 14, y1);
+  if (x1 <= x0 || y1 <= y0) return selHide();
+  const w = Math.max(46, x1 - x0 + 14),
+    h = Math.max(46, y1 - y0 + 14),
+    x = (x0 + x1) / 2 - w / 2,
+    y = (y0 + y1) / 2 - h / 2;
+  if (!SEL.on) {
+    // apparition : le cadre se place directement sur l'objet
+    Object.assign(SEL, { x, y, w, h, on: true });
+    s.classList.add('on');
+  } else {
+    const k = 1 - Math.exp(-dt * 22); // lissage indépendant du nombre d'images par seconde
+    SEL.x += (x - SEL.x) * k;
+    SEL.y += (y - SEL.y) * k;
+    SEL.w += (w - SEL.w) * k;
+    SEL.h += (h - SEL.h) * k;
   }
-  const cx = (x0 + x1) / 2,
-    cy = (y0 + y1) / 2,
-    w = Math.max(46, x1 - x0 + 14),
-    h = Math.max(46, y1 - y0 + 14);
-  s.style.display = 'block';
-  s.style.width = w + 'px';
-  s.style.height = h + 'px';
-  s.style.transform = 'translate(' + (cx - w / 2) + 'px,' + (cy - h / 2) + 'px)';
-  const d = hovered.getWorldPosition(_sv).distanceTo(rig.pos);
-  document.getElementById('selt').textContent = (d < 10 ? d.toFixed(1) : Math.round(d)) + ' M';
-  s.className = 'hud ' + (hovered.userData.actionType || 'inspect');
+  s.style.width = SEL.w.toFixed(1) + 'px';
+  s.style.height = SEL.h.toFixed(1) + 'px';
+  s.style.transform = 'translate3d(' + SEL.x.toFixed(1) + 'px,' + SEL.y.toFixed(1) + 'px,0)';
+  const cls = 'hud on ' + (hovered.userData.actionType || 'inspect') + (inReach(hovered) ? '' : ' far');
+  if (cls !== SEL.cls) s.className = SEL.cls = cls;
 }
 const INVD = [
   ['Carte d’accès', '🪪', 'Carte magnétique : ouvre le lecteur de la chambre forte.'],

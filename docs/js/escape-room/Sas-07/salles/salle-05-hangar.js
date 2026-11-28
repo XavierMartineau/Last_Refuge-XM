@@ -200,7 +200,7 @@ box(2.2, 0.08, 0.9, mats.wood, 16, 0.9, -64);
   [1, 0.35]
 ].forEach(([dx, dz]) => box(0.07, 0.9, 0.07, mats.dark, 16 + dx, 0.45, -64 + dz));
 pushC(16, -64, 1.2, 0.6); // établi (fusible 3)
-makeFuse('fuse_1', 14, 2.67, -40, false);
+makeFuse('fuse_1', 14, 2.67, -39.75, false); // au bord de la caisse du haut : atteignable depuis l’allée
 makeFuse('fuse_2', -9, 0.06, -50.9, true);
 makeFuse('fuse_3', 15.5, 0.99, -64, true);
 const fuseBox = makeSlotBox();

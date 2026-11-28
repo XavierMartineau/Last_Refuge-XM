@@ -65,9 +65,9 @@ interactive(radio, 'radio_01', 'Écouter la radio', 'toggle', { focusDist: 1 });
     0.3,
     0.4,
     paperTex2(['COFFRE :', 'les numéros des lits', 'de la rangée EST,', 'de l’entrée vers', 'le fond.']),
-    -0.7,
+    -1.05,
     0.845,
-    -16.5,
+    -16.5, // au bout ouest de la table : les bancs empêchent d’approcher par les côtés
     scene,
     0,
     -Math.PI / 2

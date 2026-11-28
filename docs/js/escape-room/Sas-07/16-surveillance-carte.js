@@ -1,26 +1,10 @@
-/* LAST REFUGE · XM — Escape room « Sas 07 » · Carte du bunker et caméras de surveillance des salles.
+/* LAST REFUGE · XM — Escape room « Sas 07 » · Caméras de surveillance des salles.
    Fichier chargé dans l’ordre par escape-room.js : il partage la portée globale des autres fichiers. */
 'use strict';
-/* ═══════════════ CARTE (touche M) + CAMÉRAS DE SURVEILLANCE ═══════════════
-   • Carte plein écran : plan 2D de la salle courante avec votre position.
-   • Une caméra au plafond de chaque salle suit le joueur des yeux. */
+/* ═══════════════ CAMÉRAS DE SURVEILLANCE ═══════════════
+   • Une caméra au plafond de chaque salle suit le joueur des yeux.
+   (La carte du bunker, touche M, a été retirée pour l’instant : voir l’historique git pour la rétablir.) */
 const CCTV = (function () {
-  const NAMES = [
-    'Sas d’entrée',
-    'Salle de contrôle',
-    'Dortoir / chambre forte',
-    'Distribution électrique',
-    'Hangar principal',
-    'Hangar sud'
-  ];
-  const HW = {
-    1: 13.9,
-    2: 11.9,
-    3: 17.9,
-    4: 17.9,
-    5: 59.9,
-    6: 59.9
-  };
   const ZR = {
     1: [23.4, -4],
     2: [-4, -12],
@@ -29,209 +13,6 @@ const CCTV = (function () {
     5: [-32, -72],
     6: [-72, -102]
   };
-  /* ── Carte : plan 2D de LA SALLE où vous êtes (murs et meubles à l’échelle, portes, objets présents, votre position et direction) ── */
-  let _ints = [],
-    _intsAt = 0;
-  function roomObjects() {
-    const now = performance.now();
-    if (now < _intsAt) return _ints;
-    _intsAt = now + 1500;
-    _ints = [];
-    scene.traverse((o) => {
-      if (o.userData && o.userData.interactive && o.userData.id) _ints.push(o);
-    });
-    return _ints;
-  }
-  const _wp = new THREE.Vector3();
-  const shortName = (o) =>
-    String(o.userData.hint || o.userData.id)
-      .replace(
-        /^(Prendre|Ramasser|Examiner|Inspecter|Ouvrir|Lire|Actionner|Écouter)\s*(le |la |l’|l'|les |un |une |des )?/i,
-        ''
-      )
-      .slice(0, 22);
-  function drawMap(g, W, H, big) {
-    const r = roomOf(rig.pos.z),
-      hw = HW[r],
-      zr = ZR[r],
-      zT = zr[0],
-      zB = zr[1],
-      rw = 2 * hw,
-      rd = zT - zB;
-    g.fillStyle = '#07100a';
-    g.fillRect(0, 0, W, H);
-    const hdr = Math.round(H * (big ? 0.09 : 0.13)),
-      ft = Math.round(H * (big ? 0.08 : 0)),
-      aw = W - W * 0.04,
-      ah = H - hdr - ft - H * 0.03,
-      s = Math.min(aw / rw, ah / rd),
-      ox = (W - rw * s) / 2,
-      oy = hdr + (ah - rd * s) / 2 + H * 0.01;
-    const X = (x) => ox + (x + hw) * s,
-      Z = (z) => oy + (zT - z) * s; // monde → pixels (nord = haut)
-    g.strokeStyle = '#14331c';
-    g.lineWidth = 1;
-    for (let x = -hw; x <= hw; x += 5) {
-      g.beginPath();
-      g.moveTo(X(x), Z(zT));
-      g.lineTo(X(x), Z(zB));
-      g.stroke();
-    }
-    for (let z = zB; z <= zT; z += 5) {
-      g.beginPath();
-      g.moveTo(X(-hw), Z(z));
-      g.lineTo(X(hw), Z(z));
-      g.stroke();
-    }
-    g.fillStyle = '#0c1b11';
-    g.fillRect(X(-hw), Z(zT), rw * s, rd * s);
-    g.strokeStyle = '#9fd8a8';
-    g.lineWidth = 3;
-    g.strokeRect(X(-hw), Z(zT), rw * s, rd * s);
-    // murs et meubles (collisions du jeu) qui se trouvent dans cette salle
-    g.fillStyle = '#2a3a2c';
-    g.strokeStyle = '#4f7a58';
-    g.lineWidth = 1;
-    const area = rw * rd;
-    const draw = (c) => {
-      if (c.length !== 4) return;
-      const cx = (c[0] + c[1]) / 2,
-        cz = (c[2] + c[3]) / 2;
-      if (cx < -hw || cx > hw || cz > zT || cz < zB) return;
-      const w = c[1] - c[0],
-        d = c[3] - c[2];
-      if (w * d > area * 0.5) return;
-      g.fillRect(X(c[0]), Z(c[3]), Math.max(1.5, w * s), Math.max(1.5, d * s));
-      g.strokeRect(X(c[0]), Z(c[3]), Math.max(1.5, w * s), Math.max(1.5, d * s));
-    };
-    COLLIDERS.forEach(draw);
-    EXTRA_COLLIDERS.forEach(draw);
-    // objets de la salle : portes (vert = ouverte, rouge = fermée), objets à ramasser (losanges), éléments à examiner (points)
-    const labels = [];
-    roomObjects().forEach((o) => {
-      if (!o.visible) return;
-      o.getWorldPosition(_wp);
-      const x = _wp.x,
-        z = _wp.z;
-      if (x < -hw - 1 || x > hw + 1 || z > zT + 1 || z < zB - 1) return;
-      const u = o.userData,
-        px = X(x),
-        py = Z(z);
-      if (/^door_/.test(u.id)) {
-        const D = DOORS.find((d) => d.id === u.id),
-          op = D && State[D.flag];
-        g.fillStyle = op ? '#3fdc72' : '#c4281c';
-        g.fillRect(px - Math.max(6, s * 1.2), py - 3, Math.max(12, s * 2.4), 6);
-        return;
-      }
-      if (u.actionType === 'pickup') {
-        g.fillStyle = '#ffd070';
-        g.beginPath();
-        g.moveTo(px, py - 6);
-        g.lineTo(px + 5, py);
-        g.lineTo(px, py + 6);
-        g.lineTo(px - 5, py);
-        g.closePath();
-        g.fill();
-        labels.push([px, py, shortName(o)]);
-      } else {
-        g.fillStyle = '#22d3ee';
-        g.beginPath();
-        g.arc(px, py, 3, 0, 6.283);
-        g.fill();
-      }
-    });
-    if (big) {
-      g.font = 'bold ' + Math.round(H * 0.02) + 'px monospace';
-      g.fillStyle = '#ffd070';
-      g.textBaseline = 'middle';
-      labels.slice(0, 30).forEach(([x, y, t]) => g.fillText(t, x + 8, y));
-    }
-    // joueur : point rouge pulsé + cône de vision
-    const px = X(rig.pos.x),
-      py = Z(rig.pos.z),
-      t = performance.now() / 1000,
-      L = Math.max(30, s * 6),
-      a = -rig.yaw; // yaw 0 = vers -z (haut de la carte)
-    g.fillStyle = 'rgba(255,59,42,.18)';
-    g.beginPath();
-    g.moveTo(px, py);
-    g.arc(px, py, L, a - Math.PI / 2 - 0.6, a - Math.PI / 2 + 0.6);
-    g.closePath();
-    g.fill();
-    g.fillStyle = '#ff3b2a';
-    g.beginPath();
-    g.arc(px, py, Math.max(5, s * 0.45), 0, 6.283);
-    g.fill();
-    g.strokeStyle = 'rgba(255,59,42,' + (0.7 - 0.5 * Math.abs(Math.sin(t * 2))) + ')';
-    g.lineWidth = 2;
-    g.beginPath();
-    g.arc(px, py, Math.max(9, s * 0.9) * (1 + 0.3 * Math.abs(Math.sin(t * 2))), 0, 6.283);
-    g.stroke();
-    // en-tête et légende
-    g.textBaseline = 'alphabetic';
-    g.fillStyle = '#ffd070';
-    g.font = 'bold ' + Math.round(hdr * 0.5) + 'px monospace';
-    g.fillText(
-      'SECTEUR ' + String(r).padStart(2, '0') + ' · ' + NAMES[r - 1].toUpperCase(),
-      W * 0.02,
-      hdr * 0.62
-    );
-    if (big) {
-      g.font = Math.round(H * 0.026) + 'px monospace';
-      g.fillStyle = '#9fd8a8';
-      g.fillText(
-        '● VOUS   ◆ objet à ramasser   • à examiner   ▬ porte (vert ouverte / rouge fermée)',
-        W * 0.02,
-        H - ft * 0.35
-      );
-      g.fillText(
-        'Inventaire : ' + (INV_LAST.length ? INV_LAST.join(' · ').slice(0, 110) : 'vide'),
-        W * 0.02,
-        H - ft * 0.05
-      );
-    }
-  }
-  /* ── Carte plein écran (touche M) ── */
-  const ov = document.createElement('canvas');
-  ov.id = 'mapov';
-  ov.style.cssText =
-    'position:fixed;left:50%;top:50%;translate:-50% -50%;width:min(92vw,170vh);aspect-ratio:16/9;z-index:15;display:none;pointer-events:none;border:2px solid #3a3326;box-shadow:0 10px 40px #000c;opacity:.96';
-  ov.width = 1280;
-  ov.height = 720;
-  document.body.appendChild(ov);
-  const octx = ov.getContext('2d');
-  let mapOn = false;
-  const toggleMap = () => {
-    mapOn = !mapOn;
-    ov.style.display = mapOn ? 'block' : 'none';
-    SND.play('paper');
-    if (mapOn) drawMap(octx, 1280, 720, true);
-  };
-  addEventListener(
-    'keydown',
-    (e) => {
-      if (e.repeat || (e.target && e.target.tagName === 'INPUT')) return;
-      if (CONTROLS.keys.map.includes(e.code)) toggleMap();
-    },
-    true
-  );
-  const mb = document.createElement('button');
-  mb.className = 'hud';
-  mb.id = 'mapb';
-  mb.textContent = 'MAP';
-  mb.title = 'Carte (M)';
-  mb.style.cssText =
-    'pointer-events:auto;right:14px;top:58px;padding:6px 8px;font:700 12px var(--stencil);letter-spacing:.1em;color:#b9bca8;background:#0a0c0a8c;border:1px solid #ffffff1c;border-radius:6px';
-  mb.onclick = toggleMap;
-  document.body.appendChild(mb);
-  /* ── rafraîchissement de la carte plein écran (appelé par la boucle) ── */
-  let mapAt = 0;
-  function frame() {
-    if (!mapOn || performance.now() < mapAt) return;
-    mapAt = performance.now() + 250;
-    drawMap(octx, 1280, 720, true);
-  }
   /* ── Caméras de surveillance dans CHAQUE salle : elles suivent le joueur des yeux (quand il est dans leur salle) ── */
   const RC_Y = {
     1: 2.8,
@@ -287,7 +68,7 @@ const CCTV = (function () {
       }
     }); // sinon : balayage lent
   }
-  return { frame, track };
+  return { track };
 })();
 
 R('panel_blood_01', async (o) => {

@@ -14,8 +14,11 @@ el.addEventListener('pointerdown', (e) => {
   drag = { x: e.clientX, y: e.clientY, moved: false };
   el.setPointerCapture(e.pointerId);
 });
+let lastPointer = null; // dernière position de la souris sur le jeu (pour rafraîchir le survol en marchant)
+el.addEventListener('pointerleave', () => (lastPointer = null));
 el.addEventListener('pointermove', (e) => {
   const L = CONTROLS.look;
+  if (e.pointerType === 'mouse') lastPointer = { clientX: e.clientX, clientY: e.clientY };
   if (drag) {
     const dx = e.clientX - drag.x,
       dy = e.clientY - drag.y;

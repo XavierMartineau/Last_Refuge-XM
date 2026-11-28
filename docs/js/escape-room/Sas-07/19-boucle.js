@@ -185,7 +185,6 @@ function loop() {
   perfTick();
   try {
     CCTV.track(dt, t);
-    CCTV.frame(dt, t);
   } catch (e) {
     if (!CCTV.err) {
       CCTV.err = 1;

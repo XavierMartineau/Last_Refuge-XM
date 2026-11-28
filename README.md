@@ -28,7 +28,7 @@ La progression (fiche terminée, salle choisie) est enregistrée dans le navigat
 
 `docs/js/commun/reglages.js` + `docs/css/commun/reglages.css` forment la console de réglages commune à la page Options et au menu Échap du jeu : affichage, audio, clavier & souris, manette, accessibilité (et « Partie » en jeu). Toutes les touches clavier et tous les boutons de manette sont **réaffectables** ; les indices du jeu affichent les touches choisies.
 
-Par défaut : **WASD** pour marcher, souris pour regarder (un clic initial autorise la capture du curseur, puis il n’est plus nécessaire de maintenir le clic ; Échap libère le curseur). F allume ou éteint la lampe. Le navigateur doit autoriser le verrouillage du pointeur. À la manette : sticks pour marcher / regarder, A interagir, B s’accroupir, Y lampe, L3 courir, LB inventaire, RB carnet, View carte, R3 vue, Menu réglages. `docs/js/commun/manette-menus.js` gère la navigation des menus à la manette.
+Par défaut : **WASD** pour marcher, souris pour regarder (un clic initial autorise la capture du curseur, puis il n’est plus nécessaire de maintenir le clic ; Échap libère le curseur). F allume ou éteint la lampe. Le navigateur doit autoriser le verrouillage du pointeur. À la manette : sticks pour marcher / regarder, A interagir, B s’accroupir, Y lampe, L3 courir, LB inventaire, RB carnet, R3 vue, Menu réglages. `docs/js/commun/manette-menus.js` gère la navigation des menus à la manette.
 
 Dans le créateur, « Continuer » déverrouille l’étape suivante ; les étapes déjà visitées restent accessibles. La croix ou le stick gauche navigue entre les choix, A valide, B revient et le stick droit tourne l’aperçu. Les manettes compatibles avec la disposition standard de l’API Gamepad sont prises en charge ; leur disponibilité dépend du navigateur et de la console.
 
@@ -46,6 +46,8 @@ Les menus proposent une ambiance sonore générée en direct. Si le navigateur b
 Les réglages d’accessibilité proposent une correction ou une simulation des couleurs et une intensité ajustable. Les planches proposées sont des repères visuels, pas un test médical. Les coiffures longues se balancent pendant les mouvements du personnage ; cet effet est réduit avec la préférence de réduction des animations.
 
 Le HUD affiche le portrait et le nom du détenu, avec la police, la couleur et le style choisis.
+
+Un objet n’est activable (clic, E ou A) que si le corps du détenu est à moins de **0,5 m** de lui (`CONFIG.interactReach`) ; plus loin, l’indice affiche « Approchez-vous » et le cadre de sélection devient gris. Le cadre suit l’objet visé en douceur. La carte du bunker (touche M) est retirée pour l’instant.
 
 En première personne, les mains reprennent l'apparence et les accessoires du personnage. Le Sas 07 ne comporte ni arme ni combat.
 

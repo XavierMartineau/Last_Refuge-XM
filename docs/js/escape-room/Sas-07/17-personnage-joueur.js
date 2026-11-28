@@ -234,7 +234,6 @@ function applyRig(t) {
     ['Interagir', ['Clic']],
     ['Prendre un objet', ['E']],
     ['Lampe torche', ['F']],
-    ['Carte du bunker', ['M']],
     ['Carnet de mission', ['O']],
     ['Vue 1re / 3e personne', ['V']],
     ['Quitter le zoom', ['Échap']],

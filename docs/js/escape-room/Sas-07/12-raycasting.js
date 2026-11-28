@@ -4,10 +4,27 @@
 /* ════════════════════════════════════════════════════════════════
    8. RAYCASTING : hover (contour + infobulle + curseur) et clic
    ════════════════════════════════════════════════════════════════ */
+const PICK_FAR = 8; // au-delà, rien n'est survolé : rayon plus court = survol moins coûteux
 const ray = new THREE.Raycaster(),
   mv = new THREE.Vector2(),
   tip = document.getElementById('tip');
 let hovered = null;
+/* Portée : un objet n’est activable que si le corps du joueur (bord de sa silhouette, rayon
+   CONTROLS.walk.radius) est à moins de CONFIG.interactReach mètres de la boîte englobante de l’objet
+   (distance au sol). En vue rapprochée (zoom), la portée ne s’applique pas. */
+const _reachBox = new THREE.Box3();
+function reachDistance(o) {
+  _reachBox.setFromObject(o);
+  if (_reachBox.isEmpty()) return Infinity;
+  const x = THREE.MathUtils.clamp(rig.pos.x, _reachBox.min.x, _reachBox.max.x),
+    z = THREE.MathUtils.clamp(rig.pos.z, _reachBox.min.z, _reachBox.max.z);
+  return Math.max(0, Math.hypot(rig.pos.x - x, rig.pos.z - z) - CONTROLS.walk.radius);
+}
+const inReach = (o) => !!State.focus || reachDistance(o) <= CONFIG.interactReach;
+function tooFar() {
+  SND.play('click');
+  say(fmt(M.tooFar, { d: String(CONFIG.interactReach).replace('.', ',') }), 1800);
+}
 function interactionLabel(pickup = false) {
   const pad = window.LastRefugeManette, settings = window.LastRefugeReglages;
   if (pad && pad.active) {
@@ -21,6 +38,7 @@ function pick(e) {
   const r = gameCanvasRect();
   mv.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(mv, camera);
+  ray.far = State.focus ? Infinity : PICK_FAR;
   for (const h of ray.intersectObjects(scene.children, true)) {
     // 1er objet touché = occultation respectée
     let o = h.object;
@@ -41,8 +59,11 @@ function hover(e) {
   if (onZoomCooldown(o)) o = null; // objet qu’on vient de quitter : ni contour ni infobulle pendant 2 s
   setHover(o);
   if (o) {
-    tip.textContent = '[' + interactionLabel(o.userData.actionType === 'pickup') + '] ' + o.userData.hint;
-    tip.style.transform = `translate(${e.clientX + 16}px,${e.clientY + 14}px)`;
+    const near = inReach(o);
+    tip.classList.toggle('far', !near);
+    tip.textContent =
+      '[' + (near ? interactionLabel(o.userData.actionType === 'pickup') : 'Approchez-vous') + '] ' + o.userData.hint;
+    tip.style.transform = `translate3d(${e.clientX + 16}px,${e.clientY + 14}px,0)`;
   }
 }
 function takeNearest() {
@@ -53,12 +74,7 @@ function takeNearest() {
       ? hovered
       : pick({ clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 });
   if (!o || o.userData.actionType !== 'pickup' || onZoomCooldown(o)) return;
-  const p = new THREE.Vector3();
-  o.getWorldPosition(p);
-  if (p.distanceTo(new THREE.Vector3(rig.pos.x, rig.pos.y - 0.4, rig.pos.z)) > 3.4) {
-    SND.play('click');
-    return say(M.tooFar, 1800);
-  }
+  if (!inReach(o)) return tooFar();
   actObj = o;
   (Actions.handlers[o.userData.id] || (() => {}))(o);
 }
@@ -80,6 +96,7 @@ function click(e) {
     release();
     return;
   }
+  if (!inReach(o)) return tooFar();
   if (o.userData.actionType === 'pickup') {
     SND.play('click');
     return say('Appuyez sur ' + interactionLabel(true) + ' pour le prendre.', 2200);
